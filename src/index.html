@@ -281,6 +281,29 @@
     opacity:0; transform:translateY(8px); transition:.25s;
   }
   .toast.show{opacity:1; transform:translateY(0);}
+
+  .guide-modal{max-width:760px;}
+  .guide-modal .guide-intro{font-style:italic; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;}
+  .guide-modal details{
+    border:1px solid var(--parchment-edge); border-radius:6px; margin-bottom:8px;
+    background:var(--parchment-2); overflow:hidden;
+  }
+  .guide-modal summary{
+    font-family:'Cinzel',serif; font-size:13.5px; padding:10px 14px; cursor:pointer; user-select:none;
+    color:var(--ink); list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  .guide-modal summary::-webkit-details-marker{display:none;}
+  .guide-modal summary::before{content:"▸"; color:var(--brass); transition:transform .15s;}
+  .guide-modal details[open] summary::before{transform:rotate(90deg);}
+  .guide-modal .guide-body{padding:2px 16px 14px 16px; font-size:12.5px; line-height:1.6; color:var(--ink-soft);}
+  .guide-modal .guide-body b{color:var(--ink);}
+  .guide-modal .guide-body table{margin-top:8px; margin-bottom:4px;}
+  .guide-modal .guide-body th, .guide-modal .guide-body td{font-size:11.5px; padding:5px 7px;}
+  .guide-modal .guide-body ul{margin:6px 0; padding-left:18px;}
+  .guide-modal .guide-body li{margin-bottom:3px;}
+  .guide-foot{display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px; flex-wrap:wrap;}
+  .guide-foot label{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-soft); text-transform:none; letter-spacing:0; cursor:pointer;}
+  .guide-foot input[type="checkbox"]{width:auto; accent-color:var(--brass);}
   .divider{height:1px; background:var(--line); margin:16px 0;}
   ::-webkit-scrollbar{width:9px;}
   ::-webkit-scrollbar-thumb{background:var(--parchment-edge); border-radius:6px;}
@@ -353,6 +376,7 @@
       <button id="importBtn">⬆ Importa backup (JSON)</button>
       <input type="file" id="importFile" accept="application/json" style="display:none;">
       <button id="copySummaryBtn">📋 Copia riepilogo testuale</button>
+      <button id="guideBtn">📖 Guida al QG</button>
       <button id="resetBtn">Azzera registro</button>
     </div>
   </div>
@@ -628,6 +652,80 @@
   </div>
 </div>
 
+<div class="modal-bg" id="guideModalBg" style="display:none;">
+  <div class="modal guide-modal">
+    <button class="modal-close" id="guideCloseX" title="Chiudi">✕</button>
+    <h3>📖 Guida al Quartier Generale</h3>
+    <div class="guide-intro">Meccanica di gioco e funzionamento del Registro — Cronache di Unshast</div>
+
+    <details open>
+      <summary>Cos'è e come si apre un QG</summary>
+      <div class="guide-body">
+        Il QG è la base operativa del gruppo: produce risorse, genera oro, offre servizi e va gestito mese per mese come un vero sistema economico.<br><br>
+        <b>Apertura</b>: servono 2 personaggi (Fondatore + Co-fondatore) e <b>300 mo</b> di capitale. Si parte Senza Classe, a Livello 1.
+      </div>
+    </details>
+
+    <details>
+      <summary>Classi, Punti QG e Livello</summary>
+      <div class="guide-body">
+        La <b>Classe</b> (Produzione / Vendita / Militare) si ottiene automaticamente alla prima struttura specializzata costruita, e dimezza il costo in punti delle strutture di quella categoria.<br><br>
+        <b>Punti QG</b> — budget totale 44:
+        <ul>
+          <li>Strutture Generali: 2 punti</li>
+          <li>Strutture della propria Classe: 2 punti</li>
+          <li>Strutture specializzate di Classe diversa: 4 punti</li>
+          <li>Strutture esenti (Impresa aggiuntiva, Avamposto): 0 punti</li>
+        </ul>
+        <b>Livello QG</b> (1–6) dipende dal livello dei personaggi membri: Lv 3–6 → QG Lv.1, 7–10 → Lv.2, 11–14 → Lv.3, 15–17 → Lv.4, 18–20 → Lv.5, 21+ → Lv.6. Massimo attuale in campagna: <b>Livello 3</b>.<br><br>
+        <b>Potenziare</b> una struttura richiede un QG di livello pari o superiore, e ripaga per intero costo in oro, materiali e punti.
+      </div>
+    </details>
+
+    <details>
+      <summary>Rotte Commerciali e Materie Prime</summary>
+      <div class="guide-body">
+        <b>Rotte</b>: 5 mo ogni 100 km, pagati il 1° del mese. Rischio di perdita: 5% base + 5% ogni 100 km non coperti da un Avamposto. Consigliato restare sotto i <b>400 km totali</b> a inizio gioco.<br><br>
+        <b>Materie prime</b>: prezzo fisso di listino. Sconti su acquisto: −20% comprando da un altro QG, fino a −30% se il materiale è tra i 5 scontati dal tuo Magazzino. Gli sconti valgono solo sugli acquisti, mai sul costo di costruzione delle strutture.
+      </div>
+    </details>
+
+    <details>
+      <summary>Strutture e Personale</summary>
+      <div class="guide-body">
+        28 strutture in 4 categorie — Generali, Produzione, Vendita, Militare — ciascuna con costo, personale richiesto, materiali, descrizione ed effetto. Il catalogo completo con tutti i dettagli è nella tab <b>Strutture</b> del programma.<br><br>
+        Ogni struttura richiede personale per funzionare; ogni lavoratore assunto costa <b>1 mo al mese</b> — è la spesa fissa principale del QG.
+      </div>
+    </details>
+
+    <details>
+      <summary>Come usare il programma — le tab</summary>
+      <div class="guide-body">
+        <ul>
+          <li><b>Panoramica</b>: dati del QG, tesoreria (con "Movimento rapido" per +/- oro), barra Punti QG, membri, riepilogo strutture.</li>
+          <li><b>Strutture</b>: catalogo filtrabile con bottone "Costruisci" (verifica e scala oro/materiali/punti in automatico); elenco strutture possedute con Potenzia/Smantella.</li>
+          <li><b>Magazzino</b>: acquisto materiali con sconti, inventario, e lavoratori — bottone "⟳ Adegua al fabbisogno" imposta i lavoratori al numero richiesto dalle strutture in un click.</li>
+          <li><b>Rotte Commerciali</b>: aggiungi rotte con calcolo automatico di costo mensile e rischio, avviso oltre i 400 km.</li>
+          <li><b>Finanze</b>: tabelle Costi Fissi (stipendi) e Costi Variabili (rotte); bottone "Chiudi mese" applica automaticamente il totale alla tesoreria; storico movimenti registrato da solo ad ogni entrata/uscita.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>Salvataggio, backup e tema</summary>
+      <div class="guide-body">
+        I dati si salvano da soli in locale, in questo browser/dispositivo — <b>non si sincronizzano</b> automaticamente tra PC diverso e telefono. Usa <b>⬇ Esporta backup (JSON)</b> per una copia di sicurezza o per spostarti su un altro dispositivo, e <b>⬆ Importa backup</b> per ricaricarla. <b>📋 Copia riepilogo testuale</b> genera un riassunto pronto da incollare su Discord.<br><br>
+        Il pulsante tema nella sidebar passa da chiaro a scuro e viceversa, ricordando la scelta al prossimo avvio.
+      </div>
+    </details>
+
+    <div class="guide-foot">
+      <label><input type="checkbox" id="guideDontShow"> Non mostrare più questa guida all'avvio</label>
+      <button class="btn btn-brass" id="guideCloseBtn">Ho capito, chiudi</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -760,6 +858,7 @@ let state = {
 
 const STORAGE_KEY = "qg_registro_v1";
 const THEME_KEY = "qg_tema";
+const GUIDE_KEY = "qg_guida_nascosta";
 let currentTab = "panoramica";
 let catFilter = "Tutte";
 let storageOk = true;
@@ -1653,10 +1752,36 @@ document.getElementById("importFile").addEventListener("change", (e)=>{
 });
 
 /* ============================================================
+   GUIDA INTEGRATA
+   ============================================================ */
+function openGuide(){
+  document.getElementById("guideModalBg").style.display = "flex";
+}
+function closeGuide(){
+  document.getElementById("guideModalBg").style.display = "none";
+  const nascondi = document.getElementById("guideDontShow").checked;
+  if(nascondi){
+    try{ localStorage.setItem(GUIDE_KEY, "1"); }catch(e){ /* ignora */ }
+  }
+}
+function initGuide(){
+  let nascosta = false;
+  try{ nascosta = localStorage.getItem(GUIDE_KEY) === "1"; }catch(e){ /* ignora */ }
+  if(!nascosta) openGuide();
+  document.getElementById("guideBtn").addEventListener("click", openGuide);
+  document.getElementById("guideCloseBtn").addEventListener("click", closeGuide);
+  document.getElementById("guideCloseX").addEventListener("click", closeGuide);
+  document.getElementById("guideModalBg").addEventListener("click", e=>{
+    if(e.target.id === "guideModalBg") closeGuide();
+  });
+}
+
+/* ============================================================
    AVVIO
    ============================================================ */
 initTheme();
 loadState();
+initGuide();
 </script>
 </body>
 </html>
