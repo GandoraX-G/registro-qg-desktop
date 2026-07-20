@@ -411,16 +411,19 @@
           <div class="row">
             <div>
               <label>Classe del QG</label>
-              <select id="inClasse">
-                <option value="Nessuna">Senza Classe</option>
-                <option value="Produzione">Produzione</option>
-                <option value="Vendita">Vendita</option>
-                <option value="Militare">Militare</option>
-              </select>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <select id="inClasse" style="flex:1;">
+                  <option value="Nessuna">Senza Classe</option>
+                  <option value="Produzione">Produzione</option>
+                  <option value="Vendita">Vendita</option>
+                  <option value="Militare">Militare</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" id="btnSbloccaClasse" style="flex:0 0 auto; display:none;" title="Consente una correzione manuale eccezionale">🔓</button>
+              </div>
             </div>
             <div>
-              <label>Livello del QG</label>
-              <select id="inLivello">
+              <label>Livello del QG <span style="font-weight:400;opacity:.7;">(calcolato automaticamente)</span></label>
+              <select id="inLivello" disabled>
                 <option value="1">Livello 1 (personaggi Lv 3–6)</option>
                 <option value="2">Livello 2 (personaggi Lv 7–10)</option>
                 <option value="3">Livello 3 (personaggi Lv 11–14)</option>
@@ -430,7 +433,7 @@
               </select>
             </div>
           </div>
-          <div class="hint">La classe si ottiene automaticamente alla costruzione della prima Struttura Specializzata (Produzione, Vendita o Militare) — impostala qui quando accade. Il livello massimo attuale del gioco è 3 (Marzo 2026).</div>
+          <div class="hint">La classe si ottiene automaticamente alla costruzione della prima Struttura Specializzata (Produzione, Vendita o Militare) e da quel momento il menu si blocca, per evitare cambi non intenzionali — usa il lucchetto 🔓 per una correzione eccezionale. Il livello del QG si calcola da solo in base ai membri elencati sotto: aggiungi/aggiorna lì i personaggi per farlo cambiare. Il livello massimo attuale del gioco è 3 (Marzo 2026).</div>
         </div>
 
         <div class="card">
@@ -573,10 +576,10 @@
         <div class="row">
           <div><label>Nome rotta / destinazione</label><input type="text" id="rNome" placeholder="es. Rotta per Samat"></div>
           <div><label>Distanza totale (km)</label><input type="number" id="rDistanza" min="0"></div>
-          <div><label>Km difesi da avamposto</label><input type="number" id="rDifesa" min="0" value="0"></div>
+          <div><label>Avamposto a difesa</label><select id="rAvamposto"><option value="">— nessuno —</option></select></div>
           <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnAddRotta">+ Aggiungi rotta</button></div>
         </div>
-        <div class="hint">Ogni 1° del mese il QG paga 5 mo ogni 100 km di rotta. Senza copertura da avamposto, esiste il 5% di probabilità (+5% ogni 100 km scoperti) che metà delle risorse trasportate vadano perse a fine mese.</div>
+        <div class="hint">Ogni 1° del mese il QG paga 5 mo ogni 100 km di rotta. Un Avamposto può difendere una sola rotta alla volta, entro un raggio di 400 km × il suo livello: oltre il raggio, o senza Avamposto assegnato, esiste il 5% di probabilità (+5% ogni 100 km scoperti) che metà delle risorse trasportate vadano perse a fine mese. Gli Avamposti si costruiscono dalla scheda Strutture.</div>
       </div>
 
       <div class="card">
@@ -740,12 +743,16 @@ let MATERIALI_PREZZI = {};
 let CATALOGO = [];
 let PUNTI_QG_MAX = 44;
 let LIVELLO_STRUTTURA_MAX = 6;
+let LIVELLO_QG_MAX_ATTUALE = 3;
 let COSTO_ROTTA_MO_PER_100KM = 5;
 let RISCHIO_ROTTA_BASE = 5;
 let RISCHIO_ROTTA_PER_100KM = 5;
 let SCONTO_ACQUISTO_ALTRO_QG = 0.20;
 let SCONTO_ACQUISTO_MAGAZZINO = 0.30;
 let COSTO_LAVORATORE_MESE = 1;
+let AVAMPOSTO_RAGGIO_KM_PER_LIVELLO = 400;
+let LIVELLO_QG_CRITERIO = "massimo";
+let LIVELLO_QG_SOGLIE = [];
 
 async function caricaConfig(){
   const res = await fetch("./data/regolamento.json");
@@ -756,12 +763,17 @@ async function caricaConfig(){
   const c = cfg.costanti || {};
   PUNTI_QG_MAX = c.puntiQGMax ?? PUNTI_QG_MAX;
   LIVELLO_STRUTTURA_MAX = c.livelloStrutturaMax ?? LIVELLO_STRUTTURA_MAX;
+  LIVELLO_QG_MAX_ATTUALE = c.livelloQGMaxAttuale ?? LIVELLO_QG_MAX_ATTUALE;
   COSTO_ROTTA_MO_PER_100KM = c.costoRottaMoPer100Km ?? COSTO_ROTTA_MO_PER_100KM;
   RISCHIO_ROTTA_BASE = c.rischioRottaBasePercento ?? RISCHIO_ROTTA_BASE;
   RISCHIO_ROTTA_PER_100KM = c.rischioRottaPer100KmScopertiPercento ?? RISCHIO_ROTTA_PER_100KM;
   SCONTO_ACQUISTO_ALTRO_QG = (c.scontoAcquistoAltroQGPercento ?? 20) / 100;
   SCONTO_ACQUISTO_MAGAZZINO = (c.scontoAcquistoMagazzinoPercento ?? 30) / 100;
   COSTO_LAVORATORE_MESE = c.costoLavoratoreMoAlMese ?? COSTO_LAVORATORE_MESE;
+  AVAMPOSTO_RAGGIO_KM_PER_LIVELLO = c.avampostoRaggioKmPerLivello ?? AVAMPOSTO_RAGGIO_KM_PER_LIVELLO;
+  const lq = cfg.livelloQG || {};
+  LIVELLO_QG_CRITERIO = lq.criterio || LIVELLO_QG_CRITERIO;
+  LIVELLO_QG_SOGLIE = lq.soglie || [];
 }
 
 
@@ -781,7 +793,7 @@ let state = {
   strutture: [],   // {uid, catId, livello}
   materiali: {},   // {nomeMateriale: quantità}
   lavoratori: 0,
-  rotte: [],       // {uid, nome, distanza, difesa}
+  rotte: [],       // {uid, nome, distanza, avampostoUid}
   magazzinoScontati: [],  // fino a 5 nomi di materiali con sconto Magazzino al 30%
   movimenti: []    // {data, label, importo, saldoDopo} — storico automatico della tesoreria
 };
@@ -792,6 +804,7 @@ const GUIDE_KEY = "qg_guida_nascosta";
 let currentTab = "panoramica";
 let catFilter = "Tutte";
 let storageOk = true;
+let classeSbloccataManualmente = false; // sblocco temporaneo (non persistito) del menu Classe
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
@@ -870,9 +883,30 @@ async function loadState(){
   }catch(e){
     console.log("Nessun registro salvato in precedenza, o dati corrotti: si parte da zero.", e);
   }
+  migraRotteLegacy();
   document.getElementById("loading").style.display = "none";
   document.getElementById("app").style.display = "grid";
   renderAll();
+}
+
+// Migrazione una tantum: le rotte create con versioni precedenti dell'app
+// avevano un campo "difesa" numerico libero, digitato a mano, invece di un
+// vero collegamento a un Avamposto costruito. Non possiamo indovinare a
+// quale Avamposto corrispondesse quel numero, quindi lo segnaliamo invece
+// di far sparire silenziosamente la copertura: la rotta risulta scoperta
+// finché non le si riassegna esplicitamente un Avamposto dalla tabella.
+function migraRotteLegacy(){
+  let daSegnalare = 0;
+  state.rotte.forEach(r=>{
+    if(r.avampostoUid === undefined){
+      if(typeof r.difesa === "number" && r.difesa > 0) daSegnalare++;
+      r.avampostoUid = null;
+      delete r.difesa;
+    }
+  });
+  if(daSegnalare > 0){
+    showToast(`⚠ ${daSegnalare} rotta/e create con una versione precedente sono tornate "scoperte": riassegna l'Avamposto dalla tabella Rotte`);
+  }
 }
 
 let saveTimeout = null;
@@ -975,7 +1009,10 @@ function buildSummaryText(){
   if(state.rotte.length>0){
     righe.push("");
     righe.push(`Rotte commerciali (${kmTot} km totali, ${costoMensileRotte().toFixed(1).replace(/\.0$/,"")} mo/mese):`);
-    state.rotte.forEach(r=> righe.push(`  • ${r.nome} — ${r.distanza} km (${r.difesa} km difesi)`));
+    state.rotte.forEach(r=>{
+      const difesa = kmDifesiRotta(r);
+      righe.push(`  • ${r.nome} — ${r.distanza} km (${difesa>0 ? difesa+" km difesi da avamposto" : "scoperta"})`);
+    });
   }
   righe.push("");
   righe.push(`Bilancio mensile — Costi fissi: ${fmtMo(costiFissiMensili())} mo · Costi variabili: ${fmtMo(costiVariabiliMensili())} mo · Totale: ${fmtMo(costoMensileTotale())} mo`);
@@ -1144,11 +1181,42 @@ function renderTopbar(){
   document.getElementById("chipPersonale").textContent = personaleRichiesto();
 }
 
+// Il Livello del QG non è più un valore libero: si deriva dai livelli dei
+// personaggi membri, secondo le soglie di regolamento.json. Il criterio
+// (massimo/minimo/media) è anch'esso in config: il regolamento originale non
+// specifica quale dei tre si intenda, quindi è stata presa un'assunzione
+// (vedi commento "_nota" in livelloQG dentro regolamento.json) — se non è
+// corretta, si corregge lì senza toccare questo codice.
+function calcolaLivelloQGDaMembri(){
+  if(!state.membri || state.membri.length===0) return 1;
+  const livelli = state.membri.map(m=>Number(m.livello)||0).filter(l=>l>0);
+  if(livelli.length===0) return 1;
+  let riferimento;
+  if(LIVELLO_QG_CRITERIO === "minimo") riferimento = Math.min(...livelli);
+  else if(LIVELLO_QG_CRITERIO === "media") riferimento = livelli.reduce((a,b)=>a+b,0)/livelli.length;
+  else riferimento = Math.max(...livelli); // default: "massimo"
+
+  let livelloQG = 1;
+  const soglie = [...LIVELLO_QG_SOGLIE].sort((a,b)=>a.livelloPersonaggioMin - b.livelloPersonaggioMin);
+  soglie.forEach(s=>{ if(riferimento >= s.livelloPersonaggioMin) livelloQG = s.qg; });
+
+  return Math.min(livelloQG, LIVELLO_QG_MAX_ATTUALE);
+}
+
 function renderPanoramica(){
+  state.livello = calcolaLivelloQGDaMembri();
+
   document.getElementById("inNome").value = state.nome;
   document.getElementById("inFondatore").value = state.fondatore;
   document.getElementById("inCofondatore").value = state.cofondatore;
   document.getElementById("inClasse").value = state.classe;
+  // La classe è bloccata una volta assegnata (auto, alla prima struttura
+  // specializzata), a meno che lo Staff non l'abbia sbloccata di proposito
+  // con il lucchetto per questa sessione (classeSbloccataManualmente non è
+  // persistita: si rilocca da sola al prossimo avvio dell'app).
+  const classeAssegnata = state.classe !== "Nessuna";
+  document.getElementById("inClasse").disabled = classeAssegnata && !classeSbloccataManualmente;
+  document.getElementById("btnSbloccaClasse").style.display = classeAssegnata && !classeSbloccataManualmente ? "inline-flex" : "none";
   document.getElementById("inLivello").value = state.livello;
   document.getElementById("inOro").value = state.oro;
 
@@ -1372,16 +1440,60 @@ function eseguiAcquisto(){
   saveState();
 }
 
+// Elenco degli Avamposti costruiti. Un Avamposto protegge una sola rotta alla
+// volta (per regolamento: "protegge la tratta commerciale di un singolo QG
+// scelto alla costruzione dell'avamposto"), quindi qui li marchiamo come
+// "liberi" o "già assegnati" per non permettere doppie assegnazioni dalla UI.
+function elencoAvamposti(){
+  return state.strutture.filter(s=>s.catId==="avamposto");
+}
+function avampostoAssegnatoA(rottaUid){
+  return state.rotte.find(r=>r.uid===rottaUid)?.avampostoUid || null;
+}
+function avampostoLibero(struttura, rottaUidCorrente){
+  return !state.rotte.some(r=>r.avampostoUid===struttura.uid && r.uid!==rottaUidCorrente);
+}
+function raggioAvamposto(struttura){
+  return AVAMPOSTO_RAGGIO_KM_PER_LIVELLO * (struttura.livello||1);
+}
+// Km "difesi" per una rotta = raggio dell'avamposto collegato (se c'è).
+// Riusa la stessa calcRischio già esistente: se il raggio copre l'intera
+// distanza il rischio scende a 0 ("protetta"), altrimenti si applica la
+// riduzione proporzionale come già avveniva col vecchio campo manuale.
+function kmDifesiRotta(r){
+  if(!r.avampostoUid) return 0;
+  const av = state.strutture.find(s=>s.uid===r.avampostoUid && s.catId==="avamposto");
+  return av ? raggioAvamposto(av) : 0;
+}
+
+function popolaSelectAvamposti(select, rottaUidCorrente){
+  const scelto = select.value;
+  select.innerHTML = `<option value="">— nessuno —</option>`;
+  elencoAvamposti().forEach(av=>{
+    const libero = avampostoLibero(av, rottaUidCorrente);
+    const opt = document.createElement("option");
+    opt.value = av.uid;
+    opt.textContent = `Avamposto (Lv.${av.livello}, raggio ${raggioAvamposto(av)} km)` + (libero ? "" : " — già assegnato altrove");
+    if(!libero && av.uid !== rottaUidCorrente) opt.disabled = true;
+    select.appendChild(opt);
+  });
+  select.value = scelto || "";
+}
+
 function renderRotte(){
   const body = document.getElementById("rotteBody");
   const empty = document.getElementById("rotteEmpty");
   body.innerHTML = "";
+
+  popolaSelectAvamposti(document.getElementById("rAvamposto"), null);
+
   if(state.rotte.length===0){
     empty.style.display = "block";
   }else{
     empty.style.display = "none";
     state.rotte.forEach(r=>{
-      const rischio = calcRischio(r.distanza, r.difesa);
+      const difesa = kmDifesiRotta(r);
+      const rischio = calcRischio(r.distanza, difesa);
       const costo = (r.distanza/100*COSTO_ROTTA_MO_PER_100KM).toFixed(1).replace(/\.0$/,"");
       let cls = "badge-risk-low";
       if(rischio>=20) cls="badge-risk-high"; else if(rischio>=10) cls="badge-risk-mid";
@@ -1389,11 +1501,14 @@ function renderRotte(){
       tr.innerHTML = `
         <td>${escapeHtml(r.nome)}</td>
         <td class="mono">${r.distanza} km</td>
-        <td class="mono">${r.difesa} km</td>
+        <td><select class="mono" data-action="cambia-avamposto" data-uid="${r.uid}" style="max-width:210px;"></select></td>
         <td class="mono">${costo} mo</td>
         <td class="${cls}">${rischio}% ${rischio===0 ? "(protetta)":""}</td>
         <td><button class="btn btn-danger btn-sm" data-action="del-rotta" data-uid="${r.uid}">Rimuovi</button></td>`;
       body.appendChild(tr);
+      const sel = tr.querySelector("[data-action='cambia-avamposto']");
+      popolaSelectAvamposti(sel, r.uid);
+      sel.value = r.avampostoUid || "";
     });
   }
   const kmTot = state.rotte.reduce((s,r)=>s+Number(r.distanza||0),0);
@@ -1473,6 +1588,17 @@ function costruisciStruttura(catId){
     showToast("Punti QG insufficienti (max 44) ⚠");
     return;
   }
+  // Limite quantitativo generico dichiarato nel catalogo (es. Imprese: max
+  // 2 × Livello QG). Se una struttura non ha "limiteCostruzioni" in
+  // regolamento.json, questo controllo semplicemente non scatta.
+  if(c.limiteCostruzioni && c.limiteCostruzioni.tipo === "perLivelloQG"){
+    const massimo = c.limiteCostruzioni.moltiplicatore * state.livello;
+    const attuali = state.strutture.filter(s=>s.catId===c.id).length;
+    if(attuali >= massimo){
+      showToast(`Limite raggiunto: massimo ${massimo} ${c.nome} al Livello QG attuale (${c.limiteCostruzioni.moltiplicatore}× livello) ⚠`);
+      return;
+    }
+  }
   if(state.oro < c.costo){
     showToast("Oro insufficiente in tesoreria ⚠");
     return;
@@ -1533,7 +1659,14 @@ function smantellaStruttura(uidStr){
   const c = CATALOGO.find(x=>x.id===s.catId);
   if(c.id==="avamposto"){
     c.materiali.forEach(mat=>{ state.materiali[mat.m] = (state.materiali[mat.m]||0) + mat.u; });
-    showToast("Avamposto smantellato: materiali restituiti al magazzino");
+    // Se questo avamposto proteggeva una rotta, lo scolleghiamo: la rotta
+    // torna scoperta invece di continuare a fare riferimento a una struttura
+    // che non esiste più.
+    const rotteScollegate = state.rotte.filter(r=>r.avampostoUid===uidStr).length;
+    state.rotte.forEach(r=>{ if(r.avampostoUid===uidStr) r.avampostoUid = null; });
+    showToast(rotteScollegate>0
+      ? `Avamposto smantellato: materiali restituiti, ${rotteScollegate} rotta/e tornate scoperte`
+      : "Avamposto smantellato: materiali restituiti al magazzino");
   }else{
     showToast(`${c.nome} smantellata`);
   }
@@ -1560,8 +1693,20 @@ document.querySelectorAll(".nav-item").forEach(item=>{
 document.getElementById("inNome").addEventListener("input", e=>{ state.nome = e.target.value; renderTopbar(); saveState(); });
 document.getElementById("inFondatore").addEventListener("input", e=>{ state.fondatore = e.target.value; saveState(); });
 document.getElementById("inCofondatore").addEventListener("input", e=>{ state.cofondatore = e.target.value; saveState(); });
-document.getElementById("inClasse").addEventListener("change", e=>{ state.classe = e.target.value; renderAll(); saveState(); });
-document.getElementById("inLivello").addEventListener("change", e=>{ state.livello = Number(e.target.value); renderTopbar(); saveState(); });
+document.getElementById("btnSbloccaClasse").addEventListener("click", ()=>{
+  if(!confirm("Cambiare manualmente la classe di un QG già assegnato è un'operazione eccezionale (di norma riservata allo Staff per correggere un errore). Vuoi sbloccare il menu per questa modifica?")) return;
+  classeSbloccataManualmente = true;
+  renderPanoramica();
+});
+
+document.getElementById("inClasse").addEventListener("change", e=>{
+  state.classe = e.target.value;
+  classeSbloccataManualmente = false; // si rilocca subito dopo l'uso, per evitare cambi ripetuti non voluti
+  renderAll();
+  saveState();
+});
+// Nota: non c'è più un listener "change" su #inLivello — il campo è disabilitato
+// e il valore viene ricalcolato da calcolaLivelloQGDaMembri() ad ogni render.
 document.getElementById("inOro").addEventListener("change", e=>{
   const nuovo = Number(e.target.value)||0;
   const delta = nuovo - state.oro;
@@ -1658,12 +1803,11 @@ document.getElementById("btnChiudiMese").addEventListener("click", ()=>{
 document.getElementById("btnAddRotta").addEventListener("click", ()=>{
   const nome = document.getElementById("rNome").value.trim();
   const distanza = Number(document.getElementById("rDistanza").value);
-  const difesa = Number(document.getElementById("rDifesa").value)||0;
+  const avampostoUid = document.getElementById("rAvamposto").value || null;
   if(!nome || !distanza){ showToast("Inserisci nome e distanza della rotta"); return; }
-  state.rotte.push({uid: uid(), nome, distanza, difesa});
+  state.rotte.push({uid: uid(), nome, distanza, avampostoUid});
   document.getElementById("rNome").value = "";
   document.getElementById("rDistanza").value = "";
-  document.getElementById("rDifesa").value = "0";
   renderRotte(); saveState();
 });
 
@@ -1671,6 +1815,15 @@ document.getElementById("rotteBody").addEventListener("click", e=>{
   const btn = e.target.closest("[data-action='del-rotta']");
   if(!btn) return;
   state.rotte = state.rotte.filter(r=>r.uid!==btn.dataset.uid);
+  renderRotte(); saveState();
+});
+
+document.getElementById("rotteBody").addEventListener("change", e=>{
+  const sel = e.target.closest("[data-action='cambia-avamposto']");
+  if(!sel) return;
+  const r = state.rotte.find(x=>x.uid===sel.dataset.uid);
+  if(!r) return;
+  r.avampostoUid = sel.value || null;
   renderRotte(); saveState();
 });
 

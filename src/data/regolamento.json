@@ -10,7 +10,20 @@
     "rischioRottaPer100KmScopertiPercento": 5,
     "scontoAcquistoAltroQGPercento": 20,
     "scontoAcquistoMagazzinoPercento": 30,
-    "costoLavoratoreMoAlMese": 1
+    "costoLavoratoreMoAlMese": 1,
+    "avampostoRaggioKmPerLivello": 400
+  },
+  "livelloQG": {
+    "_nota": "Criterio con cui si calcola il livello del QG dai livelli dei personaggi membri. Il regolamento dice solo 'in base al livello dei personaggi membri' senza specificare se si intende il più alto, il più basso o la media: qui usiamo 'massimo' come assunzione di default. Cambia questo valore in 'minimo' o 'media' se non è quello che intendevate — è l'unica riga da toccare, non serve modificare il codice.",
+    "criterio": "massimo",
+    "soglie": [
+      {"qg": 1, "livelloPersonaggioMin": 3},
+      {"qg": 2, "livelloPersonaggioMin": 7},
+      {"qg": 3, "livelloPersonaggioMin": 11},
+      {"qg": 4, "livelloPersonaggioMin": 15},
+      {"qg": 5, "livelloPersonaggioMin": 18},
+      {"qg": 6, "livelloPersonaggioMin": 21}
+    ]
   },
   "materiali": {
     "Legna": 1, "Pietra": 2, "Sale": 0.5, "Ferro": 3, "Rame": 2, "Argento": 8,
@@ -34,6 +47,7 @@
      "desc":"Consacra oggetti a una Divinità: Parola Guaritrice gratuita e pf temporanei al riposo."},
     {"id":"impresa","nome":"Impresa","categoria":"Generali","costo":50,"personale":1,"exempt":true,
      "materiali":[{"m":"Legna","u":10},{"m":"Pietra","u":10}],
+     "limiteCostruzioni":{"tipo":"perLivelloQG","moltiplicatore":2},
      "desc":"Vende beni lontano da Porta Ethea. Non spende Punti QG; puoi costruirne fino a 2 × Livello QG."},
     {"id":"struttura_lavoro","nome":"Struttura da Lavoro","categoria":"Generali","costo":70,"personale":1,
      "materiali":[{"m":"Pietra","u":20}],
