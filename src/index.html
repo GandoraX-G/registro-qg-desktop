@@ -733,107 +733,37 @@
    DATI DI RIFERIMENTO — estratti dalla Meccanica dei QG
    ============================================================ */
 
-const MATERIALI_PREZZI = {
-  "Legna": 1, "Pietra": 2, "Sale": 0.5, "Ferro": 3, "Rame": 2, "Argento": 8,
-  "Oro": 15, "Platino": 30, "Pollo": 2, "Capra": 4, "Pecora": 4, "Mucca": 8, "Bue": 10,
-  "Birra": 1, "Vino": 2, "Beni vegetali": 1, "Beni animali": 2, "Carne animale": 2, "Pesce": 2,
-  "Beni vegetali raffinati": 3, "Beni animali raffinati": 5, "Carne animale raffinata": 6,
-  "Pesce raffinato": 4, "Stoffa": 5
-};
+/* Questi valori vengono popolati da caricaConfig() leggendo src/data/regolamento.json.
+   Non sono più hardcoded qui: per applicare una patch al regolamento (nuovi prezzi,
+   nuove soglie, nuove strutture) modifica quel file, non questo script. */
+let MATERIALI_PREZZI = {};
+let CATALOGO = [];
+let PUNTI_QG_MAX = 44;
+let LIVELLO_STRUTTURA_MAX = 6;
+let COSTO_ROTTA_MO_PER_100KM = 5;
+let RISCHIO_ROTTA_BASE = 5;
+let RISCHIO_ROTTA_PER_100KM = 5;
+let SCONTO_ACQUISTO_ALTRO_QG = 0.20;
+let SCONTO_ACQUISTO_MAGAZZINO = 0.30;
+let COSTO_LAVORATORE_MESE = 1;
 
-const CATALOGO = [
-  // ---------------- GENERALI ----------------
-  {id:"biblioteca", nome:"Biblioteca", categoria:"Generali", costo:100, personale:1,
-   materiali:[{m:"Legna",u:50},{m:"Pietra",u:25}],
-   desc:"Collezione di libri tematici. Consente Indagini (informazioni accurate + bonus +5) e può ospitare un Bestiario."},
-  {id:"giardino", nome:"Giardino", categoria:"Generali", costo:50, personale:1,
-   materiali:[{m:"Legna",u:50}],
-   desc:"Coltiva Beni Vegetali (5 U/mese, +5 al Lv.2, +5 al Lv.3) e piante speciali da semi d'avventura."},
-  {id:"sala_contatti", nome:"Sala Contatti", categoria:"Generali", costo:50, personale:0,
-   materiali:[{m:"Legna",u:25},{m:"Pietra",u:10}],
-   desc:"Assolda soldati per coprire una rotta commerciale (max 400km × livello). Lv.1 strade terrestri, Lv.2 anche marittime."},
-  {id:"santuario", nome:"Santuario", categoria:"Generali", costo:100, personale:2,
-   materiali:[{m:"Oro",u:2},{m:"Pietra",u:10},{m:"Legna",u:10}],
-   desc:"Consacra oggetti a una Divinità: Parola Guaritrice gratuita e pf temporanei al riposo."},
-  {id:"impresa", nome:"Impresa", categoria:"Generali", costo:50, personale:1, exempt:true,
-   materiali:[{m:"Legna",u:10},{m:"Pietra",u:10}],
-   desc:"Vende beni lontano da Porta Ethea. Non spende Punti QG; puoi costruirne fino a 2 × Livello QG."},
-  {id:"struttura_lavoro", nome:"Struttura da Lavoro", categoria:"Generali", costo:70, personale:1,
-   materiali:[{m:"Pietra",u:20}],
-   desc:"Officina specializzata in fino a 2 strumenti da artigiano per creare oggetti non magici e magici."},
-  {id:"studio_arcano", nome:"Studio Arcano", categoria:"Generali", costo:50, personale:1,
-   materiali:[{m:"Pietra",u:5},{m:"Argento",u:5}],
-   desc:"Charm settimanale per lanciare Identificare gratis; può ospitare un Catalizzatore d'essenza."},
+async function caricaConfig(){
+  const res = await fetch("./data/regolamento.json");
+  if(!res.ok) throw new Error("Impossibile caricare data/regolamento.json ("+res.status+")");
+  const cfg = await res.json();
+  MATERIALI_PREZZI = cfg.materiali || {};
+  CATALOGO = cfg.catalogo || [];
+  const c = cfg.costanti || {};
+  PUNTI_QG_MAX = c.puntiQGMax ?? PUNTI_QG_MAX;
+  LIVELLO_STRUTTURA_MAX = c.livelloStrutturaMax ?? LIVELLO_STRUTTURA_MAX;
+  COSTO_ROTTA_MO_PER_100KM = c.costoRottaMoPer100Km ?? COSTO_ROTTA_MO_PER_100KM;
+  RISCHIO_ROTTA_BASE = c.rischioRottaBasePercento ?? RISCHIO_ROTTA_BASE;
+  RISCHIO_ROTTA_PER_100KM = c.rischioRottaPer100KmScopertiPercento ?? RISCHIO_ROTTA_PER_100KM;
+  SCONTO_ACQUISTO_ALTRO_QG = (c.scontoAcquistoAltroQGPercento ?? 20) / 100;
+  SCONTO_ACQUISTO_MAGAZZINO = (c.scontoAcquistoMagazzinoPercento ?? 30) / 100;
+  COSTO_LAVORATORE_MESE = c.costoLavoratoreMoAlMese ?? COSTO_LAVORATORE_MESE;
+}
 
-  // ---------------- PRODUZIONE ----------------
-  {id:"campo_coltivato", nome:"Campo Coltivato", categoria:"Produzione", costo:100, personale:5,
-   materiali:[],
-   desc:"Produce 20 + 10×Lv Beni Vegetali (o Raffinati con Raffineria) al mese. Modificatori stagionali."},
-  {id:"miniera", nome:"Miniera", categoria:"Produzione", costo:150, personale:3,
-   materiali:[],
-   desc:"Produce 7 + 5×Lv Pietra (Lv.2 Ferro, Lv.3 Argento). Genera Token Miniera per tiri su tabella dungeon."},
-  {id:"pescheria", nome:"Pescheria", categoria:"Produzione", costo:110, personale:2,
-   materiali:[],
-   desc:"Produce 7 + 5×Lv Pesce (o Raffinato con Raffineria). Genera Token Pesca per tiri su tabella."},
-  {id:"segheria", nome:"Segheria", categoria:"Produzione", costo:120, personale:2,
-   materiali:[],
-   desc:"Produce 15 + 10×Lv Legno. Permette semi di Piante Speciali o oli speciali da alberi del luogo."},
-  {id:"bottega_artistica", nome:"Bottega Artistica", categoria:"Produzione", costo:50, personale:1,
-   materiali:[],
-   desc:"Crea 1 Opera d'Arte al mese (120mo di materiali). Dà bonus/malus commerciali di Prestigio Artistico."},
-  {id:"fattoria", nome:"Fattoria", categoria:"Produzione", costo:100, personale:0,
-   materiali:[{m:"Capra",u:1},{m:"Pecora",u:1},{m:"Mucca",u:1}],
-   desc:"Produce 7 + 5×Lv prodotti animali/mese (o raffinati con Raffineria). Genera Token Concime."},
-  {id:"raffineria", nome:"Raffineria", categoria:"Produzione", costo:150, personale:3,
-   materiali:[],
-   desc:"Raffina i materiali prodotti dalle altre strutture di produzione collegate."},
-
-  // ---------------- VENDITA ----------------
-  {id:"fabbro", nome:"Fabbro", categoria:"Vendita", costo:90, personale:2,
-   materiali:[{m:"Ferro",u:20},{m:"Pietra",u:25}],
-   desc:"Costruisce e vende armi, armature e scudi; oggetti magici fino al Leggendario Consumabile. Affilatura armi."},
-  {id:"magazzino_str", nome:"Magazzino", categoria:"Vendita", costo:60, personale:4,
-   materiali:[{m:"Pietra",u:30},{m:"Legna",u:30}],
-   desc:"Smista materiali, dà sconti extra su 5 materie prime scelte e aumenta la capacità di stoccaggio."},
-  {id:"alchimista", nome:"Alchimista", categoria:"Vendita", costo:100, personale:1,
-   materiali:[{m:"Legna",u:60},{m:"Ferro",u:10},{m:"Rame",u:5}],
-   desc:"Vende pozioni e rimedi. Calderone Alchemico per mescere due pozioni della stessa rarità."},
-  {id:"sartoria", nome:"Sartoria", categoria:"Vendita", costo:70, personale:2,
-   materiali:[{m:"Pietra",u:40}],
-   desc:"Vende abiti e mantelli; può cucire un Abito Speciale con Ispirazione Eroica e vantaggio a Carisma."},
-  {id:"locanda", nome:"Locanda", categoria:"Vendita", costo:100, personale:3,
-   materiali:[{m:"Pietra",u:25},{m:"Stoffa",u:3}],
-   desc:"Piatti con benefici temporanei in base a portata/cottura/contorno; al Lv.2 anche Bento da asporto."},
-  {id:"sala_svago", nome:"Sala di Svago", categoria:"Vendita", costo:110, personale:3,
-   materiali:[{m:"Pietra",u:20},{m:"Oro",u:1}],
-   desc:"Giochi a premi o spettacoli (Piccolo/Medio/Grande) che danno benefici temporanei ai partecipanti."},
-  {id:"servizio_edile", nome:"Servizio Edile", categoria:"Vendita", costo:120, personale:10,
-   materiali:[{m:"Pietra",u:50},{m:"Legna",u:20}],
-   desc:"Costruisce strutture/oggetti di qualsiasi dimensione; riduce materiali e sconta il costo di costruzione."},
-
-  // ---------------- MILITARE ----------------
-  {id:"avamposto", nome:"Avamposto", categoria:"Militare", costo:30, personale:10, exempt:true,
-   materiali:[{m:"Pietra",u:10}],
-   desc:"Protegge fino a 400km × Lv di rotta/territorio da un QG. Non spende Punti QG; smantellarlo restituisce i materiali."},
-  {id:"studio_diplomatico", nome:"Studio Diplomatico", categoria:"Militare", costo:110, personale:2,
-   materiali:[{m:"Legna",u:50}],
-   desc:"Scambia unità tra gli eserciti di Unshast per ottenere Companion con privilegi delle fazioni scelte."},
-  {id:"sala_arcana", nome:"Sala Arcana", categoria:"Militare", costo:150, personale:2,
-   materiali:[{m:"Oro",u:4},{m:"Pietra",u:30}],
-   desc:"Consente a lanciatori di incantesimi di apprendere incantesimi tramite rituale (fino al 5° liv.)."},
-  {id:"porto_militare", nome:"Porto Militare", categoria:"Militare", costo:80, personale:10,
-   materiali:[{m:"Legna",u:30},{m:"Pietra",u:20}],
-   desc:"Permette avamposti su specchi d'acqua collegati; sconto 20% sui potenziamenti navali."},
-  {id:"eliporto_arcano", nome:"Eliporto Arcano", categoria:"Militare", costo:800, personale:15,
-   materiali:[{m:"Legna",u:30},{m:"Pietra",u:20},{m:"Oro",u:20},{m:"Platino",u:30}],
-   desc:"Dispiega avamposti ovunque in Unshast a costo e tempo dimezzati; ulteriore sconto 10% sulla nave."},
-  {id:"campo_addestramento", nome:"Campo d'Addestramento", categoria:"Militare", costo:50, personale:1,
-   materiali:[{m:"Legna",u:30},{m:"Pietra",u:30}],
-   desc:"Addestra unità (fino a 5×Lv). Le unità Allenate estendono la protezione dell'avamposto a 600km × Lv QG."},
-  {id:"sala_da_guerra", nome:"Sala da Guerra", categoria:"Militare", costo:500, personale:0,
-   materiali:[],
-   desc:"Consente di organizzare e pianificare una Guerra (meccanica avanzata, vedi scheda dedicata)."}
-];
 
 const CATEGORIE = ["Generali","Produzione","Vendita","Militare"];
 
@@ -866,21 +796,8 @@ let storageOk = true;
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
 /* ============================================================
-   DISPONIBILITÀ localStorage
-   ============================================================ */
-function storageAvailable(){
-  try{
-    const testKey = "__qg_test__";
-    localStorage.setItem(testKey, "1");
-    localStorage.removeItem(testKey);
-    return true;
-  }catch(e){
-    return false;
-  }
-}
-
-/* ============================================================
-   TEMA (Chiaro / Scuro)
+   TEMA (Chiaro / Scuro) — resta su localStorage: è una preferenza
+   di visualizzazione locale al dispositivo, non un dato di gioco.
    ============================================================ */
 function initTheme(){
   let tema = "light";
@@ -904,20 +821,54 @@ function applyTheme(tema){
 
 /* ============================================================
    PERSISTENZA
+   ------------------------------------------------------------
+   Fonte primaria: file nativo sul disco, tramite due comandi Rust
+   (salva_registro / carica_registro) esposti da src-tauri/src/main.rs.
+   Questo evita che il registro sparisca svuotando la cache del webview
+   o disinstallando/reinstallando l'app — cosa che poteva succedere
+   quando l'unica copia viveva in localStorage.
+
+   Se per qualsiasi motivo l'app gira fuori da Tauri (es. apri
+   index.html in un browser normale durante lo sviluppo dell'interfaccia),
+   window.__TAURI__ non esiste: in quel caso si torna a localStorage
+   così puoi comunque testare la UI senza dover compilare l'app.
    ============================================================ */
-function loadState(){
-  storageOk = storageAvailable();
-  document.getElementById("storageWarning").classList.toggle("show", !storageOk);
-  if(storageOk){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
+const TAURI_DISPONIBILE = !!(window.__TAURI__ && window.__TAURI__.core);
+
+function storageAvailable(){
+  try{
+    const testKey = "__qg_test__";
+    localStorage.setItem(testKey, "1");
+    localStorage.removeItem(testKey);
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+async function loadState(){
+  document.getElementById("storageWarning").classList.toggle("show", false);
+  try{
+    if(TAURI_DISPONIBILE){
+      storageOk = true;
+      const raw = await window.__TAURI__.core.invoke("carica_registro");
       if(raw){
         const parsed = JSON.parse(raw);
         state = Object.assign(state, parsed);
       }
-    }catch(e){
-      console.log("Nessun registro salvato in precedenza, o dati corrotti: si parte da zero.", e);
+    }else{
+      storageOk = storageAvailable();
+      document.getElementById("storageWarning").classList.toggle("show", !storageOk);
+      if(storageOk){
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(raw){
+          const parsed = JSON.parse(raw);
+          state = Object.assign(state, parsed);
+        }
+      }
     }
+  }catch(e){
+    console.log("Nessun registro salvato in precedenza, o dati corrotti: si parte da zero.", e);
   }
   document.getElementById("loading").style.display = "none";
   document.getElementById("app").style.display = "grid";
@@ -927,19 +878,21 @@ function loadState(){
 let saveTimeout = null;
 function saveState(){
   clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(()=>{
-    if(!storageOk){
-      document.getElementById("storageWarning").classList.add("show");
-      return;
-    }
+  saveTimeout = setTimeout(async ()=>{
+    const payload = JSON.stringify(state);
     try{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if(TAURI_DISPONIBILE){
+        await window.__TAURI__.core.invoke("salva_registro", {contenuto: payload});
+      }else if(storageOk){
+        localStorage.setItem(STORAGE_KEY, payload);
+      }else{
+        throw new Error("Nessuna destinazione di salvataggio disponibile");
+      }
       flashSaved();
     }catch(e){
       console.error("Errore di salvataggio", e);
-      storageOk = false;
       document.getElementById("storageWarning").classList.add("show");
-      showToast("Salvataggio locale non riuscito ⚠ — scarica un backup dalla sidebar");
+      showToast("Salvataggio non riuscito ⚠ — scarica un backup dalla sidebar");
     }
   }, 250);
 }
@@ -1005,7 +958,7 @@ function buildSummaryText(){
   righe.push(`${classeLabel} · Livello QG ${state.livello}`);
   righe.push("");
   righe.push(`Tesoreria: ${state.oro} mo`);
-  righe.push(`Punti QG: ${puntiSpesiTotali()} / 44`);
+  righe.push(`Punti QG: ${puntiSpesiTotali()} / ${PUNTI_QG_MAX}`);
   righe.push(`Personale richiesto: ${personaleRichiesto()} (+ ${state.lavoratori} lavoratori assunti)`);
   righe.push("");
   righe.push("Membri:");
@@ -1093,7 +1046,7 @@ function valoreMagazzino(){
 }
 
 function costoMensileRotte(){
-  return state.rotte.reduce((sum,r)=> sum + (r.distanza/100)*5, 0);
+  return state.rotte.reduce((sum,r)=> sum + (r.distanza/100)*COSTO_ROTTA_MO_PER_100KM, 0);
 }
 
 /* ============================================================
@@ -1144,19 +1097,14 @@ function registraMovimento(label, importo){
   if(state.movimenti.length > 60) state.movimenti.length = 60;
 }
 
-function rischioRotta(distanza, difesa){
-  const dif = Math.min(difesa, distanza);
-  if(dif >= distanza) return 0;
-  const nonDifesi = distanza - dif;
-  return Math.min(100, 5 + 5*Math.floor(nonDifesi/100) + (nonDifesi%100>0 && nonDifesi<100 ? 5 : 0) - (nonDifesi<100 ? 0:0)) ;
-}
-// simpler & consistent risk calc: base 5% + 5% per every started 100km undefended
+// Rischio attacco su una rotta: percentuale base + una quota per ogni blocco di
+// 100km non difesi (valori presi da regolamento.json, non più hardcoded).
 function calcRischio(distanza, difesa){
   const dif = Math.min(Number(difesa)||0, Number(distanza)||0);
   const nonDifesi = Math.max(0,(Number(distanza)||0) - dif);
   if(nonDifesi <= 0) return 0;
   const blocchi = Math.ceil(nonDifesi/100);
-  return Math.min(100, 5 + 5*(blocchi-1) + 5); // 5% base + 5% extra per each additional 100km block beyond the first
+  return Math.min(100, RISCHIO_ROTTA_BASE + RISCHIO_ROTTA_PER_100KM*blocchi);
 }
 
 function contaStruttureCategoria(cat){
@@ -1191,7 +1139,7 @@ function renderTopbar(){
   const classeLabel = state.classe==="Nessuna" ? "Senza Classe" : "Classe "+state.classe;
   document.getElementById("qgSubDisplay").textContent = `${classeLabel} · Livello ${state.livello}`;
   document.getElementById("chipOro").textContent = state.oro;
-  document.getElementById("chipPunti").textContent = `${puntiSpesiTotali()}/44`;
+  document.getElementById("chipPunti").textContent = `${puntiSpesiTotali()}/${PUNTI_QG_MAX}`;
   document.getElementById("chipStrutture").textContent = state.strutture.length;
   document.getElementById("chipPersonale").textContent = personaleRichiesto();
 }
@@ -1205,9 +1153,9 @@ function renderPanoramica(){
   document.getElementById("inOro").value = state.oro;
 
   const spesi = puntiSpesiTotali();
-  const pct = Math.min(100, (spesi/44)*100);
+  const pct = Math.min(100, (spesi/PUNTI_QG_MAX)*100);
   document.getElementById("puntiBar").style.width = pct+"%";
-  document.getElementById("puntiBarLabel").textContent = `${spesi} / 44`;
+  document.getElementById("puntiBarLabel").textContent = `${spesi} / ${PUNTI_QG_MAX}`;
 
   const mBody = document.getElementById("membriBody");
   mBody.innerHTML = "";
@@ -1402,8 +1350,8 @@ function calcCostoAcquisto(){
   const provenienza = document.getElementById("acqProvenienza").value;
   const prezzoBase = MATERIALI_PREZZI[mat] || 0;
   let sconto = 0;
-  if(provenienza === "qg20") sconto = 0.20;
-  if(provenienza === "mag30") sconto = 0.30;
+  if(provenienza === "qg20") sconto = SCONTO_ACQUISTO_ALTRO_QG;
+  if(provenienza === "mag30") sconto = SCONTO_ACQUISTO_MAGAZZINO;
   const totale = prezzoBase * qta * (1 - sconto);
   return {mat, qta, totale, sconto};
 }
@@ -1434,7 +1382,7 @@ function renderRotte(){
     empty.style.display = "none";
     state.rotte.forEach(r=>{
       const rischio = calcRischio(r.distanza, r.difesa);
-      const costo = (r.distanza/100*5).toFixed(1).replace(/\.0$/,"");
+      const costo = (r.distanza/100*COSTO_ROTTA_MO_PER_100KM).toFixed(1).replace(/\.0$/,"");
       let cls = "badge-risk-low";
       if(rischio>=20) cls="badge-risk-high"; else if(rischio>=10) cls="badge-risk-mid";
       const tr = document.createElement("tr");
@@ -1521,7 +1469,7 @@ function costruisciStruttura(catId){
   const costoPunti = puntiCosto(c);
   const spesiAttuali = puntiSpesiTotali();
 
-  if(!c.exempt && spesiAttuali + costoPunti > 44){
+  if(!c.exempt && spesiAttuali + costoPunti > PUNTI_QG_MAX){
     showToast("Punti QG insufficienti (max 44) ⚠");
     return;
   }
@@ -1556,13 +1504,13 @@ function potenziaStruttura(uidStr){
   const s = state.strutture.find(x=>x.uid===uidStr);
   if(!s) return;
   const c = CATALOGO.find(x=>x.id===s.catId);
-  if(s.livello>=6){ showToast("Livello massimo raggiunto"); return; }
+  if(s.livello>=LIVELLO_STRUTTURA_MAX){ showToast("Livello massimo raggiunto"); return; }
   if(state.livello < s.livello+1){
     showToast(`Il QG deve essere almeno di Livello ${s.livello+1} per potenziare questa struttura ⚠`);
     return;
   }
   const costoPunti = puntiCosto(c);
-  if(!c.exempt && puntiSpesiTotali() + costoPunti > 44){
+  if(!c.exempt && puntiSpesiTotali() + costoPunti > PUNTI_QG_MAX){
     showToast("Punti QG insufficienti per il potenziamento ⚠"); return;
   }
   if(state.oro < c.costo){ showToast("Oro insufficiente per il potenziamento ⚠"); return; }
@@ -1732,8 +1680,8 @@ document.getElementById("resetBtn").addEventListener("click", ()=>{
     nome:"Il mio Quartier Generale", fondatore:"", cofondatore:"", classe:"Nessuna", livello:1,
     oro:0, membri:[], strutture:[], materiali:{}, lavoratori:0, rotte:[], magazzinoScontati:[], movimenti:[]
   };
-  try{ if(storageOk) localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ /* ignora */ }
   renderAll();
+  saveState();
   showToast("Registro azzerato");
 });
 
@@ -1780,8 +1728,15 @@ function initGuide(){
    AVVIO
    ============================================================ */
 initTheme();
-loadState();
 initGuide();
+caricaConfig()
+  .then(loadState)
+  .catch(e=>{
+    console.error("Errore nel caricamento di data/regolamento.json", e);
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("app").style.display = "grid";
+    showToast("Impossibile caricare il regolamento (data/regolamento.json) ⚠");
+  });
 </script>
 </body>
 </html>
