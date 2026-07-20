@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro del Quartier Generale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root, :root[data-theme="light"]{
+    --wood-1:#1c130c;
+    --wood-2:#2c1d12;
+    --wood-3:#3d2716;
+    --brass:#b9924f;
+    --brass-bright:#e0b673;
+    --parchment:#ece2c6;
+    --parchment-2:#e2d5ae;
+    --parchment-edge:#cbb98a;
+    --ink:#33261a;
+    --ink-soft:#5a4a37;
+    --line:#b8a674;
+    --green:#4c6b45;
+    --green-dk:#374f31;
+    --red:#8a3a2e;
+    --red-dk:#6b2c22;
+    --blue:#3f5568;
+    --blue-dk:#2d3f4e;
+    --amber:#a8792a;
+    --amber-dk:#8a611c;
+    --input-bg:#f6efdc;
+    --progress-track:#d8c79b;
+    --shadow: 0 6px 18px rgba(0,0,0,.35);
+  }
+  :root[data-theme="dark"]{
+    --wood-1:#14100b;
+    --wood-2:#211a12;
+    --wood-3:#2f2517;
+    --brass:#b9924f;
+    --brass-bright:#e6bd7c;
+    --parchment:#211c15;
+    --parchment-2:#2a231a;
+    --parchment-edge:#4a3d29;
+    --ink:#e8dcc0;
+    --ink-soft:#b5a687;
+    --line:#5a4a30;
+    --green:#7fae72;
+    --green-dk:#5c8a51;
+    --red:#d4796a;
+    --red-dk:#b85c4d;
+    --blue:#7fa0bd;
+    --blue-dk:#5c839e;
+    --amber:#d4a24a;
+    --amber-dk:#b98730;
+    --input-bg:#2a2318;
+    --progress-track:#3a3021;
+    --shadow: 0 6px 18px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Spectral', Georgia, serif;
+    color:var(--ink);
+    background:
+      radial-gradient(ellipse at top left, rgba(255,255,255,.05), transparent 40%),
+      var(--wood-1);
+    min-height:100vh;
+    transition:background-color .25s ease, color .25s ease;
+  }
+  .app{
+    display:grid;
+    grid-template-columns: 232px 1fr;
+    min-height:100vh;
+  }
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    background:
+      linear-gradient(180deg, var(--wood-2), var(--wood-1) 70%);
+    border-right:1px solid #000;
+    padding:22px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    position:relative;
+  }
+  .sidebar::after{
+    content:"";
+    position:absolute; top:0; right:0; bottom:0; width:6px;
+    background:linear-gradient(90deg, rgba(0,0,0,.4), transparent);
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    padding:4px 8px 18px 8px;
+    border-bottom:1px solid rgba(185,146,79,.25);
+    margin-bottom:14px;
+  }
+  .seal{
+    width:34px;height:34px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--brass-bright), var(--brass) 55%, #6e4f22 100%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cinzel',serif; font-weight:700; font-size:13px; color:#2c1d12;
+    box-shadow: inset 0 0 4px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.6);
+    flex-shrink:0;
+  }
+  .brand-text{
+    font-family:'Cinzel',serif;
+    font-size:13.5px;
+    color:var(--brass-bright);
+    letter-spacing:.04em;
+    line-height:1.25;
+  }
+  .brand-text small{display:block;font-family:'Spectral',serif;font-style:italic;color:#a89571;font-size:10.5px;font-weight:400;}
+  .nav-item{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px;
+    border-radius:4px;
+    color:#c9b98f;
+    font-size:14px;
+    letter-spacing:.02em;
+    cursor:pointer;
+    border-left:3px solid transparent;
+    transition:.15s;
+    user-select:none;
+  }
+  .nav-item:hover{background:rgba(185,146,79,.09); color:var(--brass-bright);}
+  .nav-item.active{
+    background:rgba(185,146,79,.14);
+    border-left:3px solid var(--brass);
+    color:var(--brass-bright);
+    font-weight:600;
+  }
+  .nav-icon{width:16px;text-align:center;font-size:14px;opacity:.9;}
+  .sidebar-foot{
+    margin-top:auto; padding-top:14px; border-top:1px solid rgba(185,146,79,.2);
+    font-size:10.5px; color:#7c6b4d; line-height:1.5;
+  }
+  .sidebar-foot button{
+    width:100%; margin-top:8px; background:none; border:1px solid rgba(138,58,46,.5);
+    color:#c98d7f; padding:6px; border-radius:4px; font-size:11px; cursor:pointer;
+    font-family:'Spectral',serif;
+  }
+  .sidebar-foot button:hover{background:rgba(138,58,46,.15);}
+
+  /* ---------- MAIN ---------- */
+  .main{
+    background:
+      linear-gradient(160deg, rgba(255,255,255,.06), transparent 30%),
+      var(--parchment);
+    background-image:
+      radial-gradient(rgba(90,74,55,.05) 1px, transparent 1px),
+      linear-gradient(160deg, rgba(255,255,255,.10), transparent 30%),
+      var(--parchment);
+    background-size: 3px 3px, auto, auto;
+    padding:26px 34px 60px 34px;
+    overflow-y:auto;
+  }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px;
+    border-bottom:2px solid var(--line);
+    padding-bottom:14px; margin-bottom:22px;
+  }
+  .qg-title{
+    font-family:'Cinzel',serif; font-weight:700; font-size:26px; color:var(--ink);
+    letter-spacing:.01em;
+  }
+  .qg-sub{font-size:12.5px; color:var(--ink-soft); font-style:italic; margin-top:2px;}
+  .stat-strip{display:flex; gap:10px; flex-wrap:wrap;}
+  .stat-chip{
+    background:var(--parchment-2);
+    border:1px solid var(--parchment-edge);
+    border-radius:5px;
+    padding:6px 12px;
+    text-align:center;
+    min-width:82px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .stat-chip .v{font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px; color:var(--ink);}
+  .stat-chip .l{font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft);}
+
+  h2.section-title{
+    font-family:'Cinzel',serif; font-size:16px; color:var(--ink); margin:0 0 14px 0;
+    display:flex; align-items:center; gap:10px;
+  }
+  h2.section-title::after{content:""; flex:1; height:1px; background:var(--line);}
+
+  .card{
+    background:var(--parchment-2);
+    border:1px solid var(--parchment-edge);
+    border-radius:7px;
+    padding:18px 20px;
+    margin-bottom:18px;
+    box-shadow: var(--shadow);
+  }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  @media (max-width:900px){.grid2{grid-template-columns:1fr;} .app{grid-template-columns:1fr;} .sidebar{flex-direction:row; overflow-x:auto;}}
+
+  label{display:block; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:4px; margin-top:10px;}
+  label:first-child{margin-top:0;}
+  input[type=text], input[type=number], select, textarea{
+    width:100%; padding:7px 9px; border:1px solid var(--parchment-edge); border-radius:4px;
+    background:var(--input-bg); color:var(--ink); font-family:'Spectral',serif; font-size:13.5px;
+  }
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--amber); outline-offset:0;}
+  .row{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
+  .row > div{flex:1; min-width:120px;}
+
+  button.btn{
+    font-family:'Spectral',serif; font-weight:600; font-size:13px;
+    padding:8px 16px; border-radius:4px; cursor:pointer; border:1px solid transparent;
+    letter-spacing:.02em;
+  }
+  .btn-brass{background:linear-gradient(180deg, var(--brass-bright), var(--brass)); color:#2c1d12; border-color:#8a611c;}
+  .btn-brass:hover{filter:brightness(1.06);}
+  .btn-outline{background:transparent; border-color:var(--ink-soft); color:var(--ink-soft);}
+  .btn-outline:hover{background:rgba(90,74,55,.08);}
+  .btn-danger{background:transparent; border-color:var(--red); color:var(--red-dk);}
+  .btn-danger:hover{background:rgba(138,58,46,.1);}
+  .btn-sm{padding:4px 10px; font-size:11.5px;}
+  button:disabled{opacity:.45; cursor:not-allowed;}
+
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  thead th{
+    text-align:left; font-family:'Cinzel',serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-soft); border-bottom:1.5px solid var(--line); padding:6px 8px;
+  }
+  tbody td{padding:8px 8px; border-bottom:1px solid rgba(184,166,116,.4); vertical-align:top;}
+  tbody tr:hover{background:rgba(185,146,79,.08);}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .tag{
+    display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;
+    letter-spacing:.03em; color:#fff;
+  }
+  .tag-generali{background:var(--blue-dk);}
+  .tag-produzione{background:var(--green-dk);}
+  .tag-vendita{background:var(--amber-dk);}
+  .tag-militare{background:var(--red-dk);}
+
+  .progress-wrap{background:var(--progress-track); border:1px solid var(--parchment-edge); border-radius:6px; height:16px; overflow:hidden; position:relative;}
+  .progress-bar{height:100%; background:linear-gradient(90deg, var(--brass), var(--brass-bright)); transition:width .3s;}
+  .progress-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-family:'JetBrains Mono',monospace; color:#2c1d12; font-weight:600;}
+
+  .cat-filters{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .cat-filters button{
+    font-family:'Spectral',serif; font-size:12px; padding:6px 13px; border-radius:14px;
+    border:1px solid var(--parchment-edge); background:var(--parchment-2); color:var(--ink-soft); cursor:pointer;
+  }
+  .cat-filters button.active{background:var(--ink); color:var(--parchment); border-color:var(--ink);}
+
+  .structure-catalog{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px;}
+  .struct-card{
+    background:var(--input-bg); border:1px solid var(--parchment-edge); border-radius:6px; padding:12px 14px;
+    display:flex; flex-direction:column; gap:6px;
+    transition:background-color .25s ease, border-color .25s ease;
+  }
+  .struct-card h4{margin:0; font-family:'Cinzel',serif; font-size:13.5px; color:var(--ink); display:flex; justify-content:space-between; align-items:center; gap:6px;}
+  .struct-card .meta{font-size:11px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace;}
+  .struct-card .desc{font-size:11.5px; color:var(--ink-soft); font-style:italic; line-height:1.4; max-height:54px; overflow:hidden;}
+  .struct-card .mats{font-size:11px; color:var(--ink);}
+  .struct-card .foot{display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:6px;}
+
+  .empty{padding:24px; text-align:center; color:var(--ink-soft); font-style:italic; font-size:13px;}
+
+  .badge-risk-low{color:var(--green-dk); font-weight:600;}
+  .badge-risk-mid{color:var(--amber-dk); font-weight:600;}
+  .badge-risk-high{color:var(--red-dk); font-weight:600;}
+
+  .modal-bg{
+    position:fixed; inset:0; background:rgba(20,13,8,.55); display:flex; align-items:center; justify-content:center;
+    z-index:50; padding:20px;
+  }
+  .modal{
+    background:var(--parchment); border:1px solid var(--parchment-edge); border-radius:8px;
+    padding:22px 26px; max-width:480px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,.5);
+    max-height:85vh; overflow-y:auto;
+  }
+  .modal h3{font-family:'Cinzel',serif; margin-top:0; font-size:17px;}
+  .modal-close{float:right; cursor:pointer; font-size:18px; color:var(--ink-soft); background:none; border:none;}
+  .hint{font-size:11px; color:var(--ink-soft); margin-top:4px; line-height:1.4;}
+  .toast{
+    position:fixed; bottom:20px; right:20px; background:var(--ink); color:var(--parchment);
+    padding:10px 18px; border-radius:6px; font-size:12.5px; box-shadow:var(--shadow); z-index:60;
+    opacity:0; transform:translateY(8px); transition:.25s;
+  }
+  .toast.show{opacity:1; transform:translateY(0);}
+
+  .guide-modal{max-width:760px;}
+  .guide-modal .guide-intro{font-style:italic; color:var(--ink-soft); margin-bottom:14px; line-height:1.5;}
+  .guide-modal details{
+    border:1px solid var(--parchment-edge); border-radius:6px; margin-bottom:8px;
+    background:var(--parchment-2); overflow:hidden;
+  }
+  .guide-modal summary{
+    font-family:'Cinzel',serif; font-size:13.5px; padding:10px 14px; cursor:pointer; user-select:none;
+    color:var(--ink); list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  .guide-modal summary::-webkit-details-marker{display:none;}
+  .guide-modal summary::before{content:"▸"; color:var(--brass); transition:transform .15s;}
+  .guide-modal details[open] summary::before{transform:rotate(90deg);}
+  .guide-modal .guide-body{padding:2px 16px 14px 16px; font-size:12.5px; line-height:1.6; color:var(--ink-soft);}
+  .guide-modal .guide-body b{color:var(--ink);}
+  .guide-modal .guide-body table{margin-top:8px; margin-bottom:4px;}
+  .guide-modal .guide-body th, .guide-modal .guide-body td{font-size:11.5px; padding:5px 7px;}
+  .guide-modal .guide-body ul{margin:6px 0; padding-left:18px;}
+  .guide-modal .guide-body li{margin-bottom:3px;}
+  .guide-foot{display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px; flex-wrap:wrap;}
+  .guide-foot label{display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-soft); text-transform:none; letter-spacing:0; cursor:pointer;}
+  .guide-foot input[type="checkbox"]{width:auto; accent-color:var(--brass);}
+  .divider{height:1px; background:var(--line); margin:16px 0;}
+  ::-webkit-scrollbar{width:9px;}
+  ::-webkit-scrollbar-thumb{background:var(--parchment-edge); border-radius:6px;}
+  .loading-screen{
+    position:fixed; inset:0; background:var(--wood-1); color:var(--brass-bright); display:flex;
+    align-items:center; justify-content:center; font-family:'Cinzel',serif; z-index:100; font-size:14px;
+  }
+  .small-note{font-size:11px; color:var(--ink-soft); margin-top:6px;}
+  .qty-input{width:70px !important;}
+
+  .theme-toggle{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:8px 10px; margin:6px 0 4px 0;
+    border:1px solid rgba(185,146,79,.25); border-radius:5px;
+    background:rgba(0,0,0,.15);
+  }
+  .theme-toggle .tt-label{font-size:11px; color:#c9b98f; letter-spacing:.03em;}
+  .tt-switch{
+    position:relative; width:42px; height:22px; border-radius:12px; cursor:pointer;
+    background:var(--wood-3); border:1px solid rgba(185,146,79,.4); flex-shrink:0;
+  }
+  .tt-switch .tt-knob{
+    position:absolute; top:1px; left:1px; width:18px; height:18px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--brass-bright), var(--brass) 60%);
+    box-shadow:0 1px 3px rgba(0,0,0,.6);
+    transition:left .2s ease;
+  }
+  .tt-switch.on .tt-knob{left:21px;}
+
+  .save-indicator{
+    font-size:10px; color:#7c6b4d; display:flex; align-items:center; gap:5px; margin-top:2px; min-height:14px;
+  }
+  .save-indicator .dot{width:6px;height:6px;border-radius:50%;background:#5c8a51; opacity:0; transition:opacity .3s;}
+  .save-indicator .dot.show{opacity:1;}
+  .storage-warning{
+    display:none; background:rgba(138,58,46,.18); border:1px solid var(--red); color:#e0a89b;
+    font-size:10.5px; padding:7px 8px; border-radius:4px; margin-top:8px; line-height:1.4;
+  }
+  .storage-warning.show{display:block;}
+  .amount-pos{color:var(--green-dk); font-weight:600;}
+  .amount-neg{color:var(--red-dk); font-weight:600;}
+</style>
+</head>
+<body>
+
+<div id="loading" class="loading-screen">Aprendo il registro del Quartier Generale…</div>
+
+<div class="app" id="app" style="display:none;">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="seal">QG</div>
+      <div class="brand-text">Registro del<br>Quartier Generale<small>Cronache di Unshast</small></div>
+    </div>
+    <div class="nav-item active" data-tab="panoramica"><span class="nav-icon">◆</span> Panoramica</div>
+    <div class="nav-item" data-tab="strutture"><span class="nav-icon">▦</span> Strutture</div>
+    <div class="nav-item" data-tab="magazzino"><span class="nav-icon">⚖</span> Magazzino</div>
+    <div class="nav-item" data-tab="rotte"><span class="nav-icon">⚑</span> Rotte Commerciali</div>
+    <div class="nav-item" data-tab="finanze"><span class="nav-icon">▤</span> Finanze</div>
+
+    <div class="theme-toggle" id="themeToggle" title="Cambia tema chiaro/scuro">
+      <span class="tt-label" id="themeLabel">Tema Chiaro</span>
+      <div class="tt-switch" id="ttSwitch"><div class="tt-knob"></div></div>
+    </div>
+
+    <div class="sidebar-foot">
+      Tutti i dati sono salvati automaticamente in locale, in questo browser su questo dispositivo. Per portarli su un altro PC/telefono, usa Esporta e poi Importa il file lì.
+      <div class="save-indicator" id="saveIndicator"><span class="dot" id="saveDot"></span><span id="saveText">In attesa di modifiche…</span></div>
+      <div class="storage-warning" id="storageWarning">⚠ Il salvataggio locale non è disponibile in questo browser (es. modalità privata). Usa "Esporta backup" spesso per non perdere i dati.</div>
+      <button id="exportBtn">⬇ Esporta backup (JSON)</button>
+      <button id="importBtn">⬆ Importa backup (JSON)</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none;">
+      <button id="copySummaryBtn">📋 Copia riepilogo testuale</button>
+      <button id="guideBtn">📖 Guida al QG</button>
+      <button id="resetBtn">Azzera registro</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ================= PANORAMICA ================= -->
+    <section id="tab-panoramica">
+      <div class="topbar">
+        <div>
+          <div class="qg-title" id="qgTitleDisplay">Il mio Quartier Generale</div>
+          <div class="qg-sub" id="qgSubDisplay">Nessuna classe · Livello 1</div>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-chip"><div class="v mono" id="chipOro">0</div><div class="l">Oro (mo)</div></div>
+          <div class="stat-chip"><div class="v mono" id="chipPunti">0/44</div><div class="l">Punti QG</div></div>
+          <div class="stat-chip"><div class="v mono" id="chipStrutture">0</div><div class="l">Strutture</div></div>
+          <div class="stat-chip"><div class="v mono" id="chipPersonale">0</div><div class="l">Personale</div></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2 class="section-title">Dati del Quartier Generale</h2>
+          <div class="row">
+            <div><label>Nome del QG</label><input type="text" id="inNome" placeholder="es. Bastione della Torcia"></div>
+          </div>
+          <div class="row">
+            <div><label>Fondatore</label><input type="text" id="inFondatore" placeholder="Nome personaggio"></div>
+            <div><label>Co-fondatore</label><input type="text" id="inCofondatore" placeholder="Nome personaggio"></div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Classe del QG</label>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <select id="inClasse" style="flex:1;">
+                  <option value="Nessuna">Senza Classe</option>
+                  <option value="Produzione">Produzione</option>
+                  <option value="Vendita">Vendita</option>
+                  <option value="Militare">Militare</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" id="btnSbloccaClasse" style="flex:0 0 auto; display:none;" title="Consente una correzione manuale eccezionale">🔓</button>
+              </div>
+            </div>
+            <div>
+              <label>Livello del QG <span style="font-weight:400;opacity:.7;">(calcolato automaticamente)</span></label>
+              <select id="inLivello" disabled>
+                <option value="1">Livello 1 (personaggi Lv 3–6)</option>
+                <option value="2">Livello 2 (personaggi Lv 7–10)</option>
+                <option value="3">Livello 3 (personaggi Lv 11–14)</option>
+                <option value="4">Livello 4 (personaggi Lv 15–17)</option>
+                <option value="5">Livello 5 (personaggi Lv 18–20)</option>
+                <option value="6">Livello 6 (personaggi Lv 21+)</option>
+              </select>
+            </div>
+          </div>
+          <div class="hint">La classe si ottiene automaticamente alla costruzione della prima Struttura Specializzata (Produzione, Vendita o Militare) e da quel momento il menu si blocca, per evitare cambi non intenzionali — usa il lucchetto 🔓 per una correzione eccezionale. Il livello del QG si calcola da solo in base ai membri elencati sotto: aggiungi/aggiorna lì i personaggi per farlo cambiare. Il livello massimo attuale del gioco è 3 (Marzo 2026).</div>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Tesoreria</h2>
+          <label>Oro in cassa (mo)</label>
+          <div class="row">
+            <div><input type="number" id="inOro" value="0"></div>
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <div><label>Movimento rapido</label><input type="number" id="inMovimento" placeholder="es. 50 oppure -20"></div>
+            <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnMovimento" style="margin-bottom:1px;">Applica</button></div>
+          </div>
+          <div class="divider"></div>
+          <label style="margin-top:0;">Punti QG</label>
+          <div class="progress-wrap"><div class="progress-bar" id="puntiBar" style="width:0%;"></div><div class="progress-label" id="puntiBarLabel">0 / 44</div></div>
+          <div class="hint">Generali e strutture della tua classe costano 2 punti; strutture specializzate di classe diversa costano 4 punti. Superati i 44 punti spesi non potrai costruire altro (le costruzioni esenti, come Avamposti e Imprese aggiuntive, non consumano punti).</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Membri del QG</h2>
+        <table>
+          <thead><tr><th>Personaggio</th><th>Livello</th><th></th></tr></thead>
+          <tbody id="membriBody"></tbody>
+        </table>
+        <div class="row" style="margin-top:10px;">
+          <div><input type="text" id="inMembroNome" placeholder="Nome personaggio"></div>
+          <div style="max-width:100px;"><input type="number" id="inMembroLivello" placeholder="Lv" min="1" max="30"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline" id="btnAddMembro">+ Aggiungi</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Riepilogo Strutture per Categoria</h2>
+        <table>
+          <thead><tr><th>Categoria</th><th>Costruite</th><th>Costo punti</th></tr></thead>
+          <tbody id="riepilogoBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= STRUTTURE ================= -->
+    <section id="tab-strutture" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Strutture</div>
+          <div class="qg-sub">Catalogo edilizio del Quartier Generale</div>
+        </div>
+      </div>
+
+      <h2 class="section-title">Costruisci una nuova struttura</h2>
+      <div class="cat-filters" id="catFilters"></div>
+      <div class="structure-catalog" id="catalogGrid"></div>
+
+      <div class="divider" style="margin-top:26px;"></div>
+
+      <h2 class="section-title">Strutture costruite</h2>
+      <table>
+        <thead><tr><th>Struttura</th><th>Categoria</th><th>Livello</th><th>Punti spesi</th><th></th></tr></thead>
+        <tbody id="strutturePossedute"></tbody>
+      </table>
+      <div id="struttureEmpty" class="empty" style="display:none;">Non hai ancora costruito nessuna struttura. Scegline una dal catalogo qui sopra.</div>
+    </section>
+
+    <!-- ================= MAGAZZINO ================= -->
+    <section id="tab-magazzino" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Magazzino</div>
+          <div class="qg-sub">Materie prime e beni di scambio</div>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-chip"><div class="v mono" id="chipValoreMagazzino">0 mo</div><div class="l">Valore totale</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Acquista materiali</h2>
+        <div class="row">
+          <div>
+            <label>Materiale</label>
+            <select id="acqMateriale"></select>
+          </div>
+          <div>
+            <label>Quantità (U)</label>
+            <input type="number" id="acqQuantita" min="1" value="1">
+          </div>
+          <div>
+            <label>Provenienza</label>
+            <select id="acqProvenienza">
+              <option value="bazaar">Bazaar (prezzo pieno)</option>
+              <option value="qg20">Acquisto da un altro QG (−20%)</option>
+              <option value="mag30" id="acqOpzioneMag30" style="display:none;">Materiale scontato dal tuo Magazzino (−30%)</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px; align-items:center;">
+          <div class="stat-chip" style="min-width:150px;"><div class="v mono" id="acqCostoPreview">0 mo</div><div class="l">Costo totale</div></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnAcquista">Acquista e aggiungi al magazzino</button></div>
+        </div>
+        <div class="hint">Lo sconto del 20% si applica quando il materiale viene comprato da un altro QG invece che al Bazaar (la Corona di Samat copre la differenza al venditore). Il 30% è disponibile solo per i materiali che il tuo Magazzino ha scelto come scontati (vedi sotto) — non incide sul <em>costo di costruzione</em> delle strutture, che resta sempre quello fisso di catalogo.</div>
+      </div>
+
+      <div class="card" id="cardMagazzinoScontati" style="display:none;">
+        <h2 class="section-title">Materiali scontati dal tuo Magazzino</h2>
+        <div class="hint" style="margin-top:0;">Scegli fino a 5 materie prime: quando le acquisti (o un altro QG le acquista da te), lo sconto sale dal 20% al 30%.</div>
+        <div id="magazzinoScontatiGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Inventario</h2>
+        <table>
+          <thead><tr><th>Materiale</th><th>Prezzo unitario</th><th>Quantità (U)</th><th>Valore</th><th></th></tr></thead>
+          <tbody id="magazzinoBody"></tbody>
+        </table>
+        <div class="hint">Il prezzo unitario segue il listino ufficiale di Unshast (mo per unità di materiale). Ricorda: acquistando da un altro QG ricevi uno sconto del 20% (fino al 30% se il materiale è tra quelli scontati dal tuo Magazzino).</div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Lavoratori</h2>
+        <div class="row" style="align-items:flex-end;">
+          <div><label>Lavoratori assunti</label><input type="number" id="inLavoratori" value="0" min="0"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline" id="btnAdeguaLavoratori" style="margin-bottom:1px;">⟳ Adegua al fabbisogno</button></div>
+        </div>
+        <div class="hint">Ogni lavoratore costa 1 mo al mese. Personale totale richiesto dalle strutture costruite: <span class="mono" id="personaleRichiestoLabel">0</span>. <span id="lavoratoriDeficit" style="display:none; color:var(--red-dk); font-weight:600;"></span></div>
+      </div>
+    </section>
+
+    <!-- ================= ROTTE ================= -->
+    <section id="tab-rotte" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Rotte Commerciali</div>
+          <div class="qg-sub">Collegamenti tra Porta Ethea e le strutture esterne</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Nuova rotta</h2>
+        <div class="row">
+          <div><label>Nome rotta / destinazione</label><input type="text" id="rNome" placeholder="es. Rotta per Samat"></div>
+          <div><label>Distanza totale (km)</label><input type="number" id="rDistanza" min="0"></div>
+          <div><label>Avamposto a difesa</label><select id="rAvamposto"><option value="">— nessuno —</option></select></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnAddRotta">+ Aggiungi rotta</button></div>
+        </div>
+        <div class="hint">Ogni 1° del mese il QG paga 5 mo ogni 100 km di rotta. Un Avamposto può difendere una sola rotta alla volta, entro un raggio di 400 km × il suo livello: oltre il raggio, o senza Avamposto assegnato, esiste il 5% di probabilità (+5% ogni 100 km scoperti) che metà delle risorse trasportate vadano perse a fine mese. Gli Avamposti si costruiscono dalla scheda Strutture.</div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Rotte attive</h2>
+        <table>
+          <thead><tr><th>Rotta</th><th>Distanza</th><th>Difesa</th><th>Costo/mese</th><th>Rischio perdita</th><th></th></tr></thead>
+          <tbody id="rotteBody"></tbody>
+        </table>
+        <div id="rotteEmpty" class="empty" style="display:none;">Nessuna rotta commerciale registrata.</div>
+        <div class="divider"></div>
+        <div class="row">
+          <div class="stat-chip" style="min-width:160px;"><div class="v mono" id="chipKmTotali">0 km</div><div class="l">Distanza totale coperta</div></div>
+          <div class="stat-chip" style="min-width:160px;"><div class="v mono" id="chipCostoRotte">0 mo</div><div class="l">Costo mensile rotte</div></div>
+        </div>
+        <div class="hint" id="rotteWarning" style="display:none; color:var(--red-dk); font-weight:600;">⚠ Hai superato i 400 km totali consigliati per un QG ai livelli iniziali.</div>
+      </div>
+    </section>
+
+    <!-- ================= FINANZE ================= -->
+    <section id="tab-finanze" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Finanze</div>
+          <div class="qg-sub">Bilancio mensile, costi ricorrenti e storico movimenti</div>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-chip"><div class="v mono" id="chipCostiFissi">0 mo</div><div class="l">Costi fissi/mese</div></div>
+          <div class="stat-chip"><div class="v mono" id="chipCostiVariabili">0 mo</div><div class="l">Costi variabili/mese</div></div>
+          <div class="stat-chip"><div class="v mono" id="chipCostiTotali">0 mo</div><div class="l">Totale/mese</div></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2 class="section-title">Costi Fissi</h2>
+          <div class="hint" style="margin-top:0;">Spese ricorrenti indipendenti dall'attività del mese: si pagano finché le condizioni restano invariate.</div>
+          <table>
+            <thead><tr><th>Voce</th><th>Base di calcolo</th><th>Importo/mese</th></tr></thead>
+            <tbody id="costiFissiBody"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Costi Variabili</h2>
+          <div class="hint" style="margin-top:0;">Spese legate a scelte operative del QG: cambiano in base a rotte attive, distanze e copertura.</div>
+          <table>
+            <thead><tr><th>Voce</th><th>Base di calcolo</th><th>Importo/mese</th></tr></thead>
+            <tbody id="costiVariabiliBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Chiusura del mese</h2>
+        <div class="hint" style="margin-top:0;">Applica automaticamente il totale dei costi fissi e variabili alla tesoreria, e registra il movimento nello storico qui sotto.</div>
+        <div class="row" style="align-items:center;">
+          <div class="stat-chip" style="min-width:180px;"><div class="v mono" id="chipSaldoDopoChiusura">0 mo</div><div class="l">Oro dopo la chiusura</div></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnChiudiMese">📕 Chiudi mese e applica i costi</button></div>
+        </div>
+        <div class="hint" id="chiusuraAvviso" style="display:none; color:var(--red-dk); font-weight:600;">⚠ La tesoreria andrà in negativo dopo la chiusura di questo mese.</div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Storico movimenti</h2>
+        <table>
+          <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo dopo</th></tr></thead>
+          <tbody id="movimentiBody"></tbody>
+        </table>
+        <div id="movimentiEmpty" class="empty" style="display:none;">Nessun movimento registrato ancora. Ogni acquisto, costruzione o chiusura mese verrà annotato qui automaticamente.</div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="modal-bg" id="guideModalBg" style="display:none;">
+  <div class="modal guide-modal">
+    <button class="modal-close" id="guideCloseX" title="Chiudi">✕</button>
+    <h3>📖 Guida al Quartier Generale</h3>
+    <div class="guide-intro">Meccanica di gioco e funzionamento del Registro — Cronache di Unshast</div>
+
+    <details open>
+      <summary>Cos'è e come si apre un QG</summary>
+      <div class="guide-body">
+        Il QG è la base operativa del gruppo: produce risorse, genera oro, offre servizi e va gestito mese per mese come un vero sistema economico.<br><br>
+        <b>Apertura</b>: servono 2 personaggi (Fondatore + Co-fondatore) e <b>300 mo</b> di capitale. Si parte Senza Classe, a Livello 1.
+      </div>
+    </details>
+
+    <details>
+      <summary>Classi, Punti QG e Livello</summary>
+      <div class="guide-body">
+        La <b>Classe</b> (Produzione / Vendita / Militare) si ottiene automaticamente alla prima struttura specializzata costruita, e dimezza il costo in punti delle strutture di quella categoria.<br><br>
+        <b>Punti QG</b> — budget totale 44:
+        <ul>
+          <li>Strutture Generali: 2 punti</li>
+          <li>Strutture della propria Classe: 2 punti</li>
+          <li>Strutture specializzate di Classe diversa: 4 punti</li>
+          <li>Strutture esenti (Impresa aggiuntiva, Avamposto): 0 punti</li>
+        </ul>
+        <b>Livello QG</b> (1–6) dipende dal livello dei personaggi membri: Lv 3–6 → QG Lv.1, 7–10 → Lv.2, 11–14 → Lv.3, 15–17 → Lv.4, 18–20 → Lv.5, 21+ → Lv.6. Massimo attuale in campagna: <b>Livello 3</b>.<br><br>
+        <b>Potenziare</b> una struttura richiede un QG di livello pari o superiore, e ripaga per intero costo in oro, materiali e punti.
+      </div>
+    </details>
+
+    <details>
+      <summary>Rotte Commerciali e Materie Prime</summary>
+      <div class="guide-body">
+        <b>Rotte</b>: 5 mo ogni 100 km, pagati il 1° del mese. Rischio di perdita: 5% base + 5% ogni 100 km non coperti da un Avamposto. Consigliato restare sotto i <b>400 km totali</b> a inizio gioco.<br><br>
+        <b>Materie prime</b>: prezzo fisso di listino. Sconti su acquisto: −20% comprando da un altro QG, fino a −30% se il materiale è tra i 5 scontati dal tuo Magazzino. Gli sconti valgono solo sugli acquisti, mai sul costo di costruzione delle strutture.
+      </div>
+    </details>
+
+    <details>
+      <summary>Strutture e Personale</summary>
+      <div class="guide-body">
+        28 strutture in 4 categorie — Generali, Produzione, Vendita, Militare — ciascuna con costo, personale richiesto, materiali, descrizione ed effetto. Il catalogo completo con tutti i dettagli è nella tab <b>Strutture</b> del programma.<br><br>
+        Ogni struttura richiede personale per funzionare; ogni lavoratore assunto costa <b>1 mo al mese</b> — è la spesa fissa principale del QG.
+      </div>
+    </details>
+
+    <details>
+      <summary>Come usare il programma — le tab</summary>
+      <div class="guide-body">
+        <ul>
+          <li><b>Panoramica</b>: dati del QG, tesoreria (con "Movimento rapido" per +/- oro), barra Punti QG, membri, riepilogo strutture.</li>
+          <li><b>Strutture</b>: catalogo filtrabile con bottone "Costruisci" (verifica e scala oro/materiali/punti in automatico); elenco strutture possedute con Potenzia/Smantella.</li>
+          <li><b>Magazzino</b>: acquisto materiali con sconti, inventario, e lavoratori — bottone "⟳ Adegua al fabbisogno" imposta i lavoratori al numero richiesto dalle strutture in un click.</li>
+          <li><b>Rotte Commerciali</b>: aggiungi rotte con calcolo automatico di costo mensile e rischio, avviso oltre i 400 km.</li>
+          <li><b>Finanze</b>: tabelle Costi Fissi (stipendi) e Costi Variabili (rotte); bottone "Chiudi mese" applica automaticamente il totale alla tesoreria; storico movimenti registrato da solo ad ogni entrata/uscita.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>Salvataggio, backup e tema</summary>
+      <div class="guide-body">
+        I dati si salvano da soli in locale, in questo browser/dispositivo — <b>non si sincronizzano</b> automaticamente tra PC diverso e telefono. Usa <b>⬇ Esporta backup (JSON)</b> per una copia di sicurezza o per spostarti su un altro dispositivo, e <b>⬆ Importa backup</b> per ricaricarla. <b>📋 Copia riepilogo testuale</b> genera un riassunto pronto da incollare su Discord.<br><br>
+        Il pulsante tema nella sidebar passa da chiaro a scuro e viceversa, ricordando la scelta al prossimo avvio.
+      </div>
+    </details>
+
+    <div class="guide-foot">
+      <label><input type="checkbox" id="guideDontShow"> Non mostrare più questa guida all'avvio</label>
+      <button class="btn btn-brass" id="guideCloseBtn">Ho capito, chiudi</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DATI DI RIFERIMENTO — estratti dalla Meccanica dei QG
+   ============================================================ */
+
+/* Questi valori vengono popolati da caricaConfig() leggendo src/data/regolamento.json.
+   Non sono più hardcoded qui: per applicare una patch al regolamento (nuovi prezzi,
+   nuove soglie, nuove strutture) modifica quel file, non questo script. */
+let MATERIALI_PREZZI = {};
+let CATALOGO = [];
+let PUNTI_QG_MAX = 44;
+let LIVELLO_STRUTTURA_MAX = 6;
+let LIVELLO_QG_MAX_ATTUALE = 3;
+let COSTO_ROTTA_MO_PER_100KM = 5;
+let RISCHIO_ROTTA_BASE = 5;
+let RISCHIO_ROTTA_PER_100KM = 5;
+let SCONTO_ACQUISTO_ALTRO_QG = 0.20;
+let SCONTO_ACQUISTO_MAGAZZINO = 0.30;
+let COSTO_LAVORATORE_MESE = 1;
+let AVAMPOSTO_RAGGIO_KM_PER_LIVELLO = 400;
+let LIVELLO_QG_CRITERIO = "massimo";
+let LIVELLO_QG_SOGLIE = [];
+
+async function caricaConfig(){
+  const res = await fetch("./data/regolamento.json");
+  if(!res.ok) throw new Error("Impossibile caricare data/regolamento.json ("+res.status+")");
+  const cfg = await res.json();
+  MATERIALI_PREZZI = cfg.materiali || {};
+  CATALOGO = cfg.catalogo || [];
+  const c = cfg.costanti || {};
+  PUNTI_QG_MAX = c.puntiQGMax ?? PUNTI_QG_MAX;
+  LIVELLO_STRUTTURA_MAX = c.livelloStrutturaMax ?? LIVELLO_STRUTTURA_MAX;
+  LIVELLO_QG_MAX_ATTUALE = c.livelloQGMaxAttuale ?? LIVELLO_QG_MAX_ATTUALE;
+  COSTO_ROTTA_MO_PER_100KM = c.costoRottaMoPer100Km ?? COSTO_ROTTA_MO_PER_100KM;
+  RISCHIO_ROTTA_BASE = c.rischioRottaBasePercento ?? RISCHIO_ROTTA_BASE;
+  RISCHIO_ROTTA_PER_100KM = c.rischioRottaPer100KmScopertiPercento ?? RISCHIO_ROTTA_PER_100KM;
+  SCONTO_ACQUISTO_ALTRO_QG = (c.scontoAcquistoAltroQGPercento ?? 20) / 100;
+  SCONTO_ACQUISTO_MAGAZZINO = (c.scontoAcquistoMagazzinoPercento ?? 30) / 100;
+  COSTO_LAVORATORE_MESE = c.costoLavoratoreMoAlMese ?? COSTO_LAVORATORE_MESE;
+  AVAMPOSTO_RAGGIO_KM_PER_LIVELLO = c.avampostoRaggioKmPerLivello ?? AVAMPOSTO_RAGGIO_KM_PER_LIVELLO;
+  const lq = cfg.livelloQG || {};
+  LIVELLO_QG_CRITERIO = lq.criterio || LIVELLO_QG_CRITERIO;
+  LIVELLO_QG_SOGLIE = lq.soglie || [];
+}
+
+
+const CATEGORIE = ["Generali","Produzione","Vendita","Militare"];
+
+/* ============================================================
+   STATO
+   ============================================================ */
+let state = {
+  nome: "Il mio Quartier Generale",
+  fondatore: "",
+  cofondatore: "",
+  classe: "Nessuna",
+  livello: 1,
+  oro: 0,
+  membri: [],
+  strutture: [],   // {uid, catId, livello}
+  materiali: {},   // {nomeMateriale: quantità}
+  lavoratori: 0,
+  rotte: [],       // {uid, nome, distanza, avampostoUid}
+  magazzinoScontati: [],  // fino a 5 nomi di materiali con sconto Magazzino al 30%
+  movimenti: []    // {data, label, importo, saldoDopo} — storico automatico della tesoreria
+};
+
+const STORAGE_KEY = "qg_registro_v1";
+const THEME_KEY = "qg_tema";
+const GUIDE_KEY = "qg_guida_nascosta";
+let currentTab = "panoramica";
+let catFilter = "Tutte";
+let storageOk = true;
+let classeSbloccataManualmente = false; // sblocco temporaneo (non persistito) del menu Classe
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+/* ============================================================
+   TEMA (Chiaro / Scuro) — resta su localStorage: è una preferenza
+   di visualizzazione locale al dispositivo, non un dato di gioco.
+   ============================================================ */
+function initTheme(){
+  let tema = "light";
+  try{
+    tema = localStorage.getItem(THEME_KEY) || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  }catch(e){ /* localStorage non disponibile: resta su chiaro */ }
+  applyTheme(tema);
+
+  document.getElementById("themeToggle").addEventListener("click", ()=>{
+    const attuale = document.documentElement.getAttribute("data-theme") || "light";
+    applyTheme(attuale === "light" ? "dark" : "light");
+  });
+}
+
+function applyTheme(tema){
+  document.documentElement.setAttribute("data-theme", tema);
+  document.getElementById("ttSwitch").classList.toggle("on", tema === "dark");
+  document.getElementById("themeLabel").textContent = tema === "dark" ? "Tema Scuro" : "Tema Chiaro";
+  try{ localStorage.setItem(THEME_KEY, tema); }catch(e){ /* ignora se non disponibile */ }
+}
+
+/* ============================================================
+   PERSISTENZA
+   ------------------------------------------------------------
+   Fonte primaria: file nativo sul disco, tramite due comandi Rust
+   (salva_registro / carica_registro) esposti da src-tauri/src/main.rs.
+   Questo evita che il registro sparisca svuotando la cache del webview
+   o disinstallando/reinstallando l'app — cosa che poteva succedere
+   quando l'unica copia viveva in localStorage.
+
+   Se per qualsiasi motivo l'app gira fuori da Tauri (es. apri
+   index.html in un browser normale durante lo sviluppo dell'interfaccia),
+   window.__TAURI__ non esiste: in quel caso si torna a localStorage
+   così puoi comunque testare la UI senza dover compilare l'app.
+   ============================================================ */
+const TAURI_DISPONIBILE = !!(window.__TAURI__ && window.__TAURI__.core);
+
+function storageAvailable(){
+  try{
+    const testKey = "__qg_test__";
+    localStorage.setItem(testKey, "1");
+    localStorage.removeItem(testKey);
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+async function loadState(){
+  document.getElementById("storageWarning").classList.toggle("show", false);
+  try{
+    if(TAURI_DISPONIBILE){
+      storageOk = true;
+      const raw = await window.__TAURI__.core.invoke("carica_registro");
+      if(raw){
+        const parsed = JSON.parse(raw);
+        state = Object.assign(state, parsed);
+      }
+    }else{
+      storageOk = storageAvailable();
+      document.getElementById("storageWarning").classList.toggle("show", !storageOk);
+      if(storageOk){
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(raw){
+          const parsed = JSON.parse(raw);
+          state = Object.assign(state, parsed);
+        }
+      }
+    }
+  }catch(e){
+    console.log("Nessun registro salvato in precedenza, o dati corrotti: si parte da zero.", e);
+  }
+  migraRotteLegacy();
+  document.getElementById("loading").style.display = "none";
+  document.getElementById("app").style.display = "grid";
+  renderAll();
+}
+
+// Migrazione una tantum: le rotte create con versioni precedenti dell'app
+// avevano un campo "difesa" numerico libero, digitato a mano, invece di un
+// vero collegamento a un Avamposto costruito. Non possiamo indovinare a
+// quale Avamposto corrispondesse quel numero, quindi lo segnaliamo invece
+// di far sparire silenziosamente la copertura: la rotta risulta scoperta
+// finché non le si riassegna esplicitamente un Avamposto dalla tabella.
+function migraRotteLegacy(){
+  let daSegnalare = 0;
+  state.rotte.forEach(r=>{
+    if(r.avampostoUid === undefined){
+      if(typeof r.difesa === "number" && r.difesa > 0) daSegnalare++;
+      r.avampostoUid = null;
+      delete r.difesa;
+    }
+  });
+  if(daSegnalare > 0){
+    showToast(`⚠ ${daSegnalare} rotta/e create con una versione precedente sono tornate "scoperte": riassegna l'Avamposto dalla tabella Rotte`);
+  }
+}
+
+let saveTimeout = null;
+function saveState(){
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(async ()=>{
+    const payload = JSON.stringify(state);
+    try{
+      if(TAURI_DISPONIBILE){
+        await window.__TAURI__.core.invoke("salva_registro", {contenuto: payload});
+      }else if(storageOk){
+        localStorage.setItem(STORAGE_KEY, payload);
+      }else{
+        throw new Error("Nessuna destinazione di salvataggio disponibile");
+      }
+      flashSaved();
+    }catch(e){
+      console.error("Errore di salvataggio", e);
+      document.getElementById("storageWarning").classList.add("show");
+      showToast("Salvataggio non riuscito ⚠ — scarica un backup dalla sidebar");
+    }
+  }, 250);
+}
+
+function flashSaved(){
+  const dot = document.getElementById("saveDot");
+  const text = document.getElementById("saveText");
+  const ora = new Date().toLocaleTimeString("it-IT", {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+  text.textContent = "Salvato alle " + ora;
+  dot.classList.add("show");
+  clearTimeout(flashSaved._t);
+  flashSaved._t = setTimeout(()=> dot.classList.remove("show"), 1500);
+}
+
+function exportBackup(){
+  try{
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const dataOggi = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `QG_backup_${(state.nome||"registro").replace(/[^a-z0-9]+/gi,"_")}_${dataOggi}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showToast("Backup scaricato");
+  }catch(e){
+    console.error("Errore nell'esportazione", e);
+    showToast("Errore nell'esportazione ⚠");
+  }
+}
+
+function importBackup(file){
+  const reader = new FileReader();
+  reader.onload = (ev)=>{
+    try{
+      const parsed = JSON.parse(ev.target.result);
+      if(typeof parsed !== "object" || parsed === null) throw new Error("Formato non valido");
+      if(!confirm("Importare questo backup sovrascriverà il registro attuale su questo dispositivo. Continuare?")) return;
+      state = Object.assign({
+        nome:"Il mio Quartier Generale", fondatore:"", cofondatore:"", classe:"Nessuna", livello:1,
+        oro:0, membri:[], strutture:[], materiali:{}, lavoratori:0, rotte:[], magazzinoScontati:[], movimenti:[]
+      }, parsed);
+      saveState();
+      renderAll();
+      showToast("Backup importato");
+    }catch(e){
+      console.error("Errore nell'importazione", e);
+      showToast("File di backup non valido ⚠");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function buildSummaryText(){
+  const righe = [];
+  righe.push(`Quartier Generale — ${state.nome || "(senza nome)"}`);
+  if(state.fondatore || state.cofondatore){
+    righe.push(`Fondatore: ${state.fondatore || "—"} · Co-fondatore: ${state.cofondatore || "—"}`);
+  }
+  const classeLabel = state.classe==="Nessuna" ? "Senza Classe" : "Classe " + state.classe;
+  righe.push(`${classeLabel} · Livello QG ${state.livello}`);
+  righe.push("");
+  righe.push(`Tesoreria: ${state.oro} mo`);
+  righe.push(`Punti QG: ${puntiSpesiTotali()} / ${PUNTI_QG_MAX}`);
+  righe.push(`Personale richiesto: ${personaleRichiesto()} (+ ${state.lavoratori} lavoratori assunti)`);
+  righe.push("");
+  righe.push("Membri:");
+  if(state.membri.length===0){ righe.push("  (nessuno)"); }
+  state.membri.forEach(m=> righe.push(`  • ${m.nome} — Lv. ${m.livello}`));
+  righe.push("");
+  righe.push("Strutture costruite:");
+  if(state.strutture.length===0){ righe.push("  (nessuna)"); }
+  state.strutture.forEach(s=>{
+    const c = CATALOGO.find(x=>x.id===s.catId);
+    if(c) righe.push(`  • ${c.nome} (${c.categoria}) — Lv. ${s.livello}`);
+  });
+  const kmTot = state.rotte.reduce((s,r)=>s+Number(r.distanza||0),0);
+  if(state.rotte.length>0){
+    righe.push("");
+    righe.push(`Rotte commerciali (${kmTot} km totali, ${costoMensileRotte().toFixed(1).replace(/\.0$/,"")} mo/mese):`);
+    state.rotte.forEach(r=>{
+      const difesa = kmDifesiRotta(r);
+      righe.push(`  • ${r.nome} — ${r.distanza} km (${difesa>0 ? difesa+" km difesi da avamposto" : "scoperta"})`);
+    });
+  }
+  righe.push("");
+  righe.push(`Bilancio mensile — Costi fissi: ${fmtMo(costiFissiMensili())} mo · Costi variabili: ${fmtMo(costiVariabiliMensili())} mo · Totale: ${fmtMo(costoMensileTotale())} mo`);
+  return righe.join("\n");
+}
+
+async function copySummary(){
+  const testo = buildSummaryText();
+  try{
+    await navigator.clipboard.writeText(testo);
+    showToast("Riepilogo copiato negli appunti");
+  }catch(e){
+    // fallback per contesti senza permessi clipboard (es. file:// in alcuni browser)
+    const ta = document.createElement("textarea");
+    ta.value = testo;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try{
+      document.execCommand("copy");
+      showToast("Riepilogo copiato negli appunti");
+    }catch(e2){
+      showToast("Impossibile copiare automaticamente ⚠");
+    }
+    ta.remove();
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> t.classList.remove("show"), 1600);
+}
+
+/* ============================================================
+   LOGICA DI GIOCO
+   ============================================================ */
+function puntiCosto(struttura){
+  if(struttura.exempt) return 0;
+  if(struttura.categoria === "Generali") return 2;
+  if(struttura.categoria === state.classe) return 2;
+  return 4;
+}
+
+function puntiSpesiTotali(){
+  return state.strutture.reduce((sum, s)=>{
+    const cat = CATALOGO.find(c=>c.id===s.catId);
+    if(!cat) return sum;
+    return sum + puntiCosto(cat) * s.livello;
+  }, 0);
+}
+
+function personaleRichiesto(){
+  return state.strutture.reduce((sum,s)=>{
+    const cat = CATALOGO.find(c=>c.id===s.catId);
+    return sum + (cat ? cat.personale : 0);
+  },0);
+}
+
+function valoreMagazzino(){
+  return Object.entries(state.materiali).reduce((sum,[m,q])=>{
+    const prezzo = MATERIALI_PREZZI[m] || 0;
+    return sum + prezzo * (q||0);
+  },0);
+}
+
+function costoMensileRotte(){
+  return state.rotte.reduce((sum,r)=> sum + (r.distanza/100)*COSTO_ROTTA_MO_PER_100KM, 0);
+}
+
+/* ============================================================
+   FINANZE — costi fissi/variabili e storico movimenti
+   ============================================================ */
+function costiFissiDettaglio(){
+  return [
+    {
+      voce: "Stipendi lavoratori",
+      base: `${state.lavoratori} lavorator${state.lavoratori===1?"e":"i"} × 1 mo`,
+      importo: state.lavoratori
+    }
+  ];
+}
+
+function costiVariabiliDettaglio(){
+  const righe = [];
+  const kmTot = state.rotte.reduce((s,r)=>s+Number(r.distanza||0),0);
+  righe.push({
+    voce: "Rotte commerciali",
+    base: state.rotte.length ? `${kmTot} km totali × 5 mo/100km` : "Nessuna rotta attiva",
+    importo: costoMensileRotte()
+  });
+  return righe;
+}
+
+function costiFissiMensili(){
+  return costiFissiDettaglio().reduce((s,r)=>s+r.importo,0);
+}
+
+function costiVariabiliMensili(){
+  return costiVariabiliDettaglio().reduce((s,r)=>s+r.importo,0);
+}
+
+function costoMensileTotale(){
+  return costiFissiMensili() + costiVariabiliMensili();
+}
+
+function registraMovimento(label, importo){
+  state.oro += importo;
+  state.movimenti.unshift({
+    data: new Date().toLocaleDateString("it-IT", {day:"2-digit", month:"2-digit", year:"numeric"}) + " " +
+          new Date().toLocaleTimeString("it-IT", {hour:"2-digit", minute:"2-digit"}),
+    label,
+    importo,
+    saldoDopo: state.oro
+  });
+  if(state.movimenti.length > 60) state.movimenti.length = 60;
+}
+
+// Rischio attacco su una rotta: percentuale base + una quota per ogni blocco di
+// 100km non difesi (valori presi da regolamento.json, non più hardcoded).
+function calcRischio(distanza, difesa){
+  const dif = Math.min(Number(difesa)||0, Number(distanza)||0);
+  const nonDifesi = Math.max(0,(Number(distanza)||0) - dif);
+  if(nonDifesi <= 0) return 0;
+  const blocchi = Math.ceil(nonDifesi/100);
+  return Math.min(100, RISCHIO_ROTTA_BASE + RISCHIO_ROTTA_PER_100KM*blocchi);
+}
+
+function contaStruttureCategoria(cat){
+  return state.strutture.filter(s=>{
+    const c = CATALOGO.find(x=>x.id===s.catId);
+    return c && c.categoria===cat;
+  }).length;
+}
+
+function hasStrutturaSpecializzata(){
+  return state.strutture.some(s=>{
+    const c = CATALOGO.find(x=>x.id===s.catId);
+    return c && c.categoria !== "Generali";
+  });
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderAll(){
+  renderTopbar();
+  renderPanoramica();
+  renderCatalogo();
+  renderStrutturePossedute();
+  renderMagazzino();
+  renderRotte();
+  renderFinanze();
+}
+
+function renderTopbar(){
+  document.getElementById("qgTitleDisplay").textContent = state.nome || "Il mio Quartier Generale";
+  const classeLabel = state.classe==="Nessuna" ? "Senza Classe" : "Classe "+state.classe;
+  document.getElementById("qgSubDisplay").textContent = `${classeLabel} · Livello ${state.livello}`;
+  document.getElementById("chipOro").textContent = state.oro;
+  document.getElementById("chipPunti").textContent = `${puntiSpesiTotali()}/${PUNTI_QG_MAX}`;
+  document.getElementById("chipStrutture").textContent = state.strutture.length;
+  document.getElementById("chipPersonale").textContent = personaleRichiesto();
+}
+
+// Il Livello del QG non è più un valore libero: si deriva dai livelli dei
+// personaggi membri, secondo le soglie di regolamento.json. Il criterio
+// (massimo/minimo/media) è anch'esso in config: il regolamento originale non
+// specifica quale dei tre si intenda, quindi è stata presa un'assunzione
+// (vedi commento "_nota" in livelloQG dentro regolamento.json) — se non è
+// corretta, si corregge lì senza toccare questo codice.
+function calcolaLivelloQGDaMembri(){
+  if(!state.membri || state.membri.length===0) return 1;
+  const livelli = state.membri.map(m=>Number(m.livello)||0).filter(l=>l>0);
+  if(livelli.length===0) return 1;
+  let riferimento;
+  if(LIVELLO_QG_CRITERIO === "minimo") riferimento = Math.min(...livelli);
+  else if(LIVELLO_QG_CRITERIO === "media") riferimento = livelli.reduce((a,b)=>a+b,0)/livelli.length;
+  else riferimento = Math.max(...livelli); // default: "massimo"
+
+  let livelloQG = 1;
+  const soglie = [...LIVELLO_QG_SOGLIE].sort((a,b)=>a.livelloPersonaggioMin - b.livelloPersonaggioMin);
+  soglie.forEach(s=>{ if(riferimento >= s.livelloPersonaggioMin) livelloQG = s.qg; });
+
+  return Math.min(livelloQG, LIVELLO_QG_MAX_ATTUALE);
+}
+
+function renderPanoramica(){
+  state.livello = calcolaLivelloQGDaMembri();
+
+  document.getElementById("inNome").value = state.nome;
+  document.getElementById("inFondatore").value = state.fondatore;
+  document.getElementById("inCofondatore").value = state.cofondatore;
+  document.getElementById("inClasse").value = state.classe;
+  // La classe è bloccata una volta assegnata (auto, alla prima struttura
+  // specializzata), a meno che lo Staff non l'abbia sbloccata di proposito
+  // con il lucchetto per questa sessione (classeSbloccataManualmente non è
+  // persistita: si rilocca da sola al prossimo avvio dell'app).
+  const classeAssegnata = state.classe !== "Nessuna";
+  document.getElementById("inClasse").disabled = classeAssegnata && !classeSbloccataManualmente;
+  document.getElementById("btnSbloccaClasse").style.display = classeAssegnata && !classeSbloccataManualmente ? "inline-flex" : "none";
+  document.getElementById("inLivello").value = state.livello;
+  document.getElementById("inOro").value = state.oro;
+
+  const spesi = puntiSpesiTotali();
+  const pct = Math.min(100, (spesi/PUNTI_QG_MAX)*100);
+  document.getElementById("puntiBar").style.width = pct+"%";
+  document.getElementById("puntiBarLabel").textContent = `${spesi} / ${PUNTI_QG_MAX}`;
+
+  const mBody = document.getElementById("membriBody");
+  mBody.innerHTML = "";
+  if(state.membri.length===0){
+    mBody.innerHTML = `<tr><td colspan="3" class="empty">Nessun membro registrato.</td></tr>`;
+  }else{
+    state.membri.forEach((m,i)=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${escapeHtml(m.nome)}</td><td class="mono">${m.livello}</td>
+        <td><button class="btn btn-danger btn-sm" data-i="${i}" data-action="del-membro">Rimuovi</button></td>`;
+      mBody.appendChild(tr);
+    });
+  }
+
+  const rBody = document.getElementById("riepilogoBody");
+  rBody.innerHTML = "";
+  CATEGORIE.forEach(cat=>{
+    const n = contaStruttureCategoria(cat);
+    const struttureCat = state.strutture.filter(s=>{
+      const c = CATALOGO.find(x=>x.id===s.catId); return c && c.categoria===cat;
+    });
+    const punti = struttureCat.reduce((sum,s)=>{
+      const c = CATALOGO.find(x=>x.id===s.catId);
+      return sum + puntiCosto(c)*s.livello;
+    },0);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><span class="tag tag-${cat.toLowerCase()}">${cat}</span></td><td class="mono">${n}</td><td class="mono">${punti}</td>`;
+    rBody.appendChild(tr);
+  });
+}
+
+function renderCatalogo(){
+  const filters = document.getElementById("catFilters");
+  filters.innerHTML = "";
+  ["Tutte", ...CATEGORIE].forEach(cat=>{
+    const b = document.createElement("button");
+    b.textContent = cat;
+    if(cat===catFilter) b.classList.add("active");
+    b.onclick = ()=>{ catFilter = cat; renderCatalogo(); };
+    filters.appendChild(b);
+  });
+
+  const grid = document.getElementById("catalogGrid");
+  grid.innerHTML = "";
+  const lista = CATALOGO.filter(c=> catFilter==="Tutte" || c.categoria===catFilter);
+  lista.forEach(c=>{
+    const costoPunti = puntiCosto(c);
+    const matStr = c.materiali.length ? c.materiali.map(m=>`${m.m} ${m.u}U`).join(", ") : "—";
+    const card = document.createElement("div");
+    card.className = "struct-card";
+    card.innerHTML = `
+      <h4>${c.nome} <span class="tag tag-${c.categoria.toLowerCase()}">${c.categoria}</span></h4>
+      <div class="meta">Costo: ${c.costo} mo · Personale: ${c.personale} · Punti QG: ${c.exempt ? "esente" : costoPunti}</div>
+      <div class="mats">Materiali: ${matStr}</div>
+      <div class="desc">${c.desc}</div>
+      <div class="foot"><button class="btn btn-brass btn-sm" data-action="costruisci" data-id="${c.id}">Costruisci</button></div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function renderStrutturePossedute(){
+  const body = document.getElementById("strutturePossedute");
+  const empty = document.getElementById("struttureEmpty");
+  body.innerHTML = "";
+  if(state.strutture.length===0){
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  state.strutture.forEach(s=>{
+    const c = CATALOGO.find(x=>x.id===s.catId);
+    if(!c) return;
+    const punti = puntiCosto(c) * s.livello;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c.nome}</td>
+      <td><span class="tag tag-${c.categoria.toLowerCase()}">${c.categoria}</span></td>
+      <td class="mono">Lv. ${s.livello}</td>
+      <td class="mono">${c.exempt ? "esente" : punti}</td>
+      <td>
+        <button class="btn btn-outline btn-sm" data-action="potenzia" data-uid="${s.uid}">Potenzia</button>
+        <button class="btn btn-danger btn-sm" data-action="smantella" data-uid="${s.uid}">Smantella</button>
+      </td>`;
+    body.appendChild(tr);
+  });
+}
+
+function renderMagazzino(){
+  const body = document.getElementById("magazzinoBody");
+  body.innerHTML = "";
+  Object.keys(MATERIALI_PREZZI).forEach(m=>{
+    const q = state.materiali[m] || 0;
+    const prezzo = MATERIALI_PREZZI[m];
+    const valore = (prezzo*q).toFixed(1).replace(/\.0$/,"");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${m}</td>
+      <td class="mono">${prezzo} mo</td>
+      <td><input type="number" min="0" class="qty-input mono" data-mat="${m}" value="${q}"></td>
+      <td class="mono">${valore} mo</td>
+      <td></td>`;
+    body.appendChild(tr);
+  });
+  document.getElementById("chipValoreMagazzino").textContent = valoreMagazzino().toFixed(1).replace(/\.0$/,"") + " mo";
+  document.getElementById("inLavoratori").value = state.lavoratori;
+  const fabbisogno = personaleRichiesto();
+  document.getElementById("personaleRichiestoLabel").textContent = fabbisogno;
+  const deficitEl = document.getElementById("lavoratoriDeficit");
+  const deficit = fabbisogno - state.lavoratori;
+  if(deficit > 0){
+    deficitEl.style.display = "inline";
+    deficitEl.textContent = `⚠ Mancano ${deficit} lavorator${deficit===1?"e":"i"} rispetto al fabbisogno.`;
+  }else{
+    deficitEl.style.display = "none";
+  }
+  renderMagazzinoScontati();
+  renderAcquistoPanel();
+}
+
+/* ============================================================
+   ACQUISTO MATERIALI (con sconti Economia Interna)
+   ============================================================ */
+function hasMagazzino(){
+  return state.strutture.some(s=>s.catId==="magazzino_str");
+}
+
+function renderMagazzinoScontati(){
+  const card = document.getElementById("cardMagazzinoScontati");
+  const grid = document.getElementById("magazzinoScontatiGrid");
+  if(!hasMagazzino()){
+    card.style.display = "none";
+    return;
+  }
+  card.style.display = "block";
+  grid.innerHTML = "";
+  Object.keys(MATERIALI_PREZZI).forEach(m=>{
+    const scelto = state.magazzinoScontati.includes(m);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn btn-sm " + (scelto ? "btn-brass" : "btn-outline");
+    btn.textContent = m + (scelto ? " ✓" : "");
+    btn.dataset.mat = m;
+    grid.appendChild(btn);
+  });
+}
+
+function toggleMagazzinoScontato(m){
+  const idx = state.magazzinoScontati.indexOf(m);
+  if(idx>=0){
+    state.magazzinoScontati.splice(idx,1);
+  }else{
+    if(state.magazzinoScontati.length>=5){
+      showToast("Puoi scegliere al massimo 5 materiali scontati dal Magazzino ⚠");
+      return;
+    }
+    state.magazzinoScontati.push(m);
+  }
+  renderMagazzinoScontati();
+  renderAcquistoPanel();
+  saveState();
+}
+
+function renderAcquistoPanel(){
+  const sel = document.getElementById("acqMateriale");
+  const prevValue = sel.value;
+  sel.innerHTML = "";
+  Object.keys(MATERIALI_PREZZI).forEach(m=>{
+    const opt = document.createElement("option");
+    opt.value = m; opt.textContent = `${m} (${MATERIALI_PREZZI[m]} mo/U)`;
+    sel.appendChild(opt);
+  });
+  if(prevValue && MATERIALI_PREZZI[prevValue] !== undefined) sel.value = prevValue;
+  aggiornaOpzioneMag30();
+  aggiornaPreviewAcquisto();
+}
+
+function aggiornaOpzioneMag30(){
+  const mat = document.getElementById("acqMateriale").value;
+  const opz = document.getElementById("acqOpzioneMag30");
+  const provenienza = document.getElementById("acqProvenienza");
+  const disponibile = hasMagazzino() && state.magazzinoScontati.includes(mat);
+  opz.style.display = disponibile ? "block" : "none";
+  if(!disponibile && provenienza.value === "mag30"){
+    provenienza.value = "qg20";
+  }
+}
+
+function calcCostoAcquisto(){
+  const mat = document.getElementById("acqMateriale").value;
+  const qta = Math.max(0, Number(document.getElementById("acqQuantita").value) || 0);
+  const provenienza = document.getElementById("acqProvenienza").value;
+  const prezzoBase = MATERIALI_PREZZI[mat] || 0;
+  let sconto = 0;
+  if(provenienza === "qg20") sconto = SCONTO_ACQUISTO_ALTRO_QG;
+  if(provenienza === "mag30") sconto = SCONTO_ACQUISTO_MAGAZZINO;
+  const totale = prezzoBase * qta * (1 - sconto);
+  return {mat, qta, totale, sconto};
+}
+
+function aggiornaPreviewAcquisto(){
+  const {totale} = calcCostoAcquisto();
+  document.getElementById("acqCostoPreview").textContent = totale.toFixed(1).replace(/\.0$/,"") + " mo";
+}
+
+function eseguiAcquisto(){
+  const {mat, qta, totale} = calcCostoAcquisto();
+  if(qta <= 0){ showToast("Inserisci una quantità valida ⚠"); return; }
+  if(state.oro < totale){ showToast("Oro insufficiente in tesoreria ⚠"); return; }
+  registraMovimento(`Acquisto ${qta}U ${mat}`, -totale);
+  state.materiali[mat] = (state.materiali[mat] || 0) + qta;
+  showToast(`Acquistati ${qta}U di ${mat} per ${totale.toFixed(1).replace(/\.0$/,"")} mo`);
+  renderAll();
+  saveState();
+}
+
+// Elenco degli Avamposti costruiti. Un Avamposto protegge una sola rotta alla
+// volta (per regolamento: "protegge la tratta commerciale di un singolo QG
+// scelto alla costruzione dell'avamposto"), quindi qui li marchiamo come
+// "liberi" o "già assegnati" per non permettere doppie assegnazioni dalla UI.
+function elencoAvamposti(){
+  return state.strutture.filter(s=>s.catId==="avamposto");
+}
+function avampostoAssegnatoA(rottaUid){
+  return state.rotte.find(r=>r.uid===rottaUid)?.avampostoUid || null;
+}
+function avampostoLibero(struttura, rottaUidCorrente){
+  return !state.rotte.some(r=>r.avampostoUid===struttura.uid && r.uid!==rottaUidCorrente);
+}
+function raggioAvamposto(struttura){
+  return AVAMPOSTO_RAGGIO_KM_PER_LIVELLO * (struttura.livello||1);
+}
+// Km "difesi" per una rotta = raggio dell'avamposto collegato (se c'è).
+// Riusa la stessa calcRischio già esistente: se il raggio copre l'intera
+// distanza il rischio scende a 0 ("protetta"), altrimenti si applica la
+// riduzione proporzionale come già avveniva col vecchio campo manuale.
+function kmDifesiRotta(r){
+  if(!r.avampostoUid) return 0;
+  const av = state.strutture.find(s=>s.uid===r.avampostoUid && s.catId==="avamposto");
+  return av ? raggioAvamposto(av) : 0;
+}
+
+function popolaSelectAvamposti(select, rottaUidCorrente){
+  const scelto = select.value;
+  select.innerHTML = `<option value="">— nessuno —</option>`;
+  elencoAvamposti().forEach(av=>{
+    const libero = avampostoLibero(av, rottaUidCorrente);
+    const opt = document.createElement("option");
+    opt.value = av.uid;
+    opt.textContent = `Avamposto (Lv.${av.livello}, raggio ${raggioAvamposto(av)} km)` + (libero ? "" : " — già assegnato altrove");
+    if(!libero && av.uid !== rottaUidCorrente) opt.disabled = true;
+    select.appendChild(opt);
+  });
+  select.value = scelto || "";
+}
+
+function renderRotte(){
+  const body = document.getElementById("rotteBody");
+  const empty = document.getElementById("rotteEmpty");
+  body.innerHTML = "";
+
+  popolaSelectAvamposti(document.getElementById("rAvamposto"), null);
+
+  if(state.rotte.length===0){
+    empty.style.display = "block";
+  }else{
+    empty.style.display = "none";
+    state.rotte.forEach(r=>{
+      const difesa = kmDifesiRotta(r);
+      const rischio = calcRischio(r.distanza, difesa);
+      const costo = (r.distanza/100*COSTO_ROTTA_MO_PER_100KM).toFixed(1).replace(/\.0$/,"");
+      let cls = "badge-risk-low";
+      if(rischio>=20) cls="badge-risk-high"; else if(rischio>=10) cls="badge-risk-mid";
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(r.nome)}</td>
+        <td class="mono">${r.distanza} km</td>
+        <td><select class="mono" data-action="cambia-avamposto" data-uid="${r.uid}" style="max-width:210px;"></select></td>
+        <td class="mono">${costo} mo</td>
+        <td class="${cls}">${rischio}% ${rischio===0 ? "(protetta)":""}</td>
+        <td><button class="btn btn-danger btn-sm" data-action="del-rotta" data-uid="${r.uid}">Rimuovi</button></td>`;
+      body.appendChild(tr);
+      const sel = tr.querySelector("[data-action='cambia-avamposto']");
+      popolaSelectAvamposti(sel, r.uid);
+      sel.value = r.avampostoUid || "";
+    });
+  }
+  const kmTot = state.rotte.reduce((s,r)=>s+Number(r.distanza||0),0);
+  document.getElementById("chipKmTotali").textContent = kmTot + " km";
+  document.getElementById("chipCostoRotte").textContent = costoMensileRotte().toFixed(1).replace(/\.0$/,"") + " mo";
+  document.getElementById("rotteWarning").style.display = kmTot>400 ? "block" : "none";
+}
+
+function escapeHtml(s){
+  const d = document.createElement("div"); d.textContent = s||""; return d.innerHTML;
+}
+
+function fmtMo(n){
+  return (Math.round(n*10)/10).toFixed(1).replace(/\.0$/,"");
+}
+
+function renderFinanze(){
+  const fissi = costiFissiDettaglio();
+  const variabili = costiVariabiliDettaglio();
+  const totFissi = costiFissiMensili();
+  const totVariabili = costiVariabiliMensili();
+  const totale = totFissi + totVariabili;
+
+  const fBody = document.getElementById("costiFissiBody");
+  fBody.innerHTML = "";
+  fissi.forEach(r=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${escapeHtml(r.voce)}</td><td class="mono">${escapeHtml(r.base)}</td><td class="mono">${fmtMo(r.importo)} mo</td>`;
+    fBody.appendChild(tr);
+  });
+
+  const vBody = document.getElementById("costiVariabiliBody");
+  vBody.innerHTML = "";
+  variabili.forEach(r=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${escapeHtml(r.voce)}</td><td class="mono">${escapeHtml(r.base)}</td><td class="mono">${fmtMo(r.importo)} mo</td>`;
+    vBody.appendChild(tr);
+  });
+
+  document.getElementById("chipCostiFissi").textContent = fmtMo(totFissi) + " mo";
+  document.getElementById("chipCostiVariabili").textContent = fmtMo(totVariabili) + " mo";
+  document.getElementById("chipCostiTotali").textContent = fmtMo(totale) + " mo";
+
+  const saldoDopo = state.oro - totale;
+  const chipSaldo = document.getElementById("chipSaldoDopoChiusura");
+  chipSaldo.textContent = fmtMo(saldoDopo) + " mo";
+  chipSaldo.className = "v mono " + (saldoDopo < 0 ? "amount-neg" : "");
+  document.getElementById("chiusuraAvviso").style.display = saldoDopo < 0 ? "block" : "none";
+
+  const mBody = document.getElementById("movimentiBody");
+  const mEmpty = document.getElementById("movimentiEmpty");
+  mBody.innerHTML = "";
+  if(!state.movimenti || state.movimenti.length===0){
+    mEmpty.style.display = "block";
+  }else{
+    mEmpty.style.display = "none";
+    state.movimenti.forEach(m=>{
+      const tr = document.createElement("tr");
+      const cls = m.importo >= 0 ? "amount-pos" : "amount-neg";
+      const segno = m.importo >= 0 ? "+" : "";
+      tr.innerHTML = `<td class="mono">${escapeHtml(m.data)}</td><td>${escapeHtml(m.label)}</td><td class="mono ${cls}">${segno}${fmtMo(m.importo)} mo</td><td class="mono">${fmtMo(m.saldoDopo)} mo</td>`;
+      mBody.appendChild(tr);
+    });
+  }
+}
+
+/* ============================================================
+   AZIONI
+   ============================================================ */
+function costruisciStruttura(catId){
+  const c = CATALOGO.find(x=>x.id===catId);
+  if(!c) return;
+  const costoPunti = puntiCosto(c);
+  const spesiAttuali = puntiSpesiTotali();
+
+  if(!c.exempt && spesiAttuali + costoPunti > PUNTI_QG_MAX){
+    showToast("Punti QG insufficienti (max 44) ⚠");
+    return;
+  }
+  // Limite quantitativo generico dichiarato nel catalogo (es. Imprese: max
+  // 2 × Livello QG). Se una struttura non ha "limiteCostruzioni" in
+  // regolamento.json, questo controllo semplicemente non scatta.
+  if(c.limiteCostruzioni && c.limiteCostruzioni.tipo === "perLivelloQG"){
+    const massimo = c.limiteCostruzioni.moltiplicatore * state.livello;
+    const attuali = state.strutture.filter(s=>s.catId===c.id).length;
+    if(attuali >= massimo){
+      showToast(`Limite raggiunto: massimo ${massimo} ${c.nome} al Livello QG attuale (${c.limiteCostruzioni.moltiplicatore}× livello) ⚠`);
+      return;
+    }
+  }
+  if(state.oro < c.costo){
+    showToast("Oro insufficiente in tesoreria ⚠");
+    return;
+  }
+  // verifica materiali
+  for(const mat of c.materiali){
+    const disp = state.materiali[mat.m] || 0;
+    if(disp < mat.u){
+      showToast(`Materiali insufficienti: manca ${mat.m} ⚠`);
+      return;
+    }
+  }
+  // applica
+  registraMovimento(`Costruzione: ${c.nome}`, -c.costo);
+  c.materiali.forEach(mat=>{ state.materiali[mat.m] = (state.materiali[mat.m]||0) - mat.u; });
+  state.strutture.push({uid: uid(), catId: c.id, livello: 1});
+
+  if(c.categoria !== "Generali" && state.classe==="Nessuna"){
+    state.classe = c.categoria;
+    showToast(`${c.nome} costruita! Il QG ottiene la Classe ${c.categoria}`);
+  }else{
+    showToast(`${c.nome} costruita!`);
+  }
+  saveState();
+  renderAll();
+}
+
+function potenziaStruttura(uidStr){
+  const s = state.strutture.find(x=>x.uid===uidStr);
+  if(!s) return;
+  const c = CATALOGO.find(x=>x.id===s.catId);
+  if(s.livello>=LIVELLO_STRUTTURA_MAX){ showToast("Livello massimo raggiunto"); return; }
+  if(state.livello < s.livello+1){
+    showToast(`Il QG deve essere almeno di Livello ${s.livello+1} per potenziare questa struttura ⚠`);
+    return;
+  }
+  const costoPunti = puntiCosto(c);
+  if(!c.exempt && puntiSpesiTotali() + costoPunti > PUNTI_QG_MAX){
+    showToast("Punti QG insufficienti per il potenziamento ⚠"); return;
+  }
+  if(state.oro < c.costo){ showToast("Oro insufficiente per il potenziamento ⚠"); return; }
+  for(const mat of c.materiali){
+    const disp = state.materiali[mat.m] || 0;
+    if(disp < mat.u){ showToast(`Materiali insufficienti: manca ${mat.m} ⚠`); return; }
+  }
+  registraMovimento(`Potenziamento: ${c.nome} → Lv.${s.livello+1}`, -c.costo);
+  c.materiali.forEach(mat=>{ state.materiali[mat.m] = (state.materiali[mat.m]||0) - mat.u; });
+  s.livello += 1;
+  showToast(`${c.nome} potenziata a Livello ${s.livello}`);
+  saveState();
+  renderAll();
+}
+
+function smantellaStruttura(uidStr){
+  const idx = state.strutture.findIndex(x=>x.uid===uidStr);
+  if(idx<0) return;
+  const s = state.strutture[idx];
+  const c = CATALOGO.find(x=>x.id===s.catId);
+  if(c.id==="avamposto"){
+    c.materiali.forEach(mat=>{ state.materiali[mat.m] = (state.materiali[mat.m]||0) + mat.u; });
+    // Se questo avamposto proteggeva una rotta, lo scolleghiamo: la rotta
+    // torna scoperta invece di continuare a fare riferimento a una struttura
+    // che non esiste più.
+    const rotteScollegate = state.rotte.filter(r=>r.avampostoUid===uidStr).length;
+    state.rotte.forEach(r=>{ if(r.avampostoUid===uidStr) r.avampostoUid = null; });
+    showToast(rotteScollegate>0
+      ? `Avamposto smantellato: materiali restituiti, ${rotteScollegate} rotta/e tornate scoperte`
+      : "Avamposto smantellato: materiali restituiti al magazzino");
+  }else{
+    showToast(`${c.nome} smantellata`);
+  }
+  state.strutture.splice(idx,1);
+  saveState();
+  renderAll();
+}
+
+/* ============================================================
+   EVENTI
+   ============================================================ */
+document.querySelectorAll(".nav-item").forEach(item=>{
+  item.addEventListener("click", ()=>{
+    document.querySelectorAll(".nav-item").forEach(i=>i.classList.remove("active"));
+    item.classList.add("active");
+    const tab = item.dataset.tab;
+    currentTab = tab;
+    ["panoramica","strutture","magazzino","rotte","finanze"].forEach(t=>{
+      document.getElementById("tab-"+t).style.display = (t===tab) ? "block" : "none";
+    });
+  });
+});
+
+document.getElementById("inNome").addEventListener("input", e=>{ state.nome = e.target.value; renderTopbar(); saveState(); });
+document.getElementById("inFondatore").addEventListener("input", e=>{ state.fondatore = e.target.value; saveState(); });
+document.getElementById("inCofondatore").addEventListener("input", e=>{ state.cofondatore = e.target.value; saveState(); });
+document.getElementById("btnSbloccaClasse").addEventListener("click", ()=>{
+  if(!confirm("Cambiare manualmente la classe di un QG già assegnato è un'operazione eccezionale (di norma riservata allo Staff per correggere un errore). Vuoi sbloccare il menu per questa modifica?")) return;
+  classeSbloccataManualmente = true;
+  renderPanoramica();
+});
+
+document.getElementById("inClasse").addEventListener("change", e=>{
+  state.classe = e.target.value;
+  classeSbloccataManualmente = false; // si rilocca subito dopo l'uso, per evitare cambi ripetuti non voluti
+  renderAll();
+  saveState();
+});
+// Nota: non c'è più un listener "change" su #inLivello — il campo è disabilitato
+// e il valore viene ricalcolato da calcolaLivelloQGDaMembri() ad ogni render.
+document.getElementById("inOro").addEventListener("change", e=>{
+  const nuovo = Number(e.target.value)||0;
+  const delta = nuovo - state.oro;
+  if(delta!==0) registraMovimento("Correzione manuale saldo", delta);
+  renderAll(); saveState();
+});
+
+document.getElementById("btnMovimento").addEventListener("click", ()=>{
+  const val = Number(document.getElementById("inMovimento").value)||0;
+  if(val===0){ showToast("Inserisci un importo diverso da zero"); return; }
+  registraMovimento(val>=0 ? "Movimento rapido (entrata)" : "Movimento rapido (uscita)", val);
+  document.getElementById("inMovimento").value = "";
+  renderAll(); saveState();
+  showToast(val>=0 ? `+${val} mo aggiunte alla tesoreria` : `${val} mo rimosse dalla tesoreria`);
+});
+
+document.getElementById("btnAddMembro").addEventListener("click", ()=>{
+  const nome = document.getElementById("inMembroNome").value.trim();
+  const lv = Number(document.getElementById("inMembroLivello").value);
+  if(!nome || !lv){ showToast("Inserisci nome e livello del personaggio"); return; }
+  state.membri.push({nome, livello: lv});
+  document.getElementById("inMembroNome").value = "";
+  document.getElementById("inMembroLivello").value = "";
+  renderPanoramica(); saveState();
+});
+
+document.getElementById("membriBody").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-action='del-membro']");
+  if(!btn) return;
+  state.membri.splice(Number(btn.dataset.i),1);
+  renderPanoramica(); saveState();
+});
+
+document.getElementById("catalogGrid").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-action='costruisci']");
+  if(!btn) return;
+  costruisciStruttura(btn.dataset.id);
+});
+
+document.getElementById("strutturePossedute").addEventListener("click", e=>{
+  const potBtn = e.target.closest("[data-action='potenzia']");
+  const delBtn = e.target.closest("[data-action='smantella']");
+  if(potBtn) potenziaStruttura(potBtn.dataset.uid);
+  if(delBtn) smantellaStruttura(delBtn.dataset.uid);
+});
+
+document.getElementById("magazzinoBody").addEventListener("change", e=>{
+  const input = e.target.closest("[data-mat]");
+  if(!input) return;
+  const mat = input.dataset.mat;
+  state.materiali[mat] = Math.max(0, Number(input.value)||0);
+  renderMagazzino(); renderTopbar();
+  saveState();
+});
+
+document.getElementById("magazzinoScontatiGrid").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-mat]");
+  if(!btn) return;
+  toggleMagazzinoScontato(btn.dataset.mat);
+});
+
+document.getElementById("acqMateriale").addEventListener("change", ()=>{
+  aggiornaOpzioneMag30();
+  aggiornaPreviewAcquisto();
+});
+document.getElementById("acqQuantita").addEventListener("input", aggiornaPreviewAcquisto);
+document.getElementById("acqProvenienza").addEventListener("change", aggiornaPreviewAcquisto);
+document.getElementById("btnAcquista").addEventListener("click", eseguiAcquisto);
+
+document.getElementById("inLavoratori").addEventListener("change", e=>{
+  state.lavoratori = Math.max(0, Number(e.target.value)||0);
+  renderFinanze();
+  saveState();
+});
+
+document.getElementById("btnAdeguaLavoratori").addEventListener("click", ()=>{
+  const fabbisogno = personaleRichiesto();
+  state.lavoratori = fabbisogno;
+  showToast(`Lavoratori adeguati al fabbisogno: ${fabbisogno}`);
+  renderMagazzino(); renderFinanze(); renderTopbar();
+  saveState();
+});
+
+document.getElementById("btnChiudiMese").addEventListener("click", ()=>{
+  const totale = costoMensileTotale();
+  if(totale<=0){ showToast("Nessun costo mensile da applicare"); return; }
+  if(!confirm(`Applicare i costi del mese (${fmtMo(totale)} mo totali) alla tesoreria?`)) return;
+  registraMovimento(`Chiusura mese (stipendi ${fmtMo(costiFissiMensili())} mo, rotte ${fmtMo(costiVariabiliMensili())} mo)`, -totale);
+  renderAll();
+  saveState();
+  showToast(`Mese chiuso: -${fmtMo(totale)} mo dalla tesoreria`);
+});
+
+document.getElementById("btnAddRotta").addEventListener("click", ()=>{
+  const nome = document.getElementById("rNome").value.trim();
+  const distanza = Number(document.getElementById("rDistanza").value);
+  const avampostoUid = document.getElementById("rAvamposto").value || null;
+  if(!nome || !distanza){ showToast("Inserisci nome e distanza della rotta"); return; }
+  state.rotte.push({uid: uid(), nome, distanza, avampostoUid});
+  document.getElementById("rNome").value = "";
+  document.getElementById("rDistanza").value = "";
+  renderRotte(); saveState();
+});
+
+document.getElementById("rotteBody").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-action='del-rotta']");
+  if(!btn) return;
+  state.rotte = state.rotte.filter(r=>r.uid!==btn.dataset.uid);
+  renderRotte(); saveState();
+});
+
+document.getElementById("rotteBody").addEventListener("change", e=>{
+  const sel = e.target.closest("[data-action='cambia-avamposto']");
+  if(!sel) return;
+  const r = state.rotte.find(x=>x.uid===sel.dataset.uid);
+  if(!r) return;
+  r.avampostoUid = sel.value || null;
+  renderRotte(); saveState();
+});
+
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  if(!confirm("Vuoi davvero azzerare tutto il registro del QG? L'operazione non è reversibile. (Consiglio: esporta prima un backup)")) return;
+  state = {
+    nome:"Il mio Quartier Generale", fondatore:"", cofondatore:"", classe:"Nessuna", livello:1,
+    oro:0, membri:[], strutture:[], materiali:{}, lavoratori:0, rotte:[], magazzinoScontati:[], movimenti:[]
+  };
+  renderAll();
+  saveState();
+  showToast("Registro azzerato");
+});
+
+document.getElementById("copySummaryBtn").addEventListener("click", copySummary);
+
+document.getElementById("exportBtn").addEventListener("click", exportBackup);
+
+document.getElementById("importBtn").addEventListener("click", ()=>{
+  document.getElementById("importFile").click();
+});
+
+document.getElementById("importFile").addEventListener("change", (e)=>{
+  const file = e.target.files[0];
+  if(file) importBackup(file);
+  e.target.value = "";
+});
+
+/* ============================================================
+   GUIDA INTEGRATA
+   ============================================================ */
+function openGuide(){
+  document.getElementById("guideModalBg").style.display = "flex";
+}
+function closeGuide(){
+  document.getElementById("guideModalBg").style.display = "none";
+  const nascondi = document.getElementById("guideDontShow").checked;
+  if(nascondi){
+    try{ localStorage.setItem(GUIDE_KEY, "1"); }catch(e){ /* ignora */ }
+  }
+}
+function initGuide(){
+  let nascosta = false;
+  try{ nascosta = localStorage.getItem(GUIDE_KEY) === "1"; }catch(e){ /* ignora */ }
+  if(!nascosta) openGuide();
+  document.getElementById("guideBtn").addEventListener("click", openGuide);
+  document.getElementById("guideCloseBtn").addEventListener("click", closeGuide);
+  document.getElementById("guideCloseX").addEventListener("click", closeGuide);
+  document.getElementById("guideModalBg").addEventListener("click", e=>{
+    if(e.target.id === "guideModalBg") closeGuide();
+  });
+}
+
+/* ============================================================
+   AVVIO
+   ============================================================ */
+initTheme();
+initGuide();
+caricaConfig()
+  .then(loadState)
+  .catch(e=>{
+    console.error("Errore nel caricamento di data/regolamento.json", e);
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("app").style.display = "grid";
+    showToast("Impossibile caricare il regolamento (data/regolamento.json) ⚠");
+  });
+</script>
+</body>
+</html>
