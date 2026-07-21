@@ -1,0 +1,95 @@
+/* ============================================================
+   DARK FANTASY THEME — Color palette & CSS Variables
+   ============================================================ */
+
+:root, :root[data-theme="light"] {
+  /* Wood tones (Earthy, Dark) */
+  --wood-1: #1c130c;
+  --wood-2: #2c1d12;
+  --wood-3: #3d2716;
+  
+  /* Brass & Gold (Accents) */
+  --brass: #b9924f;
+  --brass-bright: #e0b673;
+  
+  /* Parchment (Main background) */
+  --parchment: #ece2c6;
+  --parchment-2: #e2d5ae;
+  --parchment-edge: #cbb98a;
+  
+  /* Text & Lines */
+  --ink: #33261a;
+  --ink-soft: #5a4a37;
+  --line: #b8a674;
+  
+  /* Semantic Colors */
+  --green: #4c6b45;
+  --green-dk: #374f31;
+  --red: #8a3a2e;
+  --red-dk: #6b2c22;
+  --blue: #3f5568;
+  --blue-dk: #2d3f4e;
+  --amber: #a8792a;
+  --amber-dk: #8a611c;
+  
+  /* Form & UI */
+  --input-bg: #f6efdc;
+  --progress-track: #d8c79b;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] {
+  --wood-1: #14100b;
+  --wood-2: #211a12;
+  --wood-3: #2f2517;
+  
+  --brass: #b9924f;
+  --brass-bright: #e6bd7c;
+  
+  --parchment: #211c15;
+  --parchment-2: #2a231a;
+  --parchment-edge: #4a3d29;
+  
+  --ink: #e8dcc0;
+  --ink-soft: #b5a687;
+  --line: #5a4a30;
+  
+  --green: #7fae72;
+  --green-dk: #5c8a51;
+  --red: #d4796a;
+  --red-dk: #b85c4d;
+  --blue: #7fa0bd;
+  --blue-dk: #5c839e;
+  --amber: #d4a24a;
+  --amber-dk: #b98730;
+  
+  --input-bg: #2a2318;
+  --progress-track: #3a3021;
+  --shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+/* Font Family Setup */
+:root {
+  --font-heading: "Cinzel", serif;        /* H1, H2, labels */
+  --font-body: "Spectral", Georgia, serif; /* Body, descriptive text */
+  --font-mono: "JetBrains Mono", monospace; /* Numbers, data */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: 
+    radial-gradient(ellipse at top left, rgba(255, 255, 255, 0.05), transparent 40%),
+    var(--wood-1);
+  min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
