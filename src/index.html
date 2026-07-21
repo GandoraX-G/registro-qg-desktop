@@ -496,6 +496,12 @@
         <tbody id="strutturePossedute"></tbody>
       </table>
       <div id="struttureEmpty" class="empty" style="display:none;">Non hai ancora costruito nessuna struttura. Scegline una dal catalogo qui sopra.</div>
+
+      <div id="sottomeccanicheWrap" style="display:none;">
+        <div class="divider" style="margin-top:26px;"></div>
+        <h2 class="section-title">Sotto-meccaniche attive</h2>
+        <div id="sottomeccanicheBody"></div>
+      </div>
     </section>
 
     <!-- ================= MAGAZZINO ================= -->
@@ -577,15 +583,19 @@
           <div><label>Nome rotta / destinazione</label><input type="text" id="rNome" placeholder="es. Rotta per Samat"></div>
           <div><label>Distanza totale (km)</label><input type="number" id="rDistanza" min="0"></div>
           <div><label>Avamposto a difesa</label><select id="rAvamposto"><option value="">— nessuno —</option></select></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnAddRotta">+ Aggiungi rotta</button></div>
         </div>
-        <div class="hint">Ogni 1° del mese il QG paga 5 mo ogni 100 km di rotta. Un Avamposto può difendere una sola rotta alla volta, entro un raggio di 400 km × il suo livello: oltre il raggio, o senza Avamposto assegnato, esiste il 5% di probabilità (+5% ogni 100 km scoperti) che metà delle risorse trasportate vadano perse a fine mese. Gli Avamposti si costruiscono dalla scheda Strutture.</div>
+        <div class="row">
+          <div><label>Carico abituale <span style="font-weight:400;opacity:.7;">(opzionale)</span></label><select id="rCaricoMateriale"><option value="">— nessuno dichiarato —</option></select></div>
+          <div><label>Quantità carico</label><input type="number" id="rCaricoQuantita" min="0" placeholder="es. 40"></div>
+          <div style="flex:0 0 auto; align-self:flex-end;"><button class="btn btn-brass" id="btnAddRotta">+ Aggiungi rotta</button></div>
+        </div>
+        <div class="hint">Ogni 1° del mese il QG paga 5 mo ogni 100 km di rotta. Un Avamposto può difendere una sola rotta alla volta, entro un raggio di 400 km × il suo livello: oltre il raggio, o senza Avamposto assegnato, esiste il 5% di probabilità (+5% ogni 100 km scoperti) che metà delle risorse trasportate vadano perse a fine mese. Il "carico abituale" è opzionale: se lo dichiari, un attacco riuscito sottrae davvero metà di quella quantità dal magazzino; altrimenti l'attacco viene comunque tirato e registrato nel resoconto, ma senza sottrarre nulla. Gli Avamposti si costruiscono dalla scheda Strutture.</div>
       </div>
 
       <div class="card">
         <h2 class="section-title">Rotte attive</h2>
         <table>
-          <thead><tr><th>Rotta</th><th>Distanza</th><th>Difesa</th><th>Costo/mese</th><th>Rischio perdita</th><th></th></tr></thead>
+          <thead><tr><th>Rotta</th><th>Distanza</th><th>Difesa</th><th>Carico</th><th>Costo/mese</th><th>Rischio perdita</th><th></th></tr></thead>
           <tbody id="rotteBody"></tbody>
         </table>
         <div id="rotteEmpty" class="empty" style="display:none;">Nessuna rotta commerciale registrata.</div>
@@ -634,12 +644,26 @@
 
       <div class="card">
         <h2 class="section-title">Chiusura del mese</h2>
-        <div class="hint" style="margin-top:0;">Applica automaticamente il totale dei costi fissi e variabili alla tesoreria, e registra il movimento nello storico qui sotto.</div>
+        <div class="hint" style="margin-top:0;">Applica produzione delle strutture, genera i Token mensili, tira il rischio-attacco su ogni rotta e applica l'upkeep (stipendi + rotte) alla tesoreria — tutto in un click.</div>
         <div class="row" style="align-items:center;">
+          <div class="stat-chip"><div class="v mono" id="chipMeseAttuale">Mese 1</div><div class="l">Mese corrente</div></div>
+          <div>
+            <label>Stagione <span style="font-weight:400;opacity:.7;">(avanza da sola ogni 3 mesi; correggila qui se serve)</span></label>
+            <select id="inStagione">
+              <option value="Primavera">Primavera (+10 Campo Coltivato)</option>
+              <option value="Estate">Estate (+5 Campo Coltivato)</option>
+              <option value="Autunno">Autunno (−5 Campo Coltivato)</option>
+              <option value="Inverno">Inverno (−10 Campo Coltivato)</option>
+            </select>
+          </div>
           <div class="stat-chip" style="min-width:180px;"><div class="v mono" id="chipSaldoDopoChiusura">0 mo</div><div class="l">Oro dopo la chiusura</div></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnChiudiMese">📕 Chiudi mese e applica i costi</button></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnChiudiMese">📕 Chiudi mese</button></div>
         </div>
         <div class="hint" id="chiusuraAvviso" style="display:none; color:var(--red-dk); font-weight:600;">⚠ La tesoreria andrà in negativo dopo la chiusura di questo mese.</div>
+        <div id="resocontoMeseBox" style="display:none; margin-top:14px;">
+          <h3 style="margin:0 0 6px;">Resoconto dell'ultima chiusura</h3>
+          <pre id="resocontoMeseTesto" class="mono" style="white-space:pre-wrap; background:var(--panel-2,#0002); padding:10px 12px; border-radius:8px; max-height:280px; overflow:auto;"></pre>
+        </div>
       </div>
 
       <div class="card">
@@ -753,6 +777,10 @@ let COSTO_LAVORATORE_MESE = 1;
 let AVAMPOSTO_RAGGIO_KM_PER_LIVELLO = 400;
 let LIVELLO_QG_CRITERIO = "massimo";
 let LIVELLO_QG_SOGLIE = [];
+let CALENDARIO_ORDINE_STAGIONI = ["Primavera","Estate","Autunno","Inverno"];
+let CALENDARIO_MOD_CAMPO_COLTIVATO = {};
+let RAFFINERIA_CAT_ID = "raffineria";
+let RARITA_POZIONI = ["Comune","Non Comune","Raro","Molto Raro","Leggendario"];
 
 async function caricaConfig(){
   const res = await fetch("./data/regolamento.json");
@@ -774,6 +802,11 @@ async function caricaConfig(){
   const lq = cfg.livelloQG || {};
   LIVELLO_QG_CRITERIO = lq.criterio || LIVELLO_QG_CRITERIO;
   LIVELLO_QG_SOGLIE = lq.soglie || [];
+  const cal = cfg.calendario || {};
+  CALENDARIO_ORDINE_STAGIONI = cal.ordineStagioni || CALENDARIO_ORDINE_STAGIONI;
+  CALENDARIO_MOD_CAMPO_COLTIVATO = cal.modificatoreCampoColtivato || {};
+  RAFFINERIA_CAT_ID = cfg.raffineriaCatId || RAFFINERIA_CAT_ID;
+  RARITA_POZIONI = cfg.raritaPozioni || RARITA_POZIONI;
 }
 
 
@@ -790,12 +823,15 @@ let state = {
   livello: 1,
   oro: 0,
   membri: [],
-  strutture: [],   // {uid, catId, livello}
+  strutture: [],   // {uid, catId, livello, produzioneScelta?}
   materiali: {},   // {nomeMateriale: quantità}
   lavoratori: 0,
-  rotte: [],       // {uid, nome, distanza, avampostoUid}
+  rotte: [],       // {uid, nome, distanza, avampostoUid, carico?: {materiale, quantita}}
   magazzinoScontati: [],  // fino a 5 nomi di materiali con sconto Magazzino al 30%
-  movimenti: []    // {data, label, importo, saldoDopo} — storico automatico della tesoreria
+  movimenti: [],   // {data, label, importo, saldoDopo} — storico automatico della tesoreria
+  calendario: { mese: 1, stagione: "Primavera" },
+  token: { miniera: 0, pesca: 0, concime: 0 }, // generati mensilmente; la spesa su tabelle è in P3
+  resocontoUltimoMese: null // ultimo report generato da "Chiudi mese", per rivederlo senza doverlo rigenerare
 };
 
 const STORAGE_KEY = "qg_registro_v1";
@@ -1144,6 +1180,190 @@ function calcRischio(distanza, difesa){
   return Math.min(100, RISCHIO_ROTTA_BASE + RISCHIO_ROTTA_PER_100KM*blocchi);
 }
 
+/* ============================================================
+   MOTORE DEL CICLO MENSILE (P2)
+   ------------------------------------------------------------
+   Copre: produzione delle strutture di Produzione (con scelta
+   materiale per la Miniera e modificatore stagionale per il Campo
+   Coltivato), sinergia con la Raffineria, generazione dei Token
+   mensili, upkeep (stipendi + rotte, già esistenti), e un tiro di
+   rischio-attacco per ogni rotta commerciale.
+
+   Cosa NON copre ancora (rimandato a P3, dove ogni struttura avrà
+   la sua sotto-meccanica dedicata): spesa dei Token sulle tabelle,
+   Opera d'Arte della Bottega Artistica, Stoffa extra da pecore in
+   Fattoria, "Ottenere Carne", semi/oli della Segheria, decadimento
+   di piante/bento/charm (queste strutture non hanno ancora uno
+   stato proprio da far decadere).
+   ============================================================ */
+
+function haRaffineria(){
+  return state.strutture.some(s=>s.catId===RAFFINERIA_CAT_ID);
+}
+
+// Determina cosa produce una singola Miniera questo mese, rispettando la
+// scelta del giocatore (s.produzioneScelta) tra i livelli/materiali
+// sbloccati dal suo livello attuale; di default usa il livello più alto
+// disponibile.
+function scelteProduzioneMiniera(s, c){
+  return (c.produzione.scelte||[]).filter(sc=>s.livello >= sc.livelloMin);
+}
+function scelteProduzioneAttivaMiniera(s, c){
+  const disponibili = scelteProduzioneMiniera(s, c);
+  if(disponibili.length===0) return null;
+  const scelta = disponibili.find(sc=>sc.materiale === s.produzioneScelta);
+  return scelta || disponibili[disponibili.length-1]; // default: livello più alto sbloccato
+}
+
+// Calcola la produzione mensile di tutte le strutture di Produzione.
+// Ritorna un array di righe {strutturaUid, nome, materiale, quantita} pronte
+// sia per essere sommate al magazzino sia per essere mostrate nel resoconto.
+function calcolaProduzioneMensile(){
+  const righe = [];
+  const raffineria = haRaffineria();
+  state.strutture.forEach(s=>{
+    const c = CATALOGO.find(x=>x.id===s.catId);
+    if(!c || !c.produzione) return;
+    const p = c.produzione;
+
+    if(c.id === "miniera"){
+      const scelta = scelteProduzioneAttivaMiniera(s, c);
+      if(!scelta) return;
+      const quantita = scelta.base + scelta.perLivello * s.livello;
+      righe.push({ strutturaUid: s.uid, nome: c.nome, materiale: scelta.materiale, quantita });
+      return;
+    }
+
+    let quantita = p.base + p.perLivello * s.livello;
+    let materiale = p.materiale;
+
+    if(p.stagionale && c.id === "campo_coltivato"){
+      quantita += CALENDARIO_MOD_CAMPO_COLTIVATO[state.calendario.stagione] || 0;
+      quantita = Math.max(0, quantita);
+    }
+    if(raffineria && p.materialeRaffinato){
+      materiale = p.materialeRaffinato;
+    }
+    righe.push({ strutturaUid: s.uid, nome: c.nome, materiale, quantita });
+  });
+  return righe;
+}
+
+// Token generati questo mese: 1 per ogni struttura attiva del tipo giusto
+// (Miniera -> Token Miniera, Pescheria -> Token Pesca, Fattoria -> Token
+// Concime). La spesa dei token sulle tabelle dedicate arriva in P3.
+function calcolaTokenMensili(){
+  const generati = { miniera: 0, pesca: 0, concime: 0 };
+  state.strutture.forEach(s=>{
+    const c = CATALOGO.find(x=>x.id===s.catId);
+    const tipo = c && c.produzione && c.produzione.token;
+    if(tipo && generati[tipo] !== undefined) generati[tipo]++;
+  });
+  return generati;
+}
+
+// Tira il rischio-attacco per ogni rotta. Se la rotta ha un carico dichiarato
+// (opzionale: materiale + quantità che trasporta di solito) e il tiro fallisce,
+// ne perde metà dal magazzino, come da regolamento ("perdita di metà delle
+// risorse trasportate"). Se non è stato dichiarato nessun carico, il tiro
+// viene comunque effettuato e loggato, ma senza risorse da sottrarre: non
+// esiste ancora un sistema di "merci in transito" tracciato in automatico
+// (arriverà con l'economia inter-QG di P4).
+function tiraRischioRotte(){
+  return state.rotte.map(r=>{
+    const difesa = kmDifesiRotta(r);
+    const rischioPct = calcRischio(r.distanza, difesa);
+    const tiro = Math.floor(Math.random()*100)+1; // 1-100
+    const colpita = tiro <= rischioPct;
+    let perso = null;
+    if(colpita && r.carico && r.carico.materiale && r.carico.quantita>0){
+      perso = Math.ceil(r.carico.quantita/2);
+      state.materiali[r.carico.materiale] = Math.max(0, (state.materiali[r.carico.materiale]||0) - perso);
+    }
+    return { rotta: r.nome, rischioPct, tiro, colpita, materiale: r.carico?.materiale||null, perso };
+  });
+}
+
+function prossimaStagione(stagioneAttuale){
+  const idx = CALENDARIO_ORDINE_STAGIONI.indexOf(stagioneAttuale);
+  return CALENDARIO_ORDINE_STAGIONI[(idx+1) % CALENDARIO_ORDINE_STAGIONI.length] || stagioneAttuale;
+}
+
+// Esegue l'intera chiusura del mese: produzione -> magazzino, token, tiri
+// rischio sulle rotte, upkeep dalla tesoreria, avanzamento calendario.
+// Ritorna il resoconto (righe di testo) da mostrare/salvare, senza ancora
+// applicare nulla al render — quello lo fa il chiamante dopo la conferma.
+function eseguiChiusuraMese(){
+  const righe = [];
+  righe.push(`═══ Chiusura di ${state.calendario.stagione}, mese ${state.calendario.mese} ═══`);
+
+  // 1) Produzione
+  const produzione = calcolaProduzioneMensile();
+  if(produzione.length===0){
+    righe.push("Produzione: nessuna struttura di Produzione attiva.");
+  }else{
+    righe.push("Produzione:");
+    produzione.forEach(p=>{
+      state.materiali[p.materiale] = (state.materiali[p.materiale]||0) + p.quantita;
+      righe.push(`  • ${p.nome} → +${p.quantita} ${p.materiale}`);
+    });
+  }
+
+  // 2) Token
+  const token = calcolaTokenMensili();
+  const tokenGenerati = Object.entries(token).filter(([,v])=>v>0);
+  if(tokenGenerati.length>0){
+    righe.push("Token generati (spendibili su tabelle dedicate — funzione in arrivo):");
+    tokenGenerati.forEach(([tipo,v])=>{
+      state.token[tipo] = (state.token[tipo]||0) + v;
+      righe.push(`  • Token ${tipo}: +${v} (totale ${state.token[tipo]})`);
+    });
+  }
+
+  // 3) Rischio rotte
+  if(state.rotte.length>0){
+    righe.push("Rotte commerciali:");
+    tiraRischioRotte().forEach(esito=>{
+      if(!esito.colpita){
+        righe.push(`  • ${esito.rotta}: tiro ${esito.tiro} vs ${esito.rischioPct}% — nessun attacco`);
+      }else if(esito.perso){
+        righe.push(`  • ${esito.rotta}: ATTACCATA (tiro ${esito.tiro} vs ${esito.rischioPct}%) — persi ${esito.perso} ${esito.materiale}`);
+      }else{
+        righe.push(`  • ${esito.rotta}: ATTACCATA (tiro ${esito.tiro} vs ${esito.rischioPct}%) — nessun carico dichiarato, nessuna perdita applicata`);
+      }
+    });
+  }
+
+  // 4bis) Catalizzatori d'Essenza scarichi: tornano disponibili dopo l'attesa
+  let catalizzatoriPronti = 0;
+  state.strutture.forEach(s=>{
+    if(s.catId==="santuario" && s.catalizzatore && s.catalizzatore.stato==="in_attesa"){
+      s.catalizzatore.stato = "vuoto";
+      catalizzatoriPronti++;
+    }
+  });
+  if(catalizzatoriPronti>0) righe.push(`${catalizzatoriPronti} Catalizzatore/i d'Essenza tornato/i disponibile/i.`);
+
+  // 4) Upkeep (stipendi + rotte) — logica di finanza già esistente
+  const totaleUpkeep = costoMensileTotale();
+  if(totaleUpkeep>0){
+    registraMovimento(`Chiusura mese (stipendi ${fmtMo(costiFissiMensili())} mo, rotte ${fmtMo(costiVariabiliMensili())} mo)`, -totaleUpkeep);
+    righe.push(`Upkeep pagato: -${fmtMo(totaleUpkeep)} mo (saldo: ${fmtMo(state.oro)} mo)`);
+  }else{
+    righe.push("Upkeep: nessun costo da pagare.");
+  }
+
+  // 5) Avanza calendario
+  const stagionePrecedente = state.calendario.stagione;
+  state.calendario.mese++;
+  if(state.calendario.mese % 3 === 1 && state.calendario.mese>1){
+    state.calendario.stagione = prossimaStagione(stagionePrecedente);
+  }
+  righe.push(`Si passa al mese ${state.calendario.mese} (${state.calendario.stagione}).`);
+
+  return righe;
+}
+
 function contaStruttureCategoria(cat){
   return state.strutture.filter(s=>{
     const c = CATALOGO.find(x=>x.id===s.catId);
@@ -1298,6 +1518,16 @@ function renderStrutturePossedute(){
     const c = CATALOGO.find(x=>x.id===s.catId);
     if(!c) return;
     const punti = puntiCosto(c) * s.livello;
+    let selettoreProduzione = "";
+    if(c.id === "miniera"){
+      const opzioni = scelteProduzioneMiniera(s, c);
+      if(opzioni.length > 1){
+        const attiva = scelteProduzioneAttivaMiniera(s, c);
+        selettoreProduzione = `<select class="mono" data-action="scelta-miniera" data-uid="${s.uid}" style="max-width:150px;">` +
+          opzioni.map(o=>`<option value="${o.materiale}" ${o.materiale===attiva.materiale?"selected":""}>Estrae: ${o.materiale}</option>`).join("") +
+          `</select>`;
+      }
+    }
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${c.nome}</td>
@@ -1305,10 +1535,87 @@ function renderStrutturePossedute(){
       <td class="mono">Lv. ${s.livello}</td>
       <td class="mono">${c.exempt ? "esente" : punti}</td>
       <td>
+        ${selettoreProduzione}
         <button class="btn btn-outline btn-sm" data-action="potenzia" data-uid="${s.uid}">Potenzia</button>
         <button class="btn btn-danger btn-sm" data-action="smantella" data-uid="${s.uid}">Smantella</button>
       </td>`;
     body.appendChild(tr);
+  });
+  renderSottomeccaniche();
+}
+
+function renderSottomeccaniche(){
+  const wrap = document.getElementById("sottomeccanicheWrap");
+  const body = document.getElementById("sottomeccanicheBody");
+  const rilevanti = state.strutture.filter(s=>["studio_arcano","santuario","alchimista"].includes(s.catId));
+  if(rilevanti.length===0){ wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  body.innerHTML = "";
+
+  rilevanti.forEach(s=>{
+    const c = CATALOGO.find(x=>x.id===s.catId);
+    const card = document.createElement("div");
+    card.className = "card";
+
+    if(s.catId==="studio_arcano"){
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">🔮 ${c.nome} (Lv.${s.livello}) — Charm settimanale</h3>
+        <div class="hint" style="margin:0 0 10px;">Dopo un Riposo Lungo nel Bastione, il Charm permette di lanciare <i>Identificare</i> con un'azione, senza slot né componenti. Dura 7 giorni narrativi o finché non lo usi.</div>
+        <div class="row" style="align-items:center;">
+          <span class="tag ${s.charmAttivo ? "tag-vendita" : "tag-generali"}">${s.charmAttivo ? "Charm attivo" : "Nessun Charm attivo"}</span>
+          <button class="btn btn-outline btn-sm" data-action="ottieni-charm" data-uid="${s.uid}" ${s.charmAttivo?"disabled":""}>Ottieni Charm (dopo Riposo Lungo)</button>
+          <button class="btn btn-brass btn-sm" data-action="usa-charm" data-uid="${s.uid}" ${!s.charmAttivo?"disabled":""}>Usa Charm (Identificare)</button>
+        </div>`;
+    }
+
+    if(s.catId==="santuario"){
+      if(!s.catalizzatore){
+        card.innerHTML = `
+          <h3 style="margin:0 0 8px;">✨ ${c.nome} (Lv.${s.livello}) — Catalizzatore d'Essenza</h3>
+          <div class="hint" style="margin:0 0 10px;">Non ancora costruito. Costo: ${costoCatalizzatore(s)} mo — GS massimo assorbibile: ${gsMassimoCatalizzatore(s)}.</div>
+          <button class="btn btn-outline btn-sm" data-action="costruisci-catalizzatore" data-uid="${s.uid}">Costruisci Catalizzatore</button>`;
+      }else{
+        const statoLabel = {vuoto:"Vuoto", carico:"Carico", in_attesa:"Scarico (in attesa)"}[s.catalizzatore.stato];
+        const tagClass = {vuoto:"tag-generali", carico:"tag-vendita", in_attesa:"tag-militare"}[s.catalizzatore.stato];
+        card.innerHTML = `
+          <h3 style="margin:0 0 8px;">✨ ${c.nome} (Lv.${s.livello}) — Catalizzatore d'Essenza</h3>
+          <div class="hint" style="margin:0 0 10px;">GS massimo assorbibile: ${gsMassimoCatalizzatore(s)}. Una volta trasferita l'essenza, il catalizzatore torna disponibile alla chiusura del mese successivo (approssimazione della settimana d'attesa da regolamento).</div>
+          <div class="row" style="align-items:center;">
+            <span class="tag ${tagClass}">${statoLabel}</span>
+            <button class="btn btn-outline btn-sm" data-action="carica-catalizzatore" data-uid="${s.uid}" ${s.catalizzatore.stato!=="vuoto"?"disabled":""}>Assorbi essenza</button>
+            <button class="btn btn-brass btn-sm" data-action="trasferisci-catalizzatore" data-uid="${s.uid}" ${s.catalizzatore.stato!=="carico"?"disabled":""}>Trasferisci (Potenziamento)</button>
+          </div>`;
+      }
+    }
+
+    if(s.catId==="alchimista"){
+      const opzioniRarita = RARITA_POZIONI.map(r=>`<option value="${r}">${r}</option>`).join("");
+      const righePozioni = s.pozioni.length===0
+        ? `<div class="hint" style="margin:6px 0;">Nessuna pozione in bottega.</div>`
+        : `<table style="margin:6px 0;"><thead><tr><th>Pozione</th><th>Rarità</th><th>Quantità</th><th></th></tr></thead><tbody>` +
+          s.pozioni.map(p=>`<tr><td>${escapeHtml(p.nome)}</td><td>${p.rarita}</td><td class="mono">${p.quantita}</td>` +
+            `<td><button class="btn btn-danger btn-sm" data-action="rimuovi-pozione" data-uid="${s.uid}" data-pid="${p.id}">Rimuovi</button></td></tr>`).join("") +
+          `</tbody></table>`;
+      const raritaConDue = RARITA_POZIONI.filter(r=>totalePerRarita(s.pozioni,r)>=2);
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">⚗️ ${c.nome} (Lv.${s.livello}) — Calderone Alchemico</h3>
+        <div class="hint" style="margin:0 0 6px;">Il Calderone consuma 2 pozioni della stessa rarità, tira 2d100 e sceglierai quale dei due risultati applicare consultando la Tabella della Mescita delle Pozioni (nel regolamento/5e.tools — non riprodotta qui per diritti d'autore).</div>
+        ${righePozioni}
+        <div class="row" style="align-items:flex-end;">
+          <div><label>Nome pozione</label><input type="text" data-field="pozNome" data-uid="${s.uid}" placeholder="es. Pozione di Cura"></div>
+          <div><label>Rarità</label><select data-field="pozRarita" data-uid="${s.uid}">${opzioniRarita}</select></div>
+          <div style="max-width:90px;"><label>Quantità</label><input type="number" data-field="pozQuantita" data-uid="${s.uid}" min="1" value="1"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="aggiungi-pozione" data-uid="${s.uid}">+ Aggiungi</button></div>
+        </div>
+        <div class="row" style="align-items:center; margin-top:8px;">
+          ${raritaConDue.length===0
+            ? `<span class="hint" style="margin:0;">Servono almeno 2 pozioni della stessa rarità per usare il Calderone.</span>`
+            : `<label style="margin:0;">Rarità da mescere</label><select data-field="calderoneRarita" data-uid="${s.uid}">${raritaConDue.map(r=>`<option value="${r}">${r}</option>`).join("")}</select>
+               <button class="btn btn-brass btn-sm" data-action="usa-calderone" data-uid="${s.uid}">🧪 Usa Calderone</button>`}
+        </div>`;
+    }
+
+    body.appendChild(card);
   });
 }
 
@@ -1480,12 +1787,23 @@ function popolaSelectAvamposti(select, rottaUidCorrente){
   select.value = scelto || "";
 }
 
+function popolaSelectCaricoMateriali(){
+  const select = document.getElementById("rCaricoMateriale");
+  if(select.options.length > 1) return; // già popolato, evita di ricrearlo ad ogni render
+  Object.keys(MATERIALI_PREZZI).forEach(m=>{
+    const opt = document.createElement("option");
+    opt.value = m; opt.textContent = m;
+    select.appendChild(opt);
+  });
+}
+
 function renderRotte(){
   const body = document.getElementById("rotteBody");
   const empty = document.getElementById("rotteEmpty");
   body.innerHTML = "";
 
   popolaSelectAvamposti(document.getElementById("rAvamposto"), null);
+  popolaSelectCaricoMateriali();
 
   if(state.rotte.length===0){
     empty.style.display = "block";
@@ -1495,6 +1813,7 @@ function renderRotte(){
       const difesa = kmDifesiRotta(r);
       const rischio = calcRischio(r.distanza, difesa);
       const costo = (r.distanza/100*COSTO_ROTTA_MO_PER_100KM).toFixed(1).replace(/\.0$/,"");
+      const caricoLabel = r.carico ? `${r.carico.quantita} ${r.carico.materiale}` : `<span style="opacity:.6;">nessuno</span>`;
       let cls = "badge-risk-low";
       if(rischio>=20) cls="badge-risk-high"; else if(rischio>=10) cls="badge-risk-mid";
       const tr = document.createElement("tr");
@@ -1502,6 +1821,7 @@ function renderRotte(){
         <td>${escapeHtml(r.nome)}</td>
         <td class="mono">${r.distanza} km</td>
         <td><select class="mono" data-action="cambia-avamposto" data-uid="${r.uid}" style="max-width:210px;"></select></td>
+        <td class="mono">${caricoLabel}</td>
         <td class="mono">${costo} mo</td>
         <td class="${cls}">${rischio}% ${rischio===0 ? "(protetta)":""}</td>
         <td><button class="btn btn-danger btn-sm" data-action="del-rotta" data-uid="${r.uid}">Rimuovi</button></td>`;
@@ -1526,6 +1846,14 @@ function fmtMo(n){
 }
 
 function renderFinanze(){
+  document.getElementById("chipMeseAttuale").textContent = `Mese ${state.calendario.mese}`;
+  document.getElementById("inStagione").value = state.calendario.stagione;
+
+  if(state.resocontoUltimoMese){
+    document.getElementById("resocontoMeseBox").style.display = "block";
+    document.getElementById("resocontoMeseTesto").textContent = state.resocontoUltimoMese;
+  }
+
   const fissi = costiFissiDettaglio();
   const variabili = costiVariabiliDettaglio();
   const totFissi = costiFissiMensili();
@@ -1614,7 +1942,7 @@ function costruisciStruttura(catId){
   // applica
   registraMovimento(`Costruzione: ${c.nome}`, -c.costo);
   c.materiali.forEach(mat=>{ state.materiali[mat.m] = (state.materiali[mat.m]||0) - mat.u; });
-  state.strutture.push({uid: uid(), catId: c.id, livello: 1});
+  state.strutture.push({uid: uid(), catId: c.id, livello: 1, ...statoIniziale(c.id)});
 
   if(c.categoria !== "Generali" && state.classe==="Nessuna"){
     state.classe = c.categoria;
@@ -1650,6 +1978,124 @@ function potenziaStruttura(uidStr){
   showToast(`${c.nome} potenziata a Livello ${s.livello}`);
   saveState();
   renderAll();
+}
+
+/* ============================================================
+   SOTTO-MECCANICHE DI STRUTTURA (P3 — ondata 1: Studio Arcano, Alchimista)
+   ------------------------------------------------------------
+   Nota sul Catalizzatore d'Essenza: il regolamento lo descrive dentro la
+   sezione "Studio Arcano" ma lega esplicitamente il tetto di GS e il tempo
+   di ricarica al *Santuario* ("...pari a 3 x il Lv del Santuario", "...deve
+   spendere almeno una settimana nel Santuario"). Lo trattiamo quindi come
+   una dotazione del Santuario, non dello Studio Arcano. Il testo cita anche
+   "150mo x livello del catalizzatore" per costruirlo/potenziarlo: non è
+   chiaro se si tratti di un livello proprio del catalizzatore o dello
+   stesso livello del Santuario — assumiamo quest'ultimo (un solo numero,
+   non due assi di progressione separati) per evitare di inventare una
+   meccanica non descritta. Se l'intento era diverso, è una modifica
+   localizzata qui, non un redesign.
+
+   Nota sulla "settimana di attesa": questa app ha un calendario mensile,
+   non giornaliero/settimanale. Un catalizzatore scarico si considera quindi
+   di nuovo disponibile alla chiusura del mese successivo, come
+   approssimazione (leggermente più lenta) di "almeno una settimana".
+   ============================================================ */
+function statoIniziale(catId){
+  if(catId === "studio_arcano") return { charmAttivo: false };
+  if(catId === "santuario") return { catalizzatore: null };
+  if(catId === "alchimista") return { pozioni: [] };
+  return {};
+}
+
+// --- Studio Arcano: Charm settimanale ---
+function ottieniCharm(uidStr){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="studio_arcano");
+  if(!s || s.charmAttivo) return;
+  s.charmAttivo = true;
+  showToast("Charm ottenuto: dura 7 giorni narrativi o finché non lo usi");
+  renderAll(); saveState();
+}
+function usaCharm(uidStr){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="studio_arcano");
+  if(!s || !s.charmAttivo) return;
+  s.charmAttivo = false;
+  showToast("Charm consumato: Identificare lanciato senza slot né componenti");
+  renderAll(); saveState();
+}
+
+// --- Santuario: Catalizzatore d'Essenza ---
+function costoCatalizzatore(santuario){ return 150 * santuario.livello; }
+function gsMassimoCatalizzatore(santuario){ return 3 * santuario.livello; }
+
+function costruisciCatalizzatore(uidStr){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="santuario");
+  if(!s || s.catalizzatore) return;
+  const costo = costoCatalizzatore(s);
+  if(state.oro < costo){ showToast(`Oro insufficiente: servono ${costo} mo ⚠`); return; }
+  if(!confirm(`Costruire un Catalizzatore d'Essenza per ${costo} mo (GS massimo assorbibile: ${gsMassimoCatalizzatore(s)})?`)) return;
+  registraMovimento(`Catalizzatore d'Essenza (Santuario)`, -costo);
+  s.catalizzatore = { stato: "vuoto" };
+  showToast("Catalizzatore costruito");
+  renderAll(); saveState();
+}
+function caricaCatalizzatore(uidStr){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="santuario");
+  if(!s || !s.catalizzatore || s.catalizzatore.stato!=="vuoto") return;
+  if(!confirm(`Assorbire l'essenza di una creatura (GS massimo ${gsMassimoCatalizzatore(s)}, incapacitata/morta da meno di un'ora/consenziente)? Se viva, subisce 3 livelli di affaticamento al termine.`)) return;
+  s.catalizzatore.stato = "carico";
+  showToast("Catalizzatore carico");
+  renderAll(); saveState();
+}
+function trasferisciCatalizzatore(uidStr){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="santuario");
+  if(!s || !s.catalizzatore || s.catalizzatore.stato!=="carico") return;
+  const haStudioArcano = state.strutture.some(x=>x.catId==="studio_arcano");
+  if(!haStudioArcano){ showToast("Il trasferimento va effettuato in uno Studio Arcano: non ne hai ancora costruito uno ⚠"); return; }
+  if(!confirm("Trasferire l'essenza in uno Studio Arcano? Verifica i requisiti del bersaglio (tipo creatura, non caricato, evocato o con caratteristica aumentata magicamente in modo permanente) prima di procedere.")) return;
+  s.catalizzatore.stato = "in_attesa";
+  showToast("Essenza trasferita: il catalizzatore è scarico e tornerà disponibile alla prossima chiusura del mese");
+  renderAll(); saveState();
+}
+
+// --- Alchimista: pozioni in bottega + Calderone Alchemico ---
+function aggiungiPozione(uidStr, nome, rarita, quantita){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="alchimista");
+  if(!s || !nome || quantita<=0) return;
+  const esistente = s.pozioni.find(p=>p.nome===nome && p.rarita===rarita);
+  if(esistente){ esistente.quantita += quantita; }
+  else{ s.pozioni.push({id: uid(), nome, rarita, quantita}); }
+  renderAll(); saveState();
+}
+function rimuoviPozione(uidStr, pozioneId){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="alchimista");
+  if(!s) return;
+  s.pozioni = s.pozioni.filter(p=>p.id!==pozioneId);
+  renderAll(); saveState();
+}
+function totalePerRarita(pozioni, rarita){
+  return pozioni.filter(p=>p.rarita===rarita).reduce((s,p)=>s+p.quantita,0);
+}
+// Consuma 2 unità della rarità scelta (FIFO tra le pozioni con nome diverso
+// ma stessa rarità), tira 2d100 e restituisce l'esito da mostrare — l'app
+// non riproduce la Tabella della Mescita delle Pozioni (contenuto protetto
+// da copyright): rimanda al regolamento/5e.tools per leggere il risultato.
+function usaCalderone(uidStr, rarita){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="alchimista");
+  if(!s) return null;
+  if(totalePerRarita(s.pozioni, rarita) < 2){ showToast(`Servono almeno 2 pozioni di rarità ${rarita} ⚠`); return null; }
+  let daConsumare = 2;
+  const consumate = [];
+  s.pozioni.forEach(p=>{
+    if(daConsumare<=0 || p.rarita!==rarita) return;
+    const presi = Math.min(p.quantita, daConsumare);
+    p.quantita -= presi; daConsumare -= presi;
+    consumate.push(`${presi}× ${p.nome}`);
+  });
+  s.pozioni = s.pozioni.filter(p=>p.quantita>0);
+  const tiro1 = Math.floor(Math.random()*100)+1;
+  const tiro2 = Math.floor(Math.random()*100)+1;
+  renderAll(); saveState();
+  return { consumate, tiro1, tiro2, rarita };
 }
 
 function smantellaStruttura(uidStr){
@@ -1753,6 +2199,51 @@ document.getElementById("strutturePossedute").addEventListener("click", e=>{
   if(delBtn) smantellaStruttura(delBtn.dataset.uid);
 });
 
+document.getElementById("strutturePossedute").addEventListener("change", e=>{
+  const sel = e.target.closest("[data-action='scelta-miniera']");
+  if(!sel) return;
+  const s = state.strutture.find(x=>x.uid===sel.dataset.uid);
+  if(!s) return;
+  s.produzioneScelta = sel.value;
+  saveState();
+  showToast(`La Miniera estrarrà ${sel.value} dal prossimo "Chiudi mese"`);
+});
+
+document.getElementById("sottomeccanicheBody").addEventListener("click", e=>{
+  const azione = (sel) => e.target.closest(sel);
+
+  const oCh = azione("[data-action='ottieni-charm']"); if(oCh){ ottieniCharm(oCh.dataset.uid); return; }
+  const uCh = azione("[data-action='usa-charm']"); if(uCh){ usaCharm(uCh.dataset.uid); return; }
+  const cCat = azione("[data-action='costruisci-catalizzatore']"); if(cCat){ costruisciCatalizzatore(cCat.dataset.uid); return; }
+  const lCat = azione("[data-action='carica-catalizzatore']"); if(lCat){ caricaCatalizzatore(lCat.dataset.uid); return; }
+  const tCat = azione("[data-action='trasferisci-catalizzatore']"); if(tCat){ trasferisciCatalizzatore(tCat.dataset.uid); return; }
+
+  const rPoz = azione("[data-action='rimuovi-pozione']");
+  if(rPoz){ rimuoviPozione(rPoz.dataset.uid, rPoz.dataset.pid); return; }
+
+  const aPoz = azione("[data-action='aggiungi-pozione']");
+  if(aPoz){
+    const suid = aPoz.dataset.uid;
+    const nome = document.querySelector(`[data-field='pozNome'][data-uid='${suid}']`).value.trim();
+    const rarita = document.querySelector(`[data-field='pozRarita'][data-uid='${suid}']`).value;
+    const quantita = Number(document.querySelector(`[data-field='pozQuantita'][data-uid='${suid}']`).value) || 0;
+    if(!nome || quantita<=0){ showToast("Inserisci nome e quantità della pozione"); return; }
+    aggiungiPozione(suid, nome, rarita, quantita);
+    return;
+  }
+
+  const uCal = azione("[data-action='usa-calderone']");
+  if(uCal){
+    const suid = uCal.dataset.uid;
+    const rarita = document.querySelector(`[data-field='calderoneRarita'][data-uid='${suid}']`).value;
+    const esito = usaCalderone(suid, rarita);
+    if(esito){
+      showToast(`Calderone: consumate ${esito.consumate.join(", ")} — tiri 2d100: ${esito.tiro1} e ${esito.tiro2}. Scegli quale risultato applicare dalla Tabella della Mescita delle Pozioni.`);
+    }
+    return;
+  }
+});
+
 document.getElementById("magazzinoBody").addEventListener("change", e=>{
   const input = e.target.closest("[data-mat]");
   if(!input) return;
@@ -1790,24 +2281,45 @@ document.getElementById("btnAdeguaLavoratori").addEventListener("click", ()=>{
   saveState();
 });
 
-document.getElementById("btnChiudiMese").addEventListener("click", ()=>{
-  const totale = costoMensileTotale();
-  if(totale<=0){ showToast("Nessun costo mensile da applicare"); return; }
-  if(!confirm(`Applicare i costi del mese (${fmtMo(totale)} mo totali) alla tesoreria?`)) return;
-  registraMovimento(`Chiusura mese (stipendi ${fmtMo(costiFissiMensili())} mo, rotte ${fmtMo(costiVariabiliMensili())} mo)`, -totale);
+document.getElementById("inStagione").addEventListener("change", e=>{
+  state.calendario.stagione = e.target.value;
   renderAll();
   saveState();
-  showToast(`Mese chiuso: -${fmtMo(totale)} mo dalla tesoreria`);
 });
+
+document.getElementById("btnChiudiMese").addEventListener("click", ()=>{
+  const anteprima = calcolaProduzioneMensile().length + state.rotte.length + costoMensileTotale();
+  if(anteprima<=0 && state.strutture.length===0){ showToast("Nessuna struttura o rotta attiva: niente da chiudere"); return; }
+  if(!confirm(`Chiudere ${state.calendario.stagione}, mese ${state.calendario.mese}? Verranno applicate produzione, token, rischio rotte e upkeep.`)) return;
+  const righe = eseguiChiusuraMese();
+  state.resocontoUltimoMese = righe.join("\n");
+  renderAll();
+  saveState();
+  mostraResocontoMese(righe);
+});
+
+function mostraResocontoMese(righe){
+  const box = document.getElementById("resocontoMeseBox");
+  document.getElementById("resocontoMeseTesto").textContent = righe.join("\n");
+  box.style.display = "block";
+  if(typeof box.scrollIntoView === "function"){
+    box.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+}
 
 document.getElementById("btnAddRotta").addEventListener("click", ()=>{
   const nome = document.getElementById("rNome").value.trim();
   const distanza = Number(document.getElementById("rDistanza").value);
   const avampostoUid = document.getElementById("rAvamposto").value || null;
+  const caricoMateriale = document.getElementById("rCaricoMateriale").value || null;
+  const caricoQuantita = Number(document.getElementById("rCaricoQuantita").value) || 0;
   if(!nome || !distanza){ showToast("Inserisci nome e distanza della rotta"); return; }
-  state.rotte.push({uid: uid(), nome, distanza, avampostoUid});
+  const carico = (caricoMateriale && caricoQuantita>0) ? {materiale: caricoMateriale, quantita: caricoQuantita} : null;
+  state.rotte.push({uid: uid(), nome, distanza, avampostoUid, carico});
   document.getElementById("rNome").value = "";
   document.getElementById("rDistanza").value = "";
+  document.getElementById("rCaricoMateriale").value = "";
+  document.getElementById("rCaricoQuantita").value = "";
   renderRotte(); saveState();
 });
 

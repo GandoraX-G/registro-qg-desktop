@@ -25,6 +25,15 @@
       {"qg": 6, "livelloPersonaggioMin": 21}
     ]
   },
+  "calendario": {
+    "meseIniziale": 1,
+    "stagioneIniziale": "Primavera",
+    "ordineStagioni": ["Primavera", "Estate", "Autunno", "Inverno"],
+    "_nota": "Il modificatore stagionale nel regolamento è documentato esplicitamente solo per il Campo Coltivato (par. Stagioni): non lo applichiamo alle altre strutture di Produzione perché il documento non lo prevede per loro.",
+    "modificatoreCampoColtivato": {"Primavera": 10, "Estate": 5, "Autunno": -5, "Inverno": -10}
+  },
+  "raffineriaCatId": "raffineria",
+  "raritaPozioni": ["Comune", "Non Comune", "Raro", "Molto Raro", "Leggendario"],
   "materiali": {
     "Legna": 1, "Pietra": 2, "Sale": 0.5, "Ferro": 3, "Rame": 2, "Argento": 8,
     "Oro": 15, "Platino": 30, "Pollo": 2, "Capra": 4, "Pecora": 4, "Mucca": 8, "Bue": 10,
@@ -58,21 +67,30 @@
 
     {"id":"campo_coltivato","nome":"Campo Coltivato","categoria":"Produzione","costo":100,"personale":5,
      "materiali":[],
+     "produzione":{"materiale":"Beni vegetali","base":20,"perLivello":10,"materialeRaffinato":"Beni vegetali raffinati","stagionale":true},
      "desc":"Produce 20 + 10×Lv Beni Vegetali (o Raffinati con Raffineria) al mese. Modificatori stagionali."},
     {"id":"miniera","nome":"Miniera","categoria":"Produzione","costo":150,"personale":3,
      "materiali":[],
-     "desc":"Produce 7 + 5×Lv Pietra (Lv.2 Ferro, Lv.3 Argento). Genera Token Miniera per tiri su tabella dungeon."},
+     "produzione":{"token":"miniera","scelte":[
+        {"livelloMin":1,"materiale":"Pietra","base":7,"perLivello":5},
+        {"livelloMin":2,"materiale":"Ferro","base":7,"perLivello":5},
+        {"livelloMin":3,"materiale":"Argento","base":3,"perLivello":1}
+     ]},
+     "desc":"Produce 7 + 5×Lv Pietra (Lv.2 Ferro, Lv.3 Argento — scelta mensile). Genera Token Miniera per tiri su tabella dungeon."},
     {"id":"pescheria","nome":"Pescheria","categoria":"Produzione","costo":110,"personale":2,
      "materiali":[],
+     "produzione":{"materiale":"Pesce","base":7,"perLivello":5,"materialeRaffinato":"Pesce raffinato","token":"pesca"},
      "desc":"Produce 7 + 5×Lv Pesce (o Raffinato con Raffineria). Genera Token Pesca per tiri su tabella."},
     {"id":"segheria","nome":"Segheria","categoria":"Produzione","costo":120,"personale":2,
      "materiali":[],
+     "produzione":{"materiale":"Legna","base":15,"perLivello":10},
      "desc":"Produce 15 + 10×Lv Legno. Permette semi di Piante Speciali o oli speciali da alberi del luogo."},
     {"id":"bottega_artistica","nome":"Bottega Artistica","categoria":"Produzione","costo":50,"personale":1,
      "materiali":[],
      "desc":"Crea 1 Opera d'Arte al mese (120mo di materiali). Dà bonus/malus commerciali di Prestigio Artistico."},
     {"id":"fattoria","nome":"Fattoria","categoria":"Produzione","costo":100,"personale":0,
      "materiali":[{"m":"Capra","u":1},{"m":"Pecora","u":1},{"m":"Mucca","u":1}],
+     "produzione":{"materiale":"Beni animali","base":7,"perLivello":5,"materialeRaffinato":"Beni animali raffinati","token":"concime"},
      "desc":"Produce 7 + 5×Lv prodotti animali/mese (o raffinati con Raffineria). Genera Token Concime."},
     {"id":"raffineria","nome":"Raffineria","categoria":"Produzione","costo":150,"personale":3,
      "materiali":[],
