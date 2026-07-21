@@ -34,6 +34,100 @@
   },
   "raffineriaCatId": "raffineria",
   "raritaPozioni": ["Comune", "Non Comune", "Raro", "Molto Raro", "Leggendario"],
+  "argomentiBiblioteca": [
+    {"nome": "Linguaggio Esotico", "selezionabile": false},
+    {"nome": "Linguaggio Standard", "selezionabile": true},
+    {"nome": "Tipo di Creatura", "selezionabile": true},
+    {"nome": "Architettura e Costruzione", "selezionabile": true},
+    {"nome": "Alchimia e Pozioni", "selezionabile": true},
+    {"nome": "Astronomia e Cosmologia", "selezionabile": true},
+    {"nome": "Arte e Cultura", "selezionabile": true},
+    {"nome": "Economia e Commercio", "selezionabile": true},
+    {"nome": "Cucina e Ricette", "selezionabile": true},
+    {"nome": "Ecosistemi e Biomi", "selezionabile": true},
+    {"nome": "Erbe Medicinali", "selezionabile": true},
+    {"nome": "Geografia e Cartografia", "selezionabile": true},
+    {"nome": "Tipo di Magia (Arcana, Divina o Druidica)", "selezionabile": true},
+    {"nome": "Multiverso", "selezionabile": true},
+    {"nome": "Religioni e Culto", "selezionabile": true},
+    {"nome": "Storia delle Civiltà", "selezionabile": true},
+    {"nome": "Tecnologia e Invenzioni", "selezionabile": true},
+    {"nome": "Veleni e Sostanze", "selezionabile": true}
+  ],
+  "temiBibliotecaScelteAllaCostruzione": 5,
+  "pianteSpeciali": [
+    {"nome": "Purpureo", "clima": "Mite"},
+    {"nome": "Arboreo", "clima": "Mite"},
+    {"nome": "Cristallino", "clima": "Mite"},
+    {"nome": "Dorato", "clima": "Caldo"},
+    {"nome": "Cremisi", "clima": "Caldo"},
+    {"nome": "Oscuro", "clima": "Freddo"},
+    {"nome": "Pallido", "clima": "Freddo"}
+  ],
+  "operaArte": {
+    "valoreMinimoMo": 120,
+    "materialiAmmessi": ["Pietra", "Legna", "Oro", "Stoffa"],
+    "bonusPerBlocco": 0.20,
+    "argomenti": ["Guerra e Battaglia", "Divinità e Ritmo", "Natura e Stagioni", "Potere e Nobiltà", "Magia e Scienza", "Mare e Viaggio", "Vita e Morte", "Eleganza e Passione"],
+    "regioni": ["Samat", "Neselus Est", "Neselus Ovest", "Narje Silva", "Terre Oscure", "Hauris", "Kharun", "Draushim"],
+    "_nota_matrice": "'+' = la regione apprezza lo stile (bonus), '-' = non piace (malus), assente = neutro",
+    "matrice": {
+      "Guerra e Battaglia": {"Samat": "+", "Narje Silva": "-", "Hauris": "+"},
+      "Divinità e Ritmo": {"Neselus Est": "-", "Neselus Ovest": "+", "Narje Silva": "+"},
+      "Natura e Stagioni": {"Narje Silva": "+", "Kharun": "-", "Draushim": "+"},
+      "Potere e Nobiltà": {"Samat": "-", "Hauris": "+", "Kharun": "+"},
+      "Magia e Scienza": {"Neselus Est": "+", "Neselus Ovest": "-", "Kharun": "+"},
+      "Mare e Viaggio": {"Samat": "+", "Neselus Ovest": "+", "Terre Oscure": "-", "Draushim": "+"},
+      "Vita e Morte": {"Terre Oscure": "+", "Draushim": "-"},
+      "Eleganza e Passione": {"Neselus Est": "+", "Terre Oscure": "+", "Hauris": "-"}
+    }
+  },
+  "studioDiplomatico": {
+    "fazioni": ["Guardiani del Roveto", "Echi del Re", "Via dello Stagno", "Maschere della Cacciatrice", "Regime Cremisi", "Artiglio Affilato", "Solca Sabbia", "Figli della Tempesta", "Sentinelle dell'Aurora"],
+    "costoCompanionBaseMo": 50,
+    "costoCompanionPerLivelloExtraMo": 50
+  },
+  "salaArcana": {
+    "costoTrucchettoMo": 150,
+    "costoPerLivelloIncantesimoMo": 550,
+    "settimanePerLivelloIncantesimo": 1,
+    "settimaneMinimeTrucchetto": 1,
+    "livelloIncantesimoMaxAssoluto": 5
+  },
+  "avamposto": {
+    "_nota": "Gap colmato in questa ondata: nelle fasi P1/P2 avevo implementato solo il raggio di protezione, non il costo di rifornimento mensile né il guadagno passivo che il regolamento assegna qui.",
+    "costoRifornimentoMoPer100Km": 10,
+    "costoRifornimentoRidottoMoPer100Km": 1,
+    "guadagnoPassivoMoPer100KmRaggio": 25,
+    "rifornimentoRidottoMaterialiPerAvamposto": {"Pesce": 4, "Carne animale": 4, "Beni vegetali": 8}
+  },
+  "campoAddestramento": {
+    "unitaMaxPerLivello": 5,
+    "raggioAvampostoConAllenateKmPerLivelloQG": 600
+  },
+  "portoMilitare": {
+    "_nota": "Il regolamento rimanda i Potenziamenti Navali a una pagina Notion esterna non raggiungibile da qui: non ne riproduciamo il catalogo, offriamo solo il calcolo dello sconto su un costo base inserito manualmente.",
+    "scontoNavaleBasePercento": 20
+  },
+  "eliportoArcano": {
+    "_nota": "Il 'dimezzamento del tempo di dispiegamento' è un effetto narrativo: l'app segue un calendario mensile e non traccia un tempo di costruzione separato, quindi non viene calcolato un numero qui (assunzione dichiarata).",
+    "scontoNavaleExtraPercento": 10,
+    "moltiplicatoreCostoStandard": 0.5,
+    "moltiplicatoreCostoPianoDimensionale": 2,
+    "livelloQGMinPianoDimensionale": 4
+  },
+  "salaDaGuerra": {
+    "_nota": "Il regolamento (par. Sala da Guerra) rimanda per intero alla scheda 'Guerra' separata, che non è presente in Meccanica_dei_QG.docx e non è stata fornita: qui non si inventano regole di guerra/battaglia. La stanza offre solo un tracciamento di stato e note, non un calcolo. Se/quando la scheda 'Guerra' sarà disponibile, questa sezione andrà ampliata.",
+    "statiDisponibili": ["Nessuna pianificazione", "In pianificazione", "Guerra in corso", "Conclusa"]
+  },
+  "impresa": {
+    "_nota": "Par. 1.5 Impresa. Modalità 'Vendita a distanza': spendi fino a 10mo × livello della struttura di vendita scelta, ricevi 30mo per ogni 10mo spesi + 10mo × livello Impresa (aggiunti dopo il calcolo). Qui la spesa è trattata come importo continuo (non vincolato a multipli esatti di 10) per coerenza con il resto dell'app, che tratta le mo come continue. Il bonus 'corrieri extra su rotta protetta' (par. 1.5: 'quando la rotta commerciale della tua impresa è protetta, hai la possibilità che i tuoi corrieri vendano ulteriori oggetti e materiali lungo la via; la percentuale di perdita di materiali... diventa la percentuale di guadagnare quei soldi a fine mese in base a quanto è difesa la rotta') NON è implementato. Riverificato sul testo integrale: la PROBABILITÀ è ricostruibile riusando la stessa formula già in calcRischio() (5% base + 5% ogni 100km non difesi, invertita in 'probabilità di guadagno'), ma il regolamento non specifica il VALORE o la quantità di 'quei soldi'/oggetti venduti dai corrieri lungo la via — nessuna formula, nessun collegamento a un prezzo o a un tetto. Implementarlo richiederebbe inventare una cifra non presente nel testo, quindi resta lavoro futuro dichiarato in attesa di chiarimento (serve solo la formula del valore-base, non più il collegamento rotta/avamposto che invece è già chiaro). Modalità 'Porta Ethea': il regolamento dà il valore massimo per oggetto solo per i livelli 1-3 (40/80/100mo); per livelli superiori non specificati, questa app usa lo stesso tetto del livello 3 come assunzione dichiarata, in attesa di chiarimento regolamento.",
+    "moltiplicatoreRicavoPerSpesa": 3,
+    "bonusMoPerLivelloImpresa": 10,
+    "spesaMaxMoPerLivelloStrutturaVendita": 10,
+    "strumentiPerLivello": 2,
+    "valoreMassimoOggettoPerLivello": {"1": 40, "2": 80, "3": 100}
+  },
   "materiali": {
     "Legna": 1, "Pietra": 2, "Sale": 0.5, "Ferro": 3, "Rame": 2, "Argento": 8,
     "Oro": 15, "Platino": 30, "Pollo": 2, "Capra": 4, "Pecora": 4, "Mucca": 8, "Bue": 10,
@@ -47,6 +141,7 @@
      "desc":"Collezione di libri tematici. Consente Indagini (informazioni accurate + bonus +5) e può ospitare un Bestiario."},
     {"id":"giardino","nome":"Giardino","categoria":"Generali","costo":50,"personale":1,
      "materiali":[{"m":"Legna","u":50}],
+     "produzioneStep":{"materiale":"Beni vegetali","valori":{"1":5,"2":10,"3":15}},
      "desc":"Coltiva Beni Vegetali (5 U/mese, +5 al Lv.2, +5 al Lv.3) e piante speciali da semi d'avventura."},
     {"id":"sala_contatti","nome":"Sala Contatti","categoria":"Generali","costo":50,"personale":0,
      "materiali":[{"m":"Legna","u":25},{"m":"Pietra","u":10}],

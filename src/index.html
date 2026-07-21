@@ -619,6 +619,16 @@
           <div class="stat-chip"><div class="v mono" id="chipCostiFissi">0 mo</div><div class="l">Costi fissi/mese</div></div>
           <div class="stat-chip"><div class="v mono" id="chipCostiVariabili">0 mo</div><div class="l">Costi variabili/mese</div></div>
           <div class="stat-chip"><div class="v mono" id="chipCostiTotali">0 mo</div><div class="l">Totale/mese</div></div>
+          <div class="stat-chip"><div class="v mono" id="chipOroDisponibile">0 mo</div><div class="l">Disponibile oltre riserva</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Riserva Bancaria</h2>
+        <div class="hint" style="margin-top:0;">Un importo fisso di tesoreria che le azioni volontarie dell'app (costruzioni, acquisti, potenziamenti) non useranno come fondi disponibili. Non è una regola del regolamento: è una soglia personale di comodo. L'upkeep obbligatorio di fine mese la ignora — se lo intacca, la chiusura del mese te lo segnala comunque.</div>
+        <div class="row" style="align-items:center;">
+          <div><label>Riserva fissa (mo)</label><input type="number" min="0" id="inRiservaBancaria" value="0" style="max-width:150px;"></div>
+          <div class="stat-chip"><div class="v mono" id="chipRiservaAttuale">0 mo</div><div class="l">Riserva attuale</div></div>
         </div>
       </div>
 
@@ -673,6 +683,32 @@
           <tbody id="movimentiBody"></tbody>
         </table>
         <div id="movimentiEmpty" class="empty" style="display:none;">Nessun movimento registrato ancora. Ogni acquisto, costruzione o chiusura mese verrà annotato qui automaticamente.</div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Registro Altri QG</h2>
+        <div class="hint" style="margin-top:0;">Tiene traccia dei movimenti economici con altri Quartier Generali (non è una meccanica del regolamento, solo un promemoria contabile). "Da ricevere"/"Da dare" sono crediti/debiti aperti: restano in sospeso finché non premi "Salda", poi l'importo viene applicato alla tesoreria. "Entrata"/"Uscita" sono invece movimenti già avvenuti: vengono applicati subito alla tesoreria al momento in cui li registri, come una spesa/entrata qualsiasi, ma restano annotati qui per tenere lo storico ordinato per QG.</div>
+        <div id="altriQgRiepilogo" style="margin-bottom:10px;"></div>
+        <table>
+          <thead><tr><th>QG</th><th>Tipo</th><th>Importo</th><th>Nota</th><th>Stato</th><th></th></tr></thead>
+          <tbody id="altriQgBody"></tbody>
+        </table>
+        <div id="altriQgEmpty" class="empty" style="display:none;">Nessuna voce registrata.</div>
+        <div class="row" style="align-items:flex-end; margin-top:10px;">
+          <div><label>QG</label><input type="text" id="altriQgNome" placeholder="es. QG di Samat"></div>
+          <div>
+            <label>Tipo</label>
+            <select id="altriQgTipo">
+              <option value="da_ricevere">Da ricevere (credito aperto)</option>
+              <option value="da_dare">Da dare (debito aperto)</option>
+              <option value="entrata">Entrata (già incassata)</option>
+              <option value="uscita">Uscita (già pagata)</option>
+            </select>
+          </div>
+          <div style="max-width:130px;"><label>Importo (mo)</label><input type="number" min="0" id="altriQgImporto" value="0"></div>
+          <div><label>Nota</label><input type="text" id="altriQgNota" placeholder="es. quota rotta condivisa"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" id="btnAggiungiAltriQg">+ Aggiungi voce</button></div>
+        </div>
       </div>
     </section>
 
@@ -781,6 +817,18 @@ let CALENDARIO_ORDINE_STAGIONI = ["Primavera","Estate","Autunno","Inverno"];
 let CALENDARIO_MOD_CAMPO_COLTIVATO = {};
 let RAFFINERIA_CAT_ID = "raffineria";
 let RARITA_POZIONI = ["Comune","Non Comune","Raro","Molto Raro","Leggendario"];
+let ARGOMENTI_BIBLIOTECA = [];
+let TEMI_BIBLIOTECA_SCELTE = 5;
+let PIANTE_SPECIALI = [];
+let OPERA_ARTE_CFG = {};
+let STUDIO_DIPLOMATICO_CFG = {};
+let SALA_ARCANA_CFG = {};
+let AVAMPOSTO_CFG = {};
+let CAMPO_ADDESTRAMENTO_CFG = {};
+let PORTO_MILITARE_CFG = {};
+let ELIPORTO_ARCANO_CFG = {};
+let SALA_DA_GUERRA_CFG = {};
+let IMPRESA_CFG = {};
 
 async function caricaConfig(){
   const res = await fetch("./data/regolamento.json");
@@ -807,6 +855,18 @@ async function caricaConfig(){
   CALENDARIO_MOD_CAMPO_COLTIVATO = cal.modificatoreCampoColtivato || {};
   RAFFINERIA_CAT_ID = cfg.raffineriaCatId || RAFFINERIA_CAT_ID;
   RARITA_POZIONI = cfg.raritaPozioni || RARITA_POZIONI;
+  ARGOMENTI_BIBLIOTECA = cfg.argomentiBiblioteca || [];
+  TEMI_BIBLIOTECA_SCELTE = cfg.temiBibliotecaScelteAllaCostruzione ?? TEMI_BIBLIOTECA_SCELTE;
+  PIANTE_SPECIALI = cfg.pianteSpeciali || [];
+  OPERA_ARTE_CFG = cfg.operaArte || {};
+  STUDIO_DIPLOMATICO_CFG = cfg.studioDiplomatico || {};
+  SALA_ARCANA_CFG = cfg.salaArcana || {};
+  AVAMPOSTO_CFG = cfg.avamposto || {};
+  CAMPO_ADDESTRAMENTO_CFG = cfg.campoAddestramento || {};
+  PORTO_MILITARE_CFG = cfg.portoMilitare || {};
+  ELIPORTO_ARCANO_CFG = cfg.eliportoArcano || {};
+  SALA_DA_GUERRA_CFG = cfg.salaDaGuerra || {};
+  IMPRESA_CFG = cfg.impresa || {};
 }
 
 
@@ -829,7 +889,14 @@ let state = {
   rotte: [],       // {uid, nome, distanza, avampostoUid, carico?: {materiale, quantita}}
   magazzinoScontati: [],  // fino a 5 nomi di materiali con sconto Magazzino al 30%
   movimenti: [],   // {data, label, importo, saldoDopo} — storico automatico della tesoreria
+  riservaBancaria: 0, // soglia che le spese volontarie dall'app non dovrebbero intaccare (upkeep obbligatorio la ignora, ma avvisa)
+  registroAltriQG: [], // {uid, nome, tipo:"da_ricevere"|"da_dare"|"entrata"|"uscita", importo, nota, saldato:bool}
+                        // — "da_ricevere"/"da_dare": crediti/debiti aperti, applicati alla tesoreria solo al Salda.
+                        // — "entrata"/"uscita": movimenti già avvenuti verso un altro QG, applicati subito alla
+                        //   tesoreria alla creazione (saldato:true da subito) — voluti dall'utente per tenere lo
+                        //   storico economico ordinato per QG, oltre ai crediti/debiti in sospeso.
   calendario: { mese: 1, stagione: "Primavera" },
+  clima: "Mite", // clima del settore in cui si trova il QG — determina quali Piante Speciali attecchiscono nel Giardino
   token: { miniera: 0, pesca: 0, concime: 0 }, // generati mensilmente; la spesa su tabelle è in P3
   resocontoUltimoMese: null // ultimo report generato da "Chiudi mese", per rivederlo senza doverlo rigenerare
 };
@@ -1005,7 +1072,8 @@ function importBackup(file){
       if(!confirm("Importare questo backup sovrascriverà il registro attuale su questo dispositivo. Continuare?")) return;
       state = Object.assign({
         nome:"Il mio Quartier Generale", fondatore:"", cofondatore:"", classe:"Nessuna", livello:1,
-        oro:0, membri:[], strutture:[], materiali:{}, lavoratori:0, rotte:[], magazzinoScontati:[], movimenti:[]
+        oro:0, membri:[], strutture:[], materiali:{}, lavoratori:0, rotte:[], magazzinoScontati:[], movimenti:[],
+        riservaBancaria:0, registroAltriQG:[]
       }, parsed);
       saveState();
       renderAll();
@@ -1170,6 +1238,15 @@ function registraMovimento(label, importo){
   if(state.movimenti.length > 60) state.movimenti.length = 60;
 }
 
+// Fondi "spendibili" dalle azioni volontarie dell'app (costruzioni, acquisti,
+// potenziamenti...), al netto della riserva bancaria fissa che l'utente non
+// vuole veder intaccata da queste azioni. L'upkeep obbligatorio di fine mese
+// NON usa questa funzione: si paga comunque, ma la chiusura mese avvisa se
+// scende sotto la riserva.
+function oroDisponibile(){
+  return state.oro - (state.riservaBancaria || 0);
+}
+
 // Rischio attacco su una rotta: percentuale base + una quota per ogni blocco di
 // 100km non difesi (valori presi da regolamento.json, non più hardcoded).
 function calcRischio(distanza, difesa){
@@ -1223,7 +1300,18 @@ function calcolaProduzioneMensile(){
   const raffineria = haRaffineria();
   state.strutture.forEach(s=>{
     const c = CATALOGO.find(x=>x.id===s.catId);
-    if(!c || !c.produzione) return;
+    if(!c) return;
+
+    if(c.produzioneStep){
+      const tabella = c.produzioneStep.valori;
+      // usa il valore del livello corrente, o quello più alto disponibile sotto di esso
+      const livelliDisponibili = Object.keys(tabella).map(Number).filter(l=>l<=s.livello);
+      if(livelliDisponibili.length===0) return;
+      const quantita = tabella[Math.max(...livelliDisponibili)];
+      righe.push({ strutturaUid: s.uid, nome: c.nome, materiale: c.produzioneStep.materiale, quantita });
+      return;
+    }
+    if(!c.produzione) return;
     const p = c.produzione;
 
     if(c.id === "miniera"){
@@ -1309,6 +1397,13 @@ function eseguiChiusuraMese(){
     });
   }
 
+  // 1bis) Piante speciali del Giardino (crescita/morte in base al clima)
+  const righeGiardino = avanzaGiardini();
+  if(righeGiardino.length>0){
+    righe.push("Giardino — piante speciali:");
+    righe.push(...righeGiardino);
+  }
+
   // 2) Token
   const token = calcolaTokenMensili();
   const tokenGenerati = Object.entries(token).filter(([,v])=>v>0);
@@ -1343,6 +1438,30 @@ function eseguiChiusuraMese(){
     }
   });
   if(catalizzatoriPronti>0) righe.push(`${catalizzatoriPronti} Catalizzatore/i d'Essenza tornato/i disponibile/i.`);
+
+  // 4ter) Indagini della Biblioteca scadute (bonus +5 / bestiario, durata 1 mese)
+  let indaginiScadute = 0;
+  state.strutture.forEach(s=>{
+    if(s.catId!=="biblioteca") return;
+    const primaCount = s.indagini.length;
+    s.indagini = s.indagini.filter(i=>i.meseScadenza > state.calendario.mese);
+    indaginiScadute += primaCount - s.indagini.length;
+  });
+  if(indaginiScadute>0) righe.push(`${indaginiScadute} bonus da Indagine scaduto/i (fine del mese).`);
+
+  // 4quater) Reset mensili: Bottega Artistica (1 Opera/mese) e Studio Diplomatico (fazioni)
+  state.strutture.forEach(s=>{
+    if(s.catId==="bottega_artistica") s.creataQuestoMese = false;
+    if(s.catId==="studio_diplomatico") s.fazioniSelezionate = [];
+  });
+
+  // 4quinquies) Sala Arcana: avanzamento rituali in corso
+  const righeRituali = avanzaRitualiArcani();
+  if(righeRituali.length>0){ righe.push("Sala Arcana:"); righe.push(...righeRituali); }
+
+  // 4sexies) Avamposti: rifornimenti mensili e guadagno passivo (gap P1 colmato in P3)
+  const righeAvamposti = applicaAvampostiMensile();
+  if(righeAvamposti.length>0){ righe.push("Avamposti:"); righe.push(...righeAvamposti); }
 
   // 4) Upkeep (stipendi + rotte) — logica di finanza già esistente
   const totaleUpkeep = costoMensileTotale();
@@ -1494,11 +1613,31 @@ function renderCatalogo(){
     const matStr = c.materiali.length ? c.materiali.map(m=>`${m.m} ${m.u}U`).join(", ") : "—";
     const card = document.createElement("div");
     card.className = "struct-card";
+    const selettoreDispiegamento = c.id === "avamposto"
+      ? `<div style="margin:6px 0;">
+           <label style="display:block; font-size:12px; margin-bottom:2px;">Tipo di dispiegamento</label>
+           <select id="avampostoTipoSelect" style="width:100%;">
+             ${opzioniDispiegamentoAvamposto().map(o=>`<option value="${o.value}" ${!o.abilitato?"disabled":""}>${o.label}${o.motivo}</option>`).join("")}
+           </select>
+           <div class="hint" id="avampostoCostoNota" style="margin:4px 0 0;">Costo effettivo con questa opzione: ${c.costo} mo</div>
+         </div>`
+      : "";
+    const selettoreImpresa = c.id === "impresa"
+      ? `<div style="margin:6px 0;">
+           <label style="display:block; font-size:12px; margin-bottom:2px;">Tipo di Impresa</label>
+           <select id="impresaTipoSelect" style="width:100%;">
+             <option value="distanza">Vendita a distanza (struttura di vendita + rotta)</option>
+             <option value="porta_ethea">A Porta Ethea (strumenti da artigiano)</option>
+           </select>
+         </div>`
+      : "";
     card.innerHTML = `
       <h4>${c.nome} <span class="tag tag-${c.categoria.toLowerCase()}">${c.categoria}</span></h4>
       <div class="meta">Costo: ${c.costo} mo · Personale: ${c.personale} · Punti QG: ${c.exempt ? "esente" : costoPunti}</div>
       <div class="mats">Materiali: ${matStr}</div>
       <div class="desc">${c.desc}</div>
+      ${selettoreDispiegamento}
+      ${selettoreImpresa}
       <div class="foot"><button class="btn btn-brass btn-sm" data-action="costruisci" data-id="${c.id}">Costruisci</button></div>
     `;
     grid.appendChild(card);
@@ -1547,7 +1686,7 @@ function renderStrutturePossedute(){
 function renderSottomeccaniche(){
   const wrap = document.getElementById("sottomeccanicheWrap");
   const body = document.getElementById("sottomeccanicheBody");
-  const rilevanti = state.strutture.filter(s=>["studio_arcano","santuario","alchimista"].includes(s.catId));
+  const rilevanti = state.strutture.filter(s=>["studio_arcano","santuario","alchimista","biblioteca","giardino","bottega_artistica","studio_diplomatico","sala_arcana","avamposto","campo_addestramento","porto_militare","eliporto_arcano","sala_da_guerra","impresa"].includes(s.catId));
   if(rilevanti.length===0){ wrap.style.display = "none"; return; }
   wrap.style.display = "block";
   body.innerHTML = "";
@@ -1615,8 +1754,286 @@ function renderSottomeccaniche(){
         </div>`;
     }
 
+    if(s.catId==="biblioteca"){
+      const chipTemi = ARGOMENTI_BIBLIOTECA.filter(a=>a.selezionabile).map(a=>{
+        const attivo = s.temi.includes(a.nome);
+        return `<button class="btn btn-sm ${attivo?"btn-brass":"btn-outline"}" data-action="toggle-tema" data-uid="${s.uid}" data-tema="${escapeHtml(a.nome)}">${attivo?"✓ ":""}${escapeHtml(a.nome)}</button>`;
+      }).join(" ");
+      const temiExtra = s.temi.filter(t=>!ARGOMENTI_BIBLIOTECA.some(a=>a.nome===t));
+      const bestiarioRighe = s.bestiario.length===0 ? `<div class="hint" style="margin:4px 0;">Nessuna sottospecie ancora nel Bestiario.</div>` :
+        s.bestiario.map(b=>`<div class="row" style="align-items:center; margin:4px 0;">
+          <span class="tag ${b.materiali>=3?"tag-vendita":"tag-generali"}">${escapeHtml(b.nome)} — ${b.materiali}/3 materiali${b.materiali>=3?" (sbloccata)":""}</span>
+          ${b.materiali<3 ? `<button class="btn btn-outline btn-sm" data-action="materiale-bestiario" data-uid="${s.uid}" data-bid="${b.id}">+1 materiale</button>` : ""}
+        </div>`).join("");
+      const indaginiRighe = s.indagini.length===0 ? "" :
+        `<div class="hint" style="margin:6px 0 2px;">Bonus attivi (scadono a fine mese ${s.indagini[0]?.meseScadenza ?? ""}):</div>` +
+        s.indagini.map(i=>`<div class="row" style="align-items:center;">
+          <span class="tag tag-vendita">${i.tipo==="tema" ? `+5 "${escapeHtml(i.argomento)}"` : `+1d6 vs ${escapeHtml(i.argomento)}`} — ${escapeHtml(i.personaggio)}</span>
+          <button class="btn btn-danger btn-sm" data-action="rimuovi-indagine" data-uid="${s.uid}" data-iid="${i.id}">Rimuovi</button>
+        </div>`).join("");
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">📚 ${c.nome} (Lv.${s.livello}) — Temi, Indagini, Bestiario</h3>
+        <div class="hint" style="margin:0 0 6px;">Scegli fino a ${TEMI_BIBLIOTECA_SCELTE} temi (Linguaggio Esotico escluso da regolamento). Un'Indagine dà +5 alle prove sul tema per 1 mese.</div>
+        <div style="margin:6px 0;">${chipTemi}</div>
+        ${temiExtra.length ? `<div class="hint">Temi personalizzati: ${temiExtra.map(escapeHtml).join(", ")}</div>` : ""}
+        <div class="row" style="align-items:flex-end; margin-top:8px;">
+          <div><label>Nuovo tema personalizzato</label><input type="text" data-field="temaCustom" data-uid="${s.uid}" placeholder="min. 3 libri sulla materia"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="aggiungi-tema-custom" data-uid="${s.uid}">+ Aggiungi tema</button></div>
+        </div>
+        <div class="row" style="align-items:flex-end; margin-top:10px;">
+          <div><label>Avvia Indagine su tema</label><select data-field="indagineTema" data-uid="${s.uid}">${s.temi.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("")}</select></div>
+          <div><label>Personaggio</label><input type="text" data-field="indaginePersonaggio" data-uid="${s.uid}" placeholder="es. Antares"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass btn-sm" data-action="avvia-indagine-tema" data-uid="${s.uid}" ${s.temi.length===0?"disabled":""}>Avvia Indagine</button></div>
+        </div>
+        ${indaginiRighe}
+        <div class="divider" style="margin:12px 0;"></div>
+        <h4 style="margin:0 0 6px;">Bestiario</h4>
+        ${bestiarioRighe}
+        <div class="row" style="align-items:flex-end; margin-top:8px;">
+          <div><label>Nuova sottospecie</label><input type="text" data-field="sottospecieCustom" data-uid="${s.uid}" placeholder="es. Goblin dei Boschi"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="aggiungi-sottospecie" data-uid="${s.uid}">+ Aggiungi</button></div>
+          ${s.bestiario.some(b=>b.materiali>=3) ? `
+          <div><label>Indagine Bestiario su</label><select data-field="bestiarioSelect" data-uid="${s.uid}">${s.bestiario.filter(b=>b.materiali>=3).map(b=>`<option value="${b.id}">${escapeHtml(b.nome)}</option>`).join("")}</select></div>
+          <div><label>Personaggio</label><input type="text" data-field="bestiarioPersonaggio" data-uid="${s.uid}" placeholder="es. Thessa"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass btn-sm" data-action="avvia-indagine-bestiario" data-uid="${s.uid}">Avvia Indagine</button></div>` : ""}
+        </div>`;
+    }
+
+    if(s.catId==="giardino"){
+      const opzioniPiante = PIANTE_SPECIALI.map(p=>`<option value="${escapeHtml(p.nome)}">${escapeHtml(p.nome)} (${p.clima})</option>`).join("");
+      const righePiante = s.piante.length===0 ? `<div class="hint" style="margin:6px 0;">Nessuna pianta speciale in coltivazione.</div>` :
+        s.piante.map(p=>{
+          const ok = p.clima===state.clima;
+          return `<div class="row" style="align-items:center; margin:4px 0;">
+            <span class="tag ${ok?"tag-vendita":"tag-militare"}">${escapeHtml(p.nome)} (clima ${p.clima}) — ${ok?(p.mesiCrescita>=1?"matura":"in crescita"):"⚠ clima sbagliato"}</span>
+            ${p.mesiCrescita>=1 ? `<button class="btn btn-brass btn-sm" data-action="raccogli-pianta" data-uid="${s.uid}" data-pid="${p.id}">Raccogli</button>` : ""}
+          </div>`;
+        }).join("");
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">🌱 ${c.nome} (Lv.${s.livello}) — Piante Speciali</h3>
+        <div class="hint" style="margin:0 0 6px;">Le piante crescono in 1 mese col clima giusto; se il clima resta sbagliato per un mese intero (≥ le 2 settimane da regolamento) muoiono. Imposta il clima del settore del QG qui sotto.</div>
+        <div class="row" style="align-items:center;">
+          <label style="margin:0;">Clima del QG</label>
+          <select id="inClimaQG">
+            <option value="Mite" ${state.clima==="Mite"?"selected":""}>Mite</option>
+            <option value="Caldo" ${state.clima==="Caldo"?"selected":""}>Caldo</option>
+            <option value="Freddo" ${state.clima==="Freddo"?"selected":""}>Freddo</option>
+          </select>
+        </div>
+        ${righePiante}
+        <div class="row" style="align-items:flex-end; margin-top:8px;">
+          <div><label>Pianta un seme</label><select data-field="semePianta" data-uid="${s.uid}">${opzioniPiante}</select></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="pianta-seme" data-uid="${s.uid}">+ Pianta</button></div>
+        </div>`;
+    }
+
+    if(s.catId==="bottega_artistica"){
+      const opzioniStile = OPERA_ARTE_CFG.argomenti.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
+      const opzioniRegione = OPERA_ARTE_CFG.regioni.map(r=>`<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join("");
+      const righeOpere = s.opere.length===0 ? `<div class="hint" style="margin:6px 0;">Nessuna Opera d'Arte posseduta.</div>` :
+        s.opere.map(o=>`<div class="tag tag-vendita" style="margin:2px 4px 2px 0; display:inline-block;">${o.valore} mo — ${escapeHtml(o.stile)}</div>`).join("");
+      const campiMateriali = (OPERA_ARTE_CFG.materialiAmmessi||[]).map(m=>
+        `<div style="max-width:110px;"><label>${m}</label><input type="number" min="0" value="0" data-field="operaMat-${m}" data-uid="${s.uid}"></div>`).join("");
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">🎨 ${c.nome} (Lv.${s.livello}) — Opere d'Arte e Prestigio Artistico</h3>
+        <div class="hint" style="margin:0 0 6px;">1 Opera al mese, pagata in materiali (Pietra/Legna/Oro/Stoffa) per un valore multiplo di ${OPERA_ARTE_CFG.valoreMinimoMo} mo. Ogni Opera dà ±20% ai profitti degli accordi commerciali con NPC per ogni blocco da 120mo, in base a quanto piace il suo stile alla regione controparte (non si applica ai guadagni delle stanze di vendita).</div>
+        <div>${righeOpere}</div>
+        <div class="row" style="align-items:flex-end; margin-top:8px;">
+          ${campiMateriali}
+          <div><label>Stile dell'Opera</label><select data-field="operaStile" data-uid="${s.uid}">${opzioniStile}</select></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass btn-sm" data-action="crea-opera" data-uid="${s.uid}" ${s.creataQuestoMese?"disabled":""}>${s.creataQuestoMese?"Già creata questo mese":"Crea Opera d'Arte"}</button></div>
+        </div>
+        <div class="divider" style="margin:12px 0;"></div>
+        <h4 style="margin:0 0 6px;">Calcolatore Prestigio Artistico</h4>
+        <div class="row" style="align-items:center;">
+          <label style="margin:0;">Regione controparte</label>
+          <select id="prestigioRegioneSelect-${s.uid}" data-field="prestigioRegione" data-uid="${s.uid}">${opzioniRegione}</select>
+          <span class="tag tag-generali" id="prestigioRisultato-${s.uid}">calcola →</span>
+          <button class="btn btn-outline btn-sm" data-action="calcola-prestigio" data-uid="${s.uid}">Calcola</button>
+        </div>`;
+    }
+
+    if(s.catId==="studio_diplomatico"){
+      const fazioni = STUDIO_DIPLOMATICO_CFG.fazioni || [];
+      const chipFazioni = fazioni.map(f=>{
+        const attivo = s.fazioniSelezionate.includes(f);
+        return `<button class="btn btn-sm ${attivo?"btn-brass":"btn-outline"}" data-action="toggle-fazione" data-uid="${s.uid}" data-fazione="${escapeHtml(f)}">${attivo?"✓ ":""}${escapeHtml(f)}</button>`;
+      }).join(" ");
+      const righeCompanion = s.companions.length===0 ? `<div class="hint" style="margin:6px 0;">Nessun Companion ottenuto.</div>` :
+        s.companions.map(comp=>`<div class="row" style="align-items:center; margin:4px 0;">
+          <span class="tag tag-militare">${escapeHtml(comp.nome)} — Lv.${comp.livello}${comp.nonPuoSalireLivello?" (non può salire di livello)":""} — da: ${comp.fazioniOrigine.map(escapeHtml).join(", ")}</span>
+          <button class="btn btn-danger btn-sm" data-action="rimuovi-companion" data-uid="${s.uid}" data-cid="${comp.id}">Rimuovi</button>
+        </div>`).join("");
+      const vantaggioHint = s.livello>=2 ? `<div class="hint">Dal Lv.2: finché possiedi un Companion di un altro esercito, hai vantaggio a Persuasione/Inganno nelle regioni di origine.</div>` : "";
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">🤝 ${c.nome} (Lv.${s.livello}) — Fazioni e Companion</h3>
+        <div class="hint" style="margin:0 0 6px;">Seleziona fino a ${s.livello} fazioni questo mese (si azzera alla prossima chiusura del mese). Un Companion base costa ${STUDIO_DIPLOMATICO_CFG.costoCompanionBaseMo} mo; ogni livello extra costa altri ${STUDIO_DIPLOMATICO_CFG.costoCompanionPerLivelloExtraMo} mo, ma un Companion comprato già a livello superiore non può più salire di livello.</div>
+        <div style="margin:6px 0;">${chipFazioni}</div>
+        ${vantaggioHint}
+        <div class="divider" style="margin:12px 0;"></div>
+        ${righeCompanion}
+        <div class="row" style="align-items:flex-end; margin-top:8px;">
+          <div><label>Nome Companion</label><input type="text" data-field="companionNome" data-uid="${s.uid}" placeholder="es. Vessa"></div>
+          <div style="max-width:110px;"><label>Livello</label><input type="number" min="1" value="1" data-field="companionLivello" data-uid="${s.uid}"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass btn-sm" data-action="ottieni-companion" data-uid="${s.uid}">Ottieni Companion</button></div>
+        </div>`;
+    }
+
+    if(s.catId==="sala_arcana"){
+      const max = livelloIncantesimoMax(s);
+      if(!s.rituale){
+        card.innerHTML = `
+          <h3 style="margin:0 0 8px;">🌀 ${c.nome} (Lv.${s.livello}) — Rituale di Apprendimento</h3>
+          <div class="hint" style="margin:0 0 6px;">Un solo rituale alla volta. Livello massimo incantesimo apprendibile: ${max}. Costo: ${SALA_ARCANA_CFG.costoTrucchettoMo} mo (trucchetto) o ${SALA_ARCANA_CFG.costoPerLivelloIncantesimoMo} mo × livello.</div>
+          <div class="row" style="align-items:flex-end;">
+            <div><label>Personaggio</label><input type="text" data-field="ritualePersonaggio" data-uid="${s.uid}" placeholder="es. Antares"></div>
+            <div><label>Incantesimo</label><input type="text" data-field="ritualeIncantesimo" data-uid="${s.uid}" placeholder="es. Palla di Fuoco"></div>
+            <div style="max-width:110px;"><label>Livello (0=trucchetto)</label><input type="number" min="0" max="${max}" value="0" data-field="ritualeLivello" data-uid="${s.uid}"></div>
+            <div style="flex:0 0 auto;"><button class="btn btn-brass btn-sm" data-action="avvia-rituale" data-uid="${s.uid}">Avvia Rituale</button></div>
+          </div>`;
+      }else{
+        const r = s.rituale;
+        card.innerHTML = `
+          <h3 style="margin:0 0 8px;">🌀 ${c.nome} (Lv.${s.livello}) — Rituale in corso</h3>
+          <div class="row" style="align-items:center;">
+            <span class="tag tag-vendita">${escapeHtml(r.personaggio)} → "${escapeHtml(r.incantesimo)}" (${r.livello<=0?"trucchetto":"Lv."+r.livello}) — ${Math.max(0,r.settimaneRimanenti)} settimane rimanenti</span>
+            <button class="btn btn-danger btn-sm" data-action="annulla-rituale" data-uid="${s.uid}">Annulla</button>
+          </div>
+          <div class="hint">Avanza di ~4 settimane ad ogni "Chiudi mese" (approssimazione: l'app non ha un calendario settimanale).</div>`;
+      }
+    }
+
+    if(s.catId==="avamposto"){
+      const raggio = raggioAvamposto(s);
+      const costo = costoRifornimentoAvamposto(s);
+      const guadagno = guadagnoPassivoAvamposto(s);
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">🏕️ ${c.nome} (Lv.${s.livello}) — Rifornimenti e Guadagno Passivo</h3>
+        <div class="hint" style="margin:0 0 6px;">Tipo di dispiegamento: <b>${labelTipoDispiegamento(s.tipoDispiegamento||"standard")}</b>. Raggio di protezione attuale: ${raggio} km${haUnitaAllenate()?" (bonus Unità Allenate attivo)":""}. Ogni mese: costo rifornimento in base alla distanza da Porta Ethea, guadagno passivo di ${AVAMPOSTO_CFG.guadagnoPassivoMoPer100KmRaggio} mo/100km di raggio difeso.</div>
+        <div class="row" style="align-items:center;">
+          <div><label>Distanza da Porta Ethea (km)</label><input type="number" min="0" value="${s.distanzaPortaEthea||0}" data-field="avampostoDistanza" data-uid="${s.uid}" style="max-width:130px;"></div>
+          <button class="btn btn-outline btn-sm" data-action="salva-distanza-avamposto" data-uid="${s.uid}">Salva</button>
+          <label style="margin:0;"><input type="checkbox" data-action="toggle-rifornimento-ridotto" data-uid="${s.uid}" ${s.rifornimentoRidotto?"checked":""}> Rifornimento ridotto (consuma Pesce/Carne/Beni vegetali invece di mo)</label>
+        </div>
+        <div class="hint">Stima del mese corrente: costo ${costo.toFixed(1).replace(/\.0$/,"")} mo, guadagno ${guadagno.toFixed(1).replace(/\.0$/,"")} mo.</div>`;
+    }
+
+    if(s.catId==="campo_addestramento"){
+      const max = unitaMaxAddestrabili(s);
+      const righeInAddestramento = s.unitaInAddestramento.length===0 ? `<div class="hint" style="margin:6px 0;">Nessuna unità in addestramento.</div>` :
+        s.unitaInAddestramento.map(u=>`<div class="row" style="align-items:center; margin:4px 0;">
+          <span class="tag tag-generali">${escapeHtml(u.nome)}</span>
+          <button class="btn btn-brass btn-sm" data-action="completa-addestramento" data-uid="${s.uid}" data-uid2="${u.id}">Segna come Allenata</button>
+        </div>`).join("");
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">🎯 ${c.nome} (Lv.${s.livello}) — Addestramento Unità</h3>
+        <div class="hint" style="margin:0 0 6px;">Fino a ${max} unità in addestramento contemporaneamente (5×livello). Le unità Allenate (${s.unitaAllenate||0} finora) portano il raggio di protezione di TUTTI gli Avamposti del QG a 600km × livello QG.</div>
+        ${righeInAddestramento}
+        <div class="row" style="align-items:flex-end; margin-top:8px;">
+          <div><label>Nome unità</label><input type="text" data-field="unitaNome" data-uid="${s.uid}" placeholder="es. Squadra Corvo"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="avvia-addestramento" data-uid="${s.uid}">+ Avvia addestramento</button></div>
+        </div>`;
+    }
+
+    if(s.catId==="porto_militare"){
+      const sconto = scontoNavaleTotale();
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">⚓ ${c.nome} (Lv.${s.livello}) — Sconto sui Potenziamenti Navali</h3>
+        <div class="hint" style="margin:0 0 6px;">Abilita nel catalogo l'opzione "Specchio d'acqua collegato" per gli Avamposti. Sconto navale attuale: <b>${(sconto*100).toFixed(0)}%</b>${hasEliportoArcano()?" (20% Porto Militare + 10% Eliporto Arcano)":""}. Il catalogo dei Potenziamenti Navali è su una pagina esterna non consultabile da qui: inserisci il costo base per applicare lo sconto.</div>
+        <div class="row" style="align-items:flex-end;">
+          <div><label>Costo base potenziamento (mo)</label><input type="number" min="0" data-field="navaleCosto" data-uid="${s.uid}" style="max-width:150px;"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="registra-acquisto-navale" data-uid="${s.uid}">Registra acquisto</button></div>
+        </div>`;
+    }
+
+    if(s.catId==="eliporto_arcano"){
+      const sconto = scontoNavaleTotale();
+      const livMin = ELIPORTO_ARCANO_CFG.livelloQGMinPianoDimensionale ?? 4;
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">🚁 ${c.nome} (Lv.${s.livello}) — Dispiegamento Rapido e Sconto Navale</h3>
+        <div class="hint" style="margin:0 0 6px;">Abilita nel catalogo le opzioni "Ovunque in Unshast" (metà costo) e, dal Livello QG ${livMin}, "Piano Dimensionale Interno" (doppio costo) per gli Avamposti. Il dimezzamento del tempo di dispiegamento è un effetto narrativo non tracciato numericamente qui, perché l'app segue un calendario mensile e non un tempo di costruzione separato. Sconto navale attuale: <b>${(sconto*100).toFixed(0)}%</b>.</div>
+        <div class="row" style="align-items:flex-end;">
+          <div><label>Costo base potenziamento (mo)</label><input type="number" min="0" data-field="navaleCosto" data-uid="${s.uid}" style="max-width:150px;"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="registra-acquisto-navale" data-uid="${s.uid}">Registra acquisto</button></div>
+        </div>`;
+    }
+
+    if(s.catId==="sala_da_guerra"){
+      const stati = SALA_DA_GUERRA_CFG.statiDisponibili || ["Nessuna pianificazione"];
+      const opzioniStato = stati.map(st=>`<option value="${escapeHtml(st)}" ${s.statoGuerra===st?"selected":""}>${escapeHtml(st)}</option>`).join("");
+      card.innerHTML = `
+        <h3 style="margin:0 0 8px;">⚔️ ${c.nome} (Lv.${s.livello}) — Organizzazione della Guerra</h3>
+        <div class="hint" style="margin:0 0 6px;">Il regolamento rimanda per le regole dettagliate alla scheda "Guerra" separata (attività complessa, consigliata a giocatori esperti): non essendo qui disponibile quella scheda, questa stanza offre solo un tracciamento di stato e note, senza calcoli o meccaniche di battaglia.</div>
+        <div class="row" style="align-items:center;">
+          <label style="margin:0;">Stato attuale</label>
+          <select data-action="cambia-stato-guerra" data-uid="${s.uid}">${opzioniStato}</select>
+        </div>
+        <div class="row" style="align-items:flex-end; margin-top:8px;">
+          <div style="flex:1;"><label>Note (piani, alleati, obiettivi...)</label><textarea data-field="salaGuerraNote" data-uid="${s.uid}" rows="3" style="width:100%;">${escapeHtml(s.note||"")}</textarea></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="salva-note-guerra" data-uid="${s.uid}">Salva note</button></div>
+        </div>`;
+    }
+
+    if(s.catId==="impresa"){
+      card.innerHTML = renderCardImpresa(s, c);
+    }
+
     body.appendChild(card);
   });
+}
+
+function renderCardImpresa(s, c){
+  if(s.tipo === "porta_ethea"){
+    const maxStrumenti = (IMPRESA_CFG.strumentiPerLivello ?? 2) * s.livello;
+    const tabellaValori = IMPRESA_CFG.valoreMassimoOggettoPerLivello || {};
+    const livelliNoti = Object.keys(tabellaValori).map(Number).sort((a,b)=>a-b);
+    const livelloMaxNoto = livelliNoti.length ? Math.max(...livelliNoti) : s.livello;
+    const livelloRiferimento = Math.min(s.livello, livelloMaxNoto);
+    const valoreMax = tabellaValori[String(livelloRiferimento)] ?? 0;
+    const notaAssunzione = s.livello > livelloMaxNoto
+      ? ` (il regolamento specifica il tetto solo fino al Lv.${livelloMaxNoto}; oltre, si assume lo stesso valore — assunzione dichiarata)` : "";
+    const chipStrumenti = (s.strumenti||[]).map(str=>`<span class="tag tag-vendita">${escapeHtml(str)} <button data-action="rimuovi-strumento-impresa" data-uid="${s.uid}" data-strumento="${escapeHtml(str)}" style="background:none;border:none;cursor:pointer;color:inherit;">✕</button></span>`).join(" ");
+    const puoAggiungere = (s.strumenti||[]).length < maxStrumenti;
+    return `
+      <h3 style="margin:0 0 8px;">🏪 ${c.nome} (Lv.${s.livello}) — Vendita a Porta Ethea</h3>
+      <div class="hint" style="margin:0 0 6px;">Scegli fino a ${maxStrumenti} tipi di strumenti da artigiano (2 × livello) per cui almeno un membro del QG è competente. Valore massimo per singolo oggetto venduto: ${valoreMax} mo${notaAssunzione}.</div>
+      <div style="margin:6px 0;">${chipStrumenti || '<span class="hint">Nessuno strumento selezionato.</span>'}</div>
+      <div class="row" style="align-items:flex-end;">
+        <div><label>Nuovo strumento</label><input type="text" data-field="impresaStrumentoNuovo" data-uid="${s.uid}" placeholder="es. Strumenti da falegname" ${puoAggiungere?"":"disabled"}></div>
+        <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="aggiungi-strumento-impresa" data-uid="${s.uid}" ${puoAggiungere?"":"disabled"}>+ Aggiungi</button></div>
+      </div>
+      <div class="divider" style="margin:12px 0;"></div>
+      <div class="row" style="align-items:flex-end;">
+        <div><label>Valore oggetto venduto (mo, max ${valoreMax})</label><input type="number" min="0" max="${valoreMax}" data-field="impresaValoreVendita" data-uid="${s.uid}" style="max-width:150px;"></div>
+        <div style="flex:0 0 auto;"><button class="btn btn-brass btn-sm" data-action="registra-vendita-impresa" data-uid="${s.uid}">Registra vendita</button></div>
+      </div>`;
+  }
+
+  // modalità "distanza" (default)
+  const struttureVendita = struttureVenditaDisponibili();
+  const strutturaScelta = struttureVendita.find(x=>x.uid===s.strutturaVenditaUid) || null;
+  const livelloStrutturaVendita = strutturaScelta ? strutturaScelta.livello : 0;
+  const spesaMax = (IMPRESA_CFG.spesaMaxMoPerLivelloStrutturaVendita ?? 10) * livelloStrutturaVendita;
+  const opzioniStruttura = `<option value="">— seleziona —</option>` + struttureVendita.map(x=>{
+    const cInfo = CATALOGO.find(cc=>cc.id===x.catId);
+    return `<option value="${x.uid}" ${s.strutturaVenditaUid===x.uid?"selected":""}>${escapeHtml(cInfo?cInfo.nome:x.catId)} (Lv.${x.livello})</option>`;
+  }).join("");
+  const spesaAttuale = Math.min(s.spesaMensile||0, spesaMax);
+  const ricavo = calcolaRicavoImpresa(spesaAttuale, s.livello);
+  const netto = ricavo - spesaAttuale;
+  return `
+    <h3 style="margin:0 0 8px;">🏪 ${c.nome} (Lv.${s.livello}) — Vendita a Distanza</h3>
+    <div class="hint" style="margin:0 0 6px;">Scegli una struttura di vendita che possiedi: puoi spendere fino a ${IMPRESA_CFG.spesaMaxMoPerLivelloStrutturaVendita ?? 10} mo × il suo livello. In cambio ricevi 30 mo ogni 10 mo spesi, + 10 mo × il livello dell'Impresa.</div>
+    <div class="row" style="align-items:center;">
+      <label style="margin:0;">Struttura di vendita</label>
+      <select data-action="seleziona-struttura-vendita-impresa" data-uid="${s.uid}">${opzioniStruttura}</select>
+      ${struttureVendita.length===0 ? '<span class="hint">Nessuna struttura di categoria Vendita costruita.</span>' : ""}
+    </div>
+    <div class="row" style="align-items:flex-end; margin-top:8px;">
+      <div><label>Spesa questo mese (mo, max ${spesaMax})</label><input type="number" min="0" max="${spesaMax}" value="${spesaAttuale}" data-field="impresaSpesa" data-uid="${s.uid}" style="max-width:150px;" ${strutturaScelta?"":"disabled"}></div>
+      <div style="flex:0 0 auto;"><button class="btn btn-brass btn-sm" data-action="registra-guadagno-impresa" data-uid="${s.uid}" ${strutturaScelta?"":"disabled"}>Registra guadagno mensile</button></div>
+    </div>
+    <div class="hint">Stima: spesa ${fmtMo(spesaAttuale)} mo → ricavo ${fmtMo(ricavo)} mo (netto +${fmtMo(netto)} mo).</div>`;
 }
 
 function renderMagazzino(){
@@ -1739,7 +2156,7 @@ function aggiornaPreviewAcquisto(){
 function eseguiAcquisto(){
   const {mat, qta, totale} = calcCostoAcquisto();
   if(qta <= 0){ showToast("Inserisci una quantità valida ⚠"); return; }
-  if(state.oro < totale){ showToast("Oro insufficiente in tesoreria ⚠"); return; }
+  if(oroDisponibile() < totale){ showToast("Oro insufficiente in tesoreria (oltre la riserva bancaria) ⚠"); return; }
   registraMovimento(`Acquisto ${qta}U ${mat}`, -totale);
   state.materiali[mat] = (state.materiali[mat] || 0) + qta;
   showToast(`Acquistati ${qta}U di ${mat} per ${totale.toFixed(1).replace(/\.0$/,"")} mo`);
@@ -1760,8 +2177,20 @@ function avampostoAssegnatoA(rottaUid){
 function avampostoLibero(struttura, rottaUidCorrente){
   return !state.rotte.some(r=>r.avampostoUid===struttura.uid && r.uid!==rottaUidCorrente);
 }
+// Il raggio base è 400km × livello dell'avamposto. Se il QG possiede almeno
+// un'unità Allenata (Campo d'Addestramento), il regolamento lo sostituisce
+// con 600km × livello del QG — un bonus di tutto il QG, non del singolo
+// avamposto, quindi si applica a tutti gli avamposti posseduti.
+function haUnitaAllenate(){
+  return state.strutture.some(s=>s.catId==="campo_addestramento" && (s.unitaAllenate||0) > 0);
+}
 function raggioAvamposto(struttura){
-  return AVAMPOSTO_RAGGIO_KM_PER_LIVELLO * (struttura.livello||1);
+  const base = AVAMPOSTO_RAGGIO_KM_PER_LIVELLO * (struttura.livello||1);
+  if(haUnitaAllenate()){
+    const conAllenamento = (CAMPO_ADDESTRAMENTO_CFG.raggioAvampostoConAllenateKmPerLivelloQG||600) * state.livello;
+    return Math.max(base, conAllenamento);
+  }
+  return base;
 }
 // Km "difesi" per una rotta = raggio dell'avamposto collegato (se c'è).
 // Riusa la stessa calcRischio già esistente: se il raggio copre l'intera
@@ -1879,12 +2308,25 @@ function renderFinanze(){
   document.getElementById("chipCostiFissi").textContent = fmtMo(totFissi) + " mo";
   document.getElementById("chipCostiVariabili").textContent = fmtMo(totVariabili) + " mo";
   document.getElementById("chipCostiTotali").textContent = fmtMo(totale) + " mo";
+  document.getElementById("chipOroDisponibile").textContent = fmtMo(oroDisponibile()) + " mo";
+
+  document.getElementById("inRiservaBancaria").value = state.riservaBancaria || 0;
+  document.getElementById("chipRiservaAttuale").textContent = fmtMo(state.riservaBancaria || 0) + " mo";
 
   const saldoDopo = state.oro - totale;
   const chipSaldo = document.getElementById("chipSaldoDopoChiusura");
   chipSaldo.textContent = fmtMo(saldoDopo) + " mo";
   chipSaldo.className = "v mono " + (saldoDopo < 0 ? "amount-neg" : "");
-  document.getElementById("chiusuraAvviso").style.display = saldoDopo < 0 ? "block" : "none";
+  const avviso = document.getElementById("chiusuraAvviso");
+  if(saldoDopo < 0){
+    avviso.style.display = "block";
+    avviso.textContent = "⚠ La tesoreria andrà in negativo dopo la chiusura di questo mese.";
+  }else if(saldoDopo < (state.riservaBancaria||0)){
+    avviso.style.display = "block";
+    avviso.textContent = `⚠ Dopo la chiusura la tesoreria (${fmtMo(saldoDopo)} mo) scenderà sotto la riserva bancaria fissata (${fmtMo(state.riservaBancaria)} mo).`;
+  }else{
+    avviso.style.display = "none";
+  }
 
   const mBody = document.getElementById("movimentiBody");
   const mEmpty = document.getElementById("movimentiEmpty");
@@ -1901,6 +2343,313 @@ function renderFinanze(){
       mBody.appendChild(tr);
     });
   }
+
+  const aBody = document.getElementById("altriQgBody");
+  const aEmpty = document.getElementById("altriQgEmpty");
+  const aRiepilogo = document.getElementById("altriQgRiepilogo");
+  aBody.innerHTML = "";
+  const registro = state.registroAltriQG || [];
+  if(registro.length===0){
+    aEmpty.style.display = "block";
+    aRiepilogo.innerHTML = "";
+  }else{
+    aEmpty.style.display = "none";
+    const ETICHETTE_TIPO = {
+      da_ricevere: "Da ricevere",
+      da_dare: "Da dare",
+      entrata: "Entrata",
+      uscita: "Uscita"
+    };
+    registro.forEach(v=>{
+      const tr = document.createElement("tr");
+      const tipoLabel = ETICHETTE_TIPO[v.tipo] || v.tipo;
+      const positivo = v.tipo==="da_ricevere" || v.tipo==="entrata";
+      const tipoCls = positivo ? "amount-pos" : "amount-neg";
+      const azioni = (!v.saldato && (v.tipo==="da_ricevere"||v.tipo==="da_dare")) ?
+        `<button class="btn btn-brass btn-sm" data-action="salda-altriqg" data-uid="${v.uid}">Salda</button>` : "";
+      const stato = v.saldato ? (v.tipo==="entrata"||v.tipo==="uscita" ? "✓ Registrato" : "✓ Saldato") : "Aperto";
+      tr.innerHTML = `<td>${escapeHtml(v.nome)}</td><td class="${tipoCls}">${tipoLabel}</td><td class="mono">${fmtMo(v.importo)} mo</td><td>${escapeHtml(v.nota||"")}</td><td>${stato}</td><td style="white-space:nowrap;">${azioni} <button class="btn btn-danger btn-sm" data-action="rimuovi-altriqg" data-uid="${v.uid}">Rimuovi</button></td>`;
+      aBody.appendChild(tr);
+    });
+
+    // Riepilogo aggregato per QG: "Scambiato" somma solo i movimenti già
+    // realmente applicati alla tesoreria (entrata/uscita + le voci
+    // da_ricevere/da_dare già saldate); "Aperto" mostra il saldo netto
+    // dei crediti/debiti ancora in sospeso.
+    const perQg = {};
+    registro.forEach(v=>{
+      if(!perQg[v.nome]) perQg[v.nome] = { scambiato: 0, aperto: 0 };
+      const segno = (v.tipo==="da_ricevere"||v.tipo==="entrata") ? 1 : -1;
+      if(v.tipo==="entrata" || v.tipo==="uscita"){
+        perQg[v.nome].scambiato += segno * v.importo;
+      }else if(v.saldato){
+        perQg[v.nome].scambiato += segno * v.importo;
+      }else{
+        perQg[v.nome].aperto += segno * v.importo;
+      }
+    });
+    const righeRiepilogo = Object.entries(perQg).map(([nome, r])=>{
+      const clsScambiato = r.scambiato>=0 ? "amount-pos" : "amount-neg";
+      const clsAperto = r.aperto>=0 ? "amount-pos" : "amount-neg";
+      return `<tr><td>${escapeHtml(nome)}</td><td class="mono ${clsScambiato}">${r.scambiato>=0?"+":""}${fmtMo(r.scambiato)} mo</td><td class="mono ${clsAperto}">${r.aperto>=0?"+":""}${fmtMo(r.aperto)} mo</td></tr>`;
+    }).join("");
+    aRiepilogo.innerHTML = `
+      <div class="hint" style="margin:0 0 4px;">Riepilogo per QG — "Scambiato" = movimenti già applicati alla tesoreria, "Aperto" = crediti (+) o debiti (−) ancora da saldare.</div>
+      <table><thead><tr><th>QG</th><th>Scambiato</th><th>Aperto</th></tr></thead><tbody>${righeRiepilogo}</tbody></table>`;
+  }
+}
+
+/* ============================================================
+   REGISTRO ALTRI QG — movimenti economici verso altri Quartier Generali
+   ------------------------------------------------------------
+   Non è una meccanica del regolamento: è un promemoria contabile
+   richiesto dall'utente. Due modalità:
+   - "da_ricevere"/"da_dare": crediti/debiti aperti. Restano in sospeso
+     finché non si preme "Salda", che applica l'importo alla tesoreria
+     e li segna come chiusi.
+   - "entrata"/"uscita": movimenti già avvenuti, applicati subito alla
+     tesoreria alla registrazione (richiesto dall'utente per poter
+     segnare anche le spese/entrate reali già scambiate coi vari QG,
+     non solo i crediti/debiti in sospeso).
+   Nessuna voce viene mai rimossa automaticamente, per lasciare una
+   traccia storica; il riepilogo per QG in cima alla tabella aggrega
+   "scambiato" (movimenti realmente applicati) e "aperto" (sospesi).
+   ============================================================ */
+function aggiungiAltriQg(nome, tipo, importo, nota){
+  const nomeOk = (nome||"").trim();
+  const imp = Math.max(0, Number(importo)||0);
+  if(!nomeOk){ showToast("Inserisci il nome del QG ⚠"); return; }
+  if(imp<=0){ showToast("Inserisci un importo valido ⚠"); return; }
+  const tipiValidi = ["da_ricevere","da_dare","entrata","uscita"];
+  if(!tipiValidi.includes(tipo)) tipo = "da_ricevere";
+  const notaOk = (nota||"").trim();
+
+  if(tipo==="entrata" || tipo==="uscita"){
+    // Movimento già avvenuto: si applica subito alla tesoreria, come una
+    // spesa/entrata qualsiasi (rispettando la riserva bancaria per le uscite).
+    if(tipo==="uscita" && oroDisponibile() < imp){
+      showToast("Oro insufficiente in tesoreria (oltre la riserva bancaria) ⚠");
+      return;
+    }
+    const importoMovimento = tipo==="entrata" ? imp : -imp;
+    registraMovimento(`Registro Altri QG — ${nomeOk} (${tipo==="entrata"?"entrata":"uscita"})${notaOk?": "+notaOk:""}`, importoMovimento);
+    state.registroAltriQG.push({ uid: uid(), nome: nomeOk, tipo, importo: imp, nota: notaOk, saldato: true });
+    showToast(tipo==="entrata" ? "Entrata registrata e applicata alla tesoreria" : "Uscita registrata e applicata alla tesoreria");
+    renderAll();
+  }else{
+    state.registroAltriQG.push({ uid: uid(), nome: nomeOk, tipo, importo: imp, nota: notaOk, saldato: false });
+    showToast("Voce aggiunta al Registro Altri QG");
+    renderFinanze();
+  }
+  saveState();
+}
+
+function saldaAltriQg(uidStr){
+  const v = state.registroAltriQG.find(x=>x.uid===uidStr);
+  if(!v || v.saldato) return;
+  if(v.tipo==="da_dare" && oroDisponibile() < v.importo){
+    showToast("Oro insufficiente in tesoreria (oltre la riserva bancaria) ⚠");
+    return;
+  }
+  const importoMovimento = v.tipo==="da_ricevere" ? v.importo : -v.importo;
+  registraMovimento(`Registro Altri QG — ${v.nome} (${v.tipo==="da_ricevere"?"ricevuto":"pagato"})${v.nota?": "+v.nota:""}`, importoMovimento);
+  v.saldato = true;
+  showToast("Voce saldata e applicata alla tesoreria");
+  renderAll();
+  saveState();
+}
+
+function rimuoviAltriQg(uidStr){
+  state.registroAltriQG = state.registroAltriQG.filter(x=>x.uid!==uidStr);
+  renderFinanze();
+  saveState();
+}
+
+/* ============================================================
+   PORTO MILITARE / ELIPORTO ARCANO (P3 — ondata 5)
+   ------------------------------------------------------------
+   Il regolamento descrive per l'Avamposto quattro modi di dispiegamento
+   diversi a seconda delle strutture possedute dal QG:
+     - "standard": rotta/territorio da Porta Ethea (regola base dell'Avamposto).
+     - "specchio_acqua": specchi d'acqua collegati al porto (richiede Porto
+       Militare); nessuna variazione di costo indicata dal regolamento.
+     - "unshast_eliporto": ovunque in Unshast, a metà costo (richiede
+       Eliporto Arcano). Il regolamento dimezza anche il "tempo di
+       dispiegamento": non essendoci nell'app un tempo di costruzione
+       distinto dal mese di calendario, questo effetto resta narrativo e
+       non produce un numero (assunzione dichiarata, vedi regolamento.json).
+     - "piano_dimensionale": Piani Dimensionali Interni, a doppio costo
+       (richiede Eliporto Arcano e QG di Livello 4+).
+   Lo sconto sui Potenziamenti Navali (20% Porto Militare + 10% Eliporto
+   Arcano, cumulabili) è offerto qui come semplice calcolatore su un costo
+   base inserito a mano: il catalogo dei Potenziamenti Navali vive su una
+   pagina Notion esterna non raggiungibile da questa integrazione, quindi
+   non viene riprodotto — solo lo sconto è applicato.
+   ============================================================ */
+const TIPI_DISPIEGAMENTO_AVAMPOSTO = [
+  {value:"standard", label:"Standard (rotta/territorio da Porta Ethea)"},
+  {value:"specchio_acqua", label:"Specchio d'acqua collegato"},
+  {value:"unshast_eliporto", label:"Ovunque in Unshast (metà costo)"},
+  {value:"piano_dimensionale", label:"Piano Dimensionale Interno (doppio costo)"}
+];
+
+function hasStrutturaTipo(catId){ return state.strutture.some(s=>s.catId===catId); }
+function hasPortoMilitare(){ return hasStrutturaTipo("porto_militare"); }
+function hasEliportoArcano(){ return hasStrutturaTipo("eliporto_arcano"); }
+
+function opzioniDispiegamentoAvamposto(){
+  const livMin = ELIPORTO_ARCANO_CFG.livelloQGMinPianoDimensionale ?? 4;
+  return TIPI_DISPIEGAMENTO_AVAMPOSTO.map(t=>{
+    let abilitato = true, motivo = "";
+    if(t.value === "specchio_acqua" && !hasPortoMilitare()){ abilitato = false; motivo = " — richiede Porto Militare"; }
+    if(t.value === "unshast_eliporto" && !hasEliportoArcano()){ abilitato = false; motivo = " — richiede Eliporto Arcano"; }
+    if(t.value === "piano_dimensionale"){
+      if(!hasEliportoArcano()){ abilitato = false; motivo = " — richiede Eliporto Arcano"; }
+      else if(state.livello < livMin){ abilitato = false; motivo = ` — richiede QG di Livello ${livMin}+`; }
+    }
+    return {...t, abilitato, motivo};
+  });
+}
+
+function validaTipoDispiegamentoAvamposto(tipo){
+  const opz = opzioniDispiegamentoAvamposto().find(o=>o.value===tipo);
+  if(!opz) return {ok:false, messaggio:"Tipo di dispiegamento non valido ⚠"};
+  if(!opz.abilitato) return {ok:false, messaggio:`Dispiegamento non disponibile: ${opz.label}${opz.motivo} ⚠`};
+  return {ok:true};
+}
+
+function costoDispiegamentoAvamposto(tipo, costoBase){
+  if(tipo === "unshast_eliporto") return costoBase * (ELIPORTO_ARCANO_CFG.moltiplicatoreCostoStandard ?? 0.5);
+  if(tipo === "piano_dimensionale") return costoBase * (ELIPORTO_ARCANO_CFG.moltiplicatoreCostoPianoDimensionale ?? 2);
+  return costoBase;
+}
+
+function labelTipoDispiegamento(tipo){
+  const t = TIPI_DISPIEGAMENTO_AVAMPOSTO.find(x=>x.value===tipo);
+  return t ? t.label : tipo;
+}
+
+function scontoNavaleTotale(){
+  let sconto = 0;
+  if(hasPortoMilitare()) sconto += (PORTO_MILITARE_CFG.scontoNavaleBasePercento ?? 20) / 100;
+  if(hasEliportoArcano()) sconto += (ELIPORTO_ARCANO_CFG.scontoNavaleExtraPercento ?? 10) / 100;
+  return sconto;
+}
+
+function registraAcquistoNavale(uidStr, costoBaseInput){
+  const base = Math.max(0, Number(costoBaseInput) || 0);
+  if(base <= 0){ showToast("Inserisci un costo base valido ⚠"); return; }
+  const sconto = scontoNavaleTotale();
+  const totale = base * (1 - sconto);
+  if(oroDisponibile() < totale){ showToast("Oro insufficiente in tesoreria (oltre la riserva bancaria) ⚠"); return; }
+  registraMovimento(`Potenziamento navale (sconto ${(sconto*100).toFixed(0)}%)`, -totale);
+  showToast(`Potenziamento navale acquistato per ${totale.toFixed(1).replace(/\.0$/,"")} mo (sconto ${(sconto*100).toFixed(0)}%)`);
+  renderAll();
+  saveState();
+}
+
+function cambiaStatoGuerra(uidStr, nuovoStato){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="sala_da_guerra");
+  if(!s) return;
+  s.statoGuerra = nuovoStato;
+  showToast(`Stato Guerra aggiornato: ${nuovoStato}`);
+  renderSottomeccaniche();
+  saveState();
+}
+
+function salvaNoteGuerra(uidStr, note){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="sala_da_guerra");
+  if(!s) return;
+  s.note = note || "";
+  showToast("Note salvate");
+  saveState();
+}
+
+/* ============================================================
+   IMPRESA (par. 1.5 del regolamento)
+   ------------------------------------------------------------
+   Vedi la nota dichiarata in regolamento.json → impresa._nota per le
+   assunzioni: spesa trattata come continua (non a blocchi rigidi di
+   10mo), bonus "corrieri extra su rotta protetta" non implementato,
+   tetto vendita Porta Ethea oltre Lv.3 assunto uguale al Lv.3.
+   ============================================================ */
+function struttureVenditaDisponibili(){
+  return state.strutture.filter(s=>{
+    const c = CATALOGO.find(x=>x.id===s.catId);
+    return c && c.categoria === "Vendita";
+  });
+}
+
+function calcolaRicavoImpresa(spesa, livelloImpresa){
+  const moltiplicatore = IMPRESA_CFG.moltiplicatoreRicavoPerSpesa ?? 3;
+  const bonusPerLivello = IMPRESA_CFG.bonusMoPerLivelloImpresa ?? 10;
+  return Math.max(0, spesa) * moltiplicatore + bonusPerLivello * livelloImpresa;
+}
+
+function selezionaStrutturaVenditaImpresa(uidStr, strutturaVenditaUid){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="impresa");
+  if(!s) return;
+  s.strutturaVenditaUid = strutturaVenditaUid || null;
+  s.spesaMensile = 0; // cambiare struttura azzera la spesa impostata, dato che il tetto cambia
+  renderSottomeccaniche();
+  saveState();
+}
+
+function registraGuadagnoImpresa(uidStr, spesaInput){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="impresa");
+  if(!s) return;
+  const struttura = state.strutture.find(x=>x.uid===s.strutturaVenditaUid);
+  if(!struttura){ showToast("Seleziona prima una struttura di vendita ⚠"); return; }
+  const spesaMax = (IMPRESA_CFG.spesaMaxMoPerLivelloStrutturaVendita ?? 10) * struttura.livello;
+  const spesa = Math.max(0, Number(spesaInput) || 0);
+  if(spesa > spesaMax){ showToast(`Spesa oltre il massimo consentito (${spesaMax} mo) ⚠`); return; }
+  if(spesa <= 0){ showToast("Inserisci una spesa maggiore di zero ⚠"); return; }
+  if(oroDisponibile() < spesa){ showToast("Oro insufficiente in tesoreria (oltre la riserva bancaria) per anticipare la spesa ⚠"); return; }
+  const ricavo = calcolaRicavoImpresa(spesa, s.livello);
+  const netto = ricavo - spesa;
+  s.spesaMensile = spesa;
+  registraMovimento(`Impresa "vendita a distanza" — spesa ${fmtMo(spesa)} mo, ricavo ${fmtMo(ricavo)} mo`, netto);
+  showToast(`Guadagno registrato: netto +${fmtMo(netto)} mo`);
+  renderAll();
+  saveState();
+}
+
+function aggiungiStrumentoImpresa(uidStr, nome){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="impresa");
+  if(!s) return;
+  const nomeOk = (nome||"").trim();
+  if(!nomeOk){ showToast("Inserisci il nome dello strumento ⚠"); return; }
+  const max = (IMPRESA_CFG.strumentiPerLivello ?? 2) * s.livello;
+  if((s.strumenti||[]).length >= max){ showToast(`Massimo ${max} strumenti a questo livello ⚠`); return; }
+  if(s.strumenti.includes(nomeOk)){ showToast("Strumento già selezionato"); return; }
+  s.strumenti.push(nomeOk);
+  renderSottomeccaniche();
+  saveState();
+}
+
+function rimuoviStrumentoImpresa(uidStr, nome){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="impresa");
+  if(!s) return;
+  s.strumenti = (s.strumenti||[]).filter(x=>x!==nome);
+  renderSottomeccaniche();
+  saveState();
+}
+
+function registraVenditaImpresa(uidStr, valoreInput){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="impresa");
+  if(!s) return;
+  const tabellaValori = IMPRESA_CFG.valoreMassimoOggettoPerLivello || {};
+  const livelliNoti = Object.keys(tabellaValori).map(Number);
+  const livelloMaxNoto = livelliNoti.length ? Math.max(...livelliNoti) : s.livello;
+  const livelloRiferimento = Math.min(s.livello, livelloMaxNoto);
+  const valoreMax = tabellaValori[String(livelloRiferimento)] ?? 0;
+  const valore = Math.max(0, Number(valoreInput) || 0);
+  if(valore <= 0){ showToast("Inserisci un valore maggiore di zero ⚠"); return; }
+  if(valore > valoreMax){ showToast(`Valore oltre il massimo per singolo oggetto (${valoreMax} mo) ⚠`); return; }
+  registraMovimento(`Impresa "a Porta Ethea" — vendita oggetto`, valore);
+  showToast(`Vendita registrata: +${fmtMo(valore)} mo`);
+  renderAll();
+  saveState();
 }
 
 /* ============================================================
@@ -1927,9 +2676,25 @@ function costruisciStruttura(catId){
       return;
     }
   }
-  if(state.oro < c.costo){
-    showToast("Oro insufficiente in tesoreria ⚠");
+  // Avamposto: il tipo di dispiegamento scelto nel catalogo determina il
+  // costo effettivo (vedi blocco PORTO MILITARE / ELIPORTO ARCANO sopra).
+  let tipoDispiegamento = "standard";
+  let costoEffettivo = c.costo;
+  if(catId === "avamposto"){
+    const sel = document.getElementById("avampostoTipoSelect");
+    tipoDispiegamento = sel ? sel.value : "standard";
+    const validazione = validaTipoDispiegamentoAvamposto(tipoDispiegamento);
+    if(!validazione.ok){ showToast(validazione.messaggio); return; }
+    costoEffettivo = costoDispiegamentoAvamposto(tipoDispiegamento, c.costo);
+  }
+  if(oroDisponibile() < costoEffettivo){
+    showToast("Oro insufficiente in tesoreria (oltre la riserva bancaria) ⚠");
     return;
+  }
+  let tipoImpresa = "distanza";
+  if(catId === "impresa"){
+    const selImpresa = document.getElementById("impresaTipoSelect");
+    tipoImpresa = selImpresa ? selImpresa.value : "distanza";
   }
   // verifica materiali
   for(const mat of c.materiali){
@@ -1940,9 +2705,11 @@ function costruisciStruttura(catId){
     }
   }
   // applica
-  registraMovimento(`Costruzione: ${c.nome}`, -c.costo);
+  const etichettaDispiegamento = (catId === "avamposto" && tipoDispiegamento !== "standard")
+    ? ` (${labelTipoDispiegamento(tipoDispiegamento)})` : "";
+  registraMovimento(`Costruzione: ${c.nome}${etichettaDispiegamento}`, -costoEffettivo);
   c.materiali.forEach(mat=>{ state.materiali[mat.m] = (state.materiali[mat.m]||0) - mat.u; });
-  state.strutture.push({uid: uid(), catId: c.id, livello: 1, ...statoIniziale(c.id)});
+  state.strutture.push({uid: uid(), catId: c.id, livello: 1, ...statoIniziale(c.id, {tipoDispiegamento, tipoImpresa})});
 
   if(c.categoria !== "Generali" && state.classe==="Nessuna"){
     state.classe = c.categoria;
@@ -1967,7 +2734,7 @@ function potenziaStruttura(uidStr){
   if(!c.exempt && puntiSpesiTotali() + costoPunti > PUNTI_QG_MAX){
     showToast("Punti QG insufficienti per il potenziamento ⚠"); return;
   }
-  if(state.oro < c.costo){ showToast("Oro insufficiente per il potenziamento ⚠"); return; }
+  if(oroDisponibile() < c.costo){ showToast("Oro insufficiente per il potenziamento (oltre la riserva bancaria) ⚠"); return; }
   for(const mat of c.materiali){
     const disp = state.materiali[mat.m] || 0;
     if(disp < mat.u){ showToast(`Materiali insufficienti: manca ${mat.m} ⚠`); return; }
@@ -2000,10 +2767,19 @@ function potenziaStruttura(uidStr){
    di nuovo disponibile alla chiusura del mese successivo, come
    approssimazione (leggermente più lenta) di "almeno una settimana".
    ============================================================ */
-function statoIniziale(catId){
+function statoIniziale(catId, extra){
   if(catId === "studio_arcano") return { charmAttivo: false };
   if(catId === "santuario") return { catalizzatore: null };
   if(catId === "alchimista") return { pozioni: [] };
+  if(catId === "biblioteca") return { temi: [], bestiario: [], indagini: [] }; // indagini: buff attivi {id, tipo, argomento, personaggio, meseScadenza}
+  if(catId === "giardino") return { piante: [] }; // {id, nome, clima, mesiCrescita, mesiClimaSbagliato}
+  if(catId === "bottega_artistica") return { opere: [], creataQuestoMese: false }; // opere: {id, valore, stile}
+  if(catId === "studio_diplomatico") return { fazioniSelezionate: [], companions: [] };
+  if(catId === "avamposto") return { distanzaPortaEthea: 0, rifornimentoRidotto: false, tipoDispiegamento: (extra && extra.tipoDispiegamento) || "standard" };
+  if(catId === "sala_da_guerra") return { statoGuerra: (SALA_DA_GUERRA_CFG.statiDisponibili || ["Nessuna pianificazione"])[0], note: "" };
+  if(catId === "sala_arcana") return { rituale: null }; // {personaggio, incantesimo, livello, settimaneRimanenti}
+  if(catId === "campo_addestramento") return { unitaInAddestramento: [], unitaAllenate: 0 }; // unitaInAddestramento: nomi in corso
+  if(catId === "impresa") return { tipo: (extra && extra.tipoImpresa) || "distanza", strutturaVenditaUid: null, spesaMensile: 0, strumenti: [] };
   return {};
 }
 
@@ -2031,7 +2807,7 @@ function costruisciCatalizzatore(uidStr){
   const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="santuario");
   if(!s || s.catalizzatore) return;
   const costo = costoCatalizzatore(s);
-  if(state.oro < costo){ showToast(`Oro insufficiente: servono ${costo} mo ⚠`); return; }
+  if(oroDisponibile() < costo){ showToast(`Oro insufficiente: servono ${costo} mo oltre la riserva bancaria ⚠`); return; }
   if(!confirm(`Costruire un Catalizzatore d'Essenza per ${costo} mo (GS massimo assorbibile: ${gsMassimoCatalizzatore(s)})?`)) return;
   registraMovimento(`Catalizzatore d'Essenza (Santuario)`, -costo);
   s.catalizzatore = { stato: "vuoto" };
@@ -2098,6 +2874,320 @@ function usaCalderone(uidStr, rarita){
   return { consumate, tiro1, tiro2, rarita };
 }
 
+// --- Biblioteca: Temi, Bestiario, Indagini ---
+function toggleTemaBiblioteca(uidStr, tema){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="biblioteca");
+  if(!s) return;
+  const arg = ARGOMENTI_BIBLIOTECA.find(a=>a.nome===tema);
+  if(arg && !arg.selezionabile){ showToast(`"${tema}" non è selezionabile come tema (regolamento)`); return; }
+  const idx = s.temi.indexOf(tema);
+  if(idx>=0){
+    s.temi.splice(idx,1);
+  }else{
+    if(s.temi.length >= TEMI_BIBLIOTECA_SCELTE){ showToast(`Hai già scelto ${TEMI_BIBLIOTECA_SCELTE} temi: rimuovine uno prima di aggiungerne un altro`); return; }
+    s.temi.push(tema);
+  }
+  renderAll(); saveState();
+}
+function aggiungiTemaPersonalizzato(uidStr, nome){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="biblioteca");
+  if(!s || !nome) return;
+  if(s.temi.includes(nome)){ showToast("Tema già presente"); return; }
+  s.temi.push(nome);
+  showToast(`Nuovo tema "${nome}" aggiunto (richiede almeno 3 libri sulla materia, da narrativa)`);
+  renderAll(); saveState();
+}
+function avviaIndagineTema(uidStr, tema, personaggio){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="biblioteca");
+  if(!s || !tema || !personaggio) return;
+  s.indagini.push({ id: uid(), tipo: "tema", argomento: tema, personaggio, meseScadenza: state.calendario.mese + 1 });
+  showToast(`Indagine avviata: +5 alle prove su "${tema}" per ${personaggio} fino al mese ${state.calendario.mese+1}`);
+  renderAll(); saveState();
+}
+function aggiungiSottospecieBestiario(uidStr, nome){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="biblioteca");
+  if(!s || !nome) return;
+  if(s.bestiario.find(b=>b.nome===nome)){ showToast("Sottospecie già nel Bestiario"); return; }
+  s.bestiario.push({ id: uid(), nome, materiali: 0 });
+  renderAll(); saveState();
+}
+function aggiungiMaterialeBestiario(uidStr, voceId){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="biblioteca");
+  if(!s) return;
+  const v = s.bestiario.find(b=>b.id===voceId);
+  if(!v || v.materiali>=3) return;
+  v.materiali++;
+  if(v.materiali>=3) showToast(`${v.nome} sbloccata nel Bestiario!`);
+  renderAll(); saveState();
+}
+function avviaIndagineBestiario(uidStr, voceId, personaggio){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="biblioteca");
+  const v = s && s.bestiario.find(b=>b.id===voceId);
+  if(!s || !v || v.materiali<3 || !personaggio) return;
+  s.indagini.push({ id: uid(), tipo: "bestiario", argomento: v.nome, personaggio, meseScadenza: state.calendario.mese + 1 });
+  showToast(`Indagine sul Bestiario avviata: +1d6 contro ${v.nome} per ${personaggio} fino al mese ${state.calendario.mese+1}`);
+  renderAll(); saveState();
+}
+function rimuoviIndagine(uidStr, indagineId){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="biblioteca");
+  if(!s) return;
+  s.indagini = s.indagini.filter(i=>i.id!==indagineId);
+  renderAll(); saveState();
+}
+
+// --- Giardino: Piante Speciali ---
+function piantaSeme(uidStr, nomePianta){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="giardino");
+  const def = PIANTE_SPECIALI.find(p=>p.nome===nomePianta);
+  if(!s || !def) return;
+  s.piante.push({ id: uid(), nome: def.nome, clima: def.clima, mesiCrescita: 0, mesiClimaSbagliato: 0 });
+  showToast(`${def.nome} piantato (richiede clima ${def.clima}, matura in 1 mese)`);
+  renderAll(); saveState();
+}
+function raccogliPianta(uidStr, piantaId){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="giardino");
+  if(!s) return;
+  s.piante = s.piante.filter(p=>p.id!==piantaId);
+  showToast("Pianta raccolta: assegna narrativamente il frutto/materiale ottenuto");
+  renderAll(); saveState();
+}
+
+// Avanza le piante di tutti i Giardini al chiudi-mese: cresce se il clima è
+// giusto (matura in 1 mese), muore se il clima è sbagliato. "Muore dopo 2
+// settimane in clima non adatto" viene approssimato a 1 mese intero di clima
+// sbagliato, perché l'app non ha un calendario settimanale: un mese intero
+// è sempre >= 2 settimane, quindi è un'approssimazione prudente per difetto.
+function avanzaGiardini(){
+  const righe = [];
+  state.strutture.forEach(s=>{
+    if(s.catId!=="giardino") return;
+    const sopravvissute = [];
+    s.piante.forEach(p=>{
+      const climaOk = p.clima === state.clima;
+      if(climaOk){
+        p.mesiClimaSbagliato = 0;
+        p.mesiCrescita++;
+        if(p.mesiCrescita>=1){
+          righe.push(`  • ${p.nome} è maturo: pronto per la raccolta.`);
+        }
+        sopravvissute.push(p);
+      }else{
+        p.mesiClimaSbagliato++;
+        if(p.mesiClimaSbagliato>=1){
+          righe.push(`  • ${p.nome} è morto: clima ${p.clima} richiesto, QG in clima ${state.clima}.`);
+        }else{
+          sopravvissute.push(p);
+        }
+      }
+    });
+    s.piante = sopravvissute;
+  });
+  return righe;
+}
+
+
+// --- Bottega Artistica: Opere d'Arte + calcolatore Prestigio Artistico ---
+function creaOperaArte(uidStr, stile, materialiScelti){
+  // materialiScelti: {Pietra:qty, Legna:qty, Oro:qty, Stoffa:qty}
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="bottega_artistica");
+  if(!s) return;
+  if(s.creataQuestoMese){ showToast("Questa Bottega ha già creato un'Opera d'Arte questo mese ⚠"); return; }
+  const ammessi = OPERA_ARTE_CFG.materialiAmmessi || [];
+  let valore = 0;
+  for(const m in materialiScelti){
+    const q = Number(materialiScelti[m])||0;
+    if(q<=0) continue;
+    if(!ammessi.includes(m)){ showToast(`${m} non è un materiale ammesso per un'Opera d'Arte ⚠`); return; }
+    const disp = state.materiali[m]||0;
+    if(disp < q){ showToast(`Materiali insufficienti: manca ${m} ⚠`); return; }
+    valore += q * (MATERIALI_PREZZI[m]||0);
+  }
+  const soglia = OPERA_ARTE_CFG.valoreMinimoMo || 120;
+  if(valore < soglia || valore % soglia !== 0){
+    showToast(`Il valore dei materiali scelti (${valore} mo) deve essere un multiplo di ${soglia} mo ⚠`);
+    return;
+  }
+  for(const m in materialiScelti){
+    const q = Number(materialiScelti[m])||0;
+    if(q>0) state.materiali[m] -= q;
+  }
+  s.opere.push({ id: uid(), valore, stile });
+  s.creataQuestoMese = true;
+  showToast(`Opera d'Arte creata: valore ${valore} mo, stile "${stile}"`);
+  renderAll(); saveState();
+}
+// Calcola il modificatore % totale (Prestigio Artistico) per accordi commerciali
+// con una data regione, sommando +20%/-20% per ogni blocco da 120mo di ogni
+// Opera posseduta il cui stile piace/non piace a quella regione.
+function calcolaPrestigioArtistico(regione){
+  const soglia = OPERA_ARTE_CFG.valoreMinimoMo || 120;
+  const bonusBlocco = OPERA_ARTE_CFG.bonusPerBlocco || 0.20;
+  let totale = 0;
+  state.strutture.forEach(s=>{
+    if(s.catId!=="bottega_artistica") return;
+    s.opere.forEach(o=>{
+      const giudizio = (OPERA_ARTE_CFG.matrice[o.stile]||{})[regione];
+      if(!giudizio) return;
+      const blocchi = Math.round(o.valore / soglia);
+      totale += (giudizio==="+" ? 1 : -1) * blocchi * bonusBlocco;
+    });
+  });
+  return Math.round(totale*100); // percentuale intera
+}
+
+// --- Studio Diplomatico: Fazioni e Companion ---
+function toggleFazioneSelezionata(uidStr, fazione){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="studio_diplomatico");
+  if(!s) return;
+  const idx = s.fazioniSelezionate.indexOf(fazione);
+  if(idx>=0){ s.fazioniSelezionate.splice(idx,1); }
+  else{
+    if(s.fazioniSelezionate.length >= s.livello){ showToast(`Puoi selezionare al massimo ${s.livello} fazioni al mese (pari al livello della struttura)`); return; }
+    s.fazioniSelezionate.push(fazione);
+  }
+  renderAll(); saveState();
+}
+function ottieniCompanion(uidStr, nome, livelloTarget){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="studio_diplomatico");
+  if(!s || !nome) return;
+  if(s.fazioniSelezionate.length===0){ showToast("Seleziona almeno una fazione prima di ottenere un Companion ⚠"); return; }
+  const base = STUDIO_DIPLOMATICO_CFG.costoCompanionBaseMo ?? 50;
+  const extra = STUDIO_DIPLOMATICO_CFG.costoCompanionPerLivelloExtraMo ?? 50;
+  const costo = base + extra * Math.max(0, livelloTarget - 1);
+  if(oroDisponibile() < costo){ showToast(`Oro insufficiente: servono ${costo} mo oltre la riserva bancaria ⚠`); return; }
+  if(!confirm(`Ottenere il Companion "${nome}" (Lv.${livelloTarget}) per ${costo} mo?` + (livelloTarget>1 ? " Non potrà salire di livello." : ""))) return;
+  registraMovimento(`Companion: ${nome} (Studio Diplomatico)`, -costo);
+  s.companions.push({ id: uid(), nome, fazioniOrigine: [...s.fazioniSelezionate], livello: livelloTarget, nonPuoSalireLivello: livelloTarget>1 });
+  showToast(`Companion "${nome}" ottenuto`);
+  renderAll(); saveState();
+}
+function rimuoviCompanion(uidStr, companionId){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="studio_diplomatico");
+  if(!s) return;
+  s.companions = s.companions.filter(c=>c.id!==companionId);
+  renderAll(); saveState();
+}
+
+// --- Sala Arcana: rituali di apprendimento incantesimi ---
+function livelloIncantesimoMax(s){
+  return Math.min(SALA_ARCANA_CFG.livelloIncantesimoMaxAssoluto||5, 2*s.livello - 1);
+}
+function costoRituale(livelloIncantesimo){
+  if(livelloIncantesimo<=0) return SALA_ARCANA_CFG.costoTrucchettoMo||150;
+  return (SALA_ARCANA_CFG.costoPerLivelloIncantesimoMo||550) * livelloIncantesimo;
+}
+function avviaRituale(uidStr, personaggio, incantesimo, livelloIncantesimo){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="sala_arcana");
+  if(!s || !personaggio || !incantesimo) return;
+  if(s.rituale){ showToast("Un rituale è già in corso: nella Sala Arcana se ne può svolgere solo uno alla volta ⚠"); return; }
+  const max = livelloIncantesimoMax(s);
+  if(livelloIncantesimo > max){ showToast(`Livello incantesimo troppo alto: massimo ${max} per una Sala Arcana Lv.${s.livello} ⚠`); return; }
+  const costo = costoRituale(livelloIncantesimo);
+  if(oroDisponibile() < costo){ showToast(`Oro insufficiente: servono ${costo} mo oltre la riserva bancaria ⚠`); return; }
+  if(!confirm(`Avviare il rituale per "${incantesimo}" (${livelloIncantesimo<=0?"trucchetto":"Lv."+livelloIncantesimo}) per ${personaggio}? Costo: ${costo} mo.`)) return;
+  registraMovimento(`Rituale: ${incantesimo} (Sala Arcana)`, -costo);
+  const settimane = Math.max(SALA_ARCANA_CFG.settimaneMinimeTrucchetto||1, (SALA_ARCANA_CFG.settimanePerLivelloIncantesimo||1) * livelloIncantesimo);
+  s.rituale = { personaggio, incantesimo, livello: livelloIncantesimo, settimaneRimanenti: settimane };
+  showToast(`Rituale avviato: ${settimane} settimane di preparazione richieste`);
+  renderAll(); saveState();
+}
+function annullaRituale(uidStr){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="sala_arcana");
+  if(!s || !s.rituale) return;
+  if(!confirm("Annullare il rituale in corso? L'oro speso non viene restituito.")) return;
+  s.rituale = null;
+  renderAll(); saveState();
+}
+// Avanza tutti i rituali in corso di ~1 mese (4 settimane, approssimazione
+// dato che l'app non ha un calendario settimanale). Ritorna le righe di
+// resoconto per i rituali completati.
+function avanzaRitualiArcani(){
+  const righe = [];
+  state.strutture.forEach(s=>{
+    if(s.catId!=="sala_arcana" || !s.rituale) return;
+    s.rituale.settimaneRimanenti -= 4;
+    if(s.rituale.settimaneRimanenti <= 0){
+      righe.push(`  • Rituale completato: ${s.rituale.personaggio} ha appreso "${s.rituale.incantesimo}".`);
+      s.rituale = null;
+    }
+  });
+  return righe;
+}
+
+// --- Avamposto: rifornimenti mensili + guadagno passivo (gap da P1 colmato qui) ---
+function costoRifornimentoAvamposto(av){
+  const per100 = av.rifornimentoRidotto
+    ? (AVAMPOSTO_CFG.costoRifornimentoRidottoMoPer100Km||1)
+    : (AVAMPOSTO_CFG.costoRifornimentoMoPer100Km||10);
+  return (av.distanzaPortaEthea||0)/100 * per100;
+}
+function guadagnoPassivoAvamposto(av){
+  return raggioAvamposto(av)/100 * (AVAMPOSTO_CFG.guadagnoPassivoMoPer100KmRaggio||25);
+}
+function impostaDistanzaAvamposto(uidStr, km){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="avamposto");
+  if(!s) return;
+  s.distanzaPortaEthea = Math.max(0, Number(km)||0);
+  renderAll(); saveState();
+}
+function toggleRifornimentoRidotto(uidStr){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="avamposto");
+  if(!s) return;
+  s.rifornimentoRidotto = !s.rifornimentoRidotto;
+  renderAll(); saveState();
+}
+// Applica upkeep e guadagno passivo di tutti gli Avamposti al chiudi-mese.
+// Se un avamposto ha "rifornimento ridotto" attivo ma il magazzino non ha
+// abbastanza materiali, ripiega sul costo pieno per quel mese (non blocca
+// la chiusura). "×2" nel testo del regolamento è ambiguo (raddoppia le
+// quantità base o si applica solo con più avamposti?): qui lo leggo come
+// "raddoppia le quantità base per ciascun avamposto", la lettura più
+// semplice da verificare — correggibile in AVAMPOSTO_CFG se non è quella
+// giusta.
+function applicaAvampostiMensile(){
+  const righe = [];
+  let entrateNette = 0;
+  state.strutture.forEach(av=>{
+    if(av.catId!=="avamposto") return;
+    let costo = costoRifornimentoAvamposto(av);
+    if(av.rifornimentoRidotto){
+      const richiesti = AVAMPOSTO_CFG.rifornimentoRidottoMaterialiPerAvamposto||{};
+      const scelta = Object.entries(richiesti).find(([m,q])=>(state.materiali[m]||0) >= q);
+      if(scelta){
+        state.materiali[scelta[0]] -= scelta[1];
+      }else{
+        costo = costoRifornimentoAvamposto({...av, rifornimentoRidotto:false});
+        righe.push(`  • Avamposto: materiali per il rifornimento ridotto insufficienti, applicato il costo pieno.`);
+      }
+    }
+    const guadagno = guadagnoPassivoAvamposto(av);
+    entrateNette += guadagno - costo;
+  });
+  if(state.strutture.some(s=>s.catId==="avamposto")){
+    registraMovimento("Avamposti: rifornimenti e guadagno passivo", entrateNette);
+    righe.push(`  • Avamposti: ${entrateNette>=0?"+":""}${entrateNette.toFixed(1).replace(/\.0$/,"")} mo netti (rifornimenti − guadagno passivo).`);
+  }
+  return righe;
+}
+
+// --- Campo d'Addestramento: unità in addestramento -> Allenate ---
+function unitaMaxAddestrabili(s){ return (CAMPO_ADDESTRAMENTO_CFG.unitaMaxPerLivello||5) * s.livello; }
+function avviaAddestramento(uidStr, nomeUnita){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="campo_addestramento");
+  if(!s || !nomeUnita) return;
+  if(s.unitaInAddestramento.length >= unitaMaxAddestrabili(s)){ showToast(`Massimo ${unitaMaxAddestrabili(s)} unità in addestramento contemporaneamente (5×livello) ⚠`); return; }
+  s.unitaInAddestramento.push({ id: uid(), nome: nomeUnita });
+  renderAll(); saveState();
+}
+function completaAddestramento(uidStr, unitaId){
+  const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="campo_addestramento");
+  if(!s) return;
+  s.unitaInAddestramento = s.unitaInAddestramento.filter(u=>u.id!==unitaId);
+  s.unitaAllenate = (s.unitaAllenate||0) + 1;
+  showToast("Unità Allenata! Il raggio di protezione degli Avamposti sale a 600km × livello QG");
+  renderAll(); saveState();
+}
+
 function smantellaStruttura(uidStr){
   const idx = state.strutture.findIndex(x=>x.uid===uidStr);
   if(idx<0) return;
@@ -2113,6 +3203,16 @@ function smantellaStruttura(uidStr){
     showToast(rotteScollegate>0
       ? `Avamposto smantellato: materiali restituiti, ${rotteScollegate} rotta/e tornate scoperte`
       : "Avamposto smantellato: materiali restituiti al magazzino");
+  }else if(c.categoria==="Vendita"){
+    // Se questa struttura di Vendita era collegata a un'Impresa (modalità
+    // "vendita a distanza"), scolleghiamo il riferimento invece di lasciarlo
+    // puntare a una struttura che non esiste più (stesso pattern già usato
+    // sopra per avamposto/rotte).
+    const impreseScollegate = state.strutture.filter(x=>x.catId==="impresa" && x.strutturaVenditaUid===uidStr);
+    impreseScollegate.forEach(imp=>{ imp.strutturaVenditaUid = null; imp.spesaMensile = 0; });
+    showToast(impreseScollegate.length>0
+      ? `${c.nome} smantellata: ${impreseScollegate.length} Impresa/e tornate senza struttura collegata`
+      : `${c.nome} smantellata`);
   }else{
     showToast(`${c.nome} smantellata`);
   }
@@ -2160,6 +3260,32 @@ document.getElementById("inOro").addEventListener("change", e=>{
   renderAll(); saveState();
 });
 
+document.getElementById("inRiservaBancaria").addEventListener("change", e=>{
+  state.riservaBancaria = Math.max(0, Number(e.target.value)||0);
+  renderFinanze();
+  saveState();
+});
+
+document.getElementById("btnAggiungiAltriQg").addEventListener("click", ()=>{
+  const nome = document.getElementById("altriQgNome").value;
+  const tipo = document.getElementById("altriQgTipo").value;
+  const importo = document.getElementById("altriQgImporto").value;
+  const nota = document.getElementById("altriQgNota").value;
+  aggiungiAltriQg(nome, tipo, importo, nota);
+  document.getElementById("altriQgNome").value = "";
+  document.getElementById("altriQgImporto").value = "0";
+  document.getElementById("altriQgNota").value = "";
+});
+
+document.getElementById("altriQgBody").addEventListener("click", e=>{
+  const salda = e.target.closest("[data-action='salda-altriqg']");
+  if(salda){ saldaAltriQg(salda.dataset.uid); return; }
+  const rimuovi = e.target.closest("[data-action='rimuovi-altriqg']");
+  if(rimuovi){
+    if(confirm("Rimuovere questa voce dal Registro Altri QG?")) rimuoviAltriQg(rimuovi.dataset.uid);
+  }
+});
+
 document.getElementById("btnMovimento").addEventListener("click", ()=>{
   const val = Number(document.getElementById("inMovimento").value)||0;
   if(val===0){ showToast("Inserisci un importo diverso da zero"); return; }
@@ -2190,6 +3316,17 @@ document.getElementById("catalogGrid").addEventListener("click", e=>{
   const btn = e.target.closest("[data-action='costruisci']");
   if(!btn) return;
   costruisciStruttura(btn.dataset.id);
+});
+
+document.getElementById("catalogGrid").addEventListener("change", e=>{
+  const sel = e.target.closest("#avampostoTipoSelect");
+  if(!sel) return;
+  const c = CATALOGO.find(x=>x.id==="avamposto");
+  const nota = document.getElementById("avampostoCostoNota");
+  if(c && nota){
+    const costoEff = costoDispiegamentoAvamposto(sel.value, c.costo);
+    nota.textContent = `Costo effettivo con questa opzione: ${costoEff} mo`;
+  }
 });
 
 document.getElementById("strutturePossedute").addEventListener("click", e=>{
@@ -2242,6 +3379,196 @@ document.getElementById("sottomeccanicheBody").addEventListener("click", e=>{
     }
     return;
   }
+
+  // --- Biblioteca ---
+  const tTema = azione("[data-action='toggle-tema']");
+  if(tTema){ toggleTemaBiblioteca(tTema.dataset.uid, tTema.dataset.tema); return; }
+
+  const aTemaC = azione("[data-action='aggiungi-tema-custom']");
+  if(aTemaC){
+    const suid = aTemaC.dataset.uid;
+    const nome = document.querySelector(`[data-field='temaCustom'][data-uid='${suid}']`).value.trim();
+    if(!nome){ showToast("Inserisci un nome per il nuovo tema"); return; }
+    aggiungiTemaPersonalizzato(suid, nome);
+    document.querySelector(`[data-field='temaCustom'][data-uid='${suid}']`).value = "";
+    return;
+  }
+
+  const aIndT = azione("[data-action='avvia-indagine-tema']");
+  if(aIndT){
+    const suid = aIndT.dataset.uid;
+    const tema = document.querySelector(`[data-field='indagineTema'][data-uid='${suid}']`)?.value;
+    const pers = document.querySelector(`[data-field='indaginePersonaggio'][data-uid='${suid}']`).value.trim();
+    if(!pers){ showToast("Inserisci il nome del personaggio"); return; }
+    avviaIndagineTema(suid, tema, pers);
+    return;
+  }
+
+  const rInd = azione("[data-action='rimuovi-indagine']");
+  if(rInd){ rimuoviIndagine(rInd.dataset.uid, rInd.dataset.iid); return; }
+
+  const aSotto = azione("[data-action='aggiungi-sottospecie']");
+  if(aSotto){
+    const suid = aSotto.dataset.uid;
+    const nome = document.querySelector(`[data-field='sottospecieCustom'][data-uid='${suid}']`).value.trim();
+    if(!nome){ showToast("Inserisci il nome della sottospecie"); return; }
+    aggiungiSottospecieBestiario(suid, nome);
+    document.querySelector(`[data-field='sottospecieCustom'][data-uid='${suid}']`).value = "";
+    return;
+  }
+
+  const mBest = azione("[data-action='materiale-bestiario']");
+  if(mBest){ aggiungiMaterialeBestiario(mBest.dataset.uid, mBest.dataset.bid); return; }
+
+  const aIndB = azione("[data-action='avvia-indagine-bestiario']");
+  if(aIndB){
+    const suid = aIndB.dataset.uid;
+    const bid = document.querySelector(`[data-field='bestiarioSelect'][data-uid='${suid}']`)?.value;
+    const pers = document.querySelector(`[data-field='bestiarioPersonaggio'][data-uid='${suid}']`)?.value.trim();
+    if(!bid || !pers){ showToast("Seleziona la sottospecie e il personaggio"); return; }
+    avviaIndagineBestiario(suid, bid, pers);
+    return;
+  }
+
+  // --- Giardino ---
+  const pSeme = azione("[data-action='pianta-seme']");
+  if(pSeme){
+    const suid = pSeme.dataset.uid;
+    const nome = document.querySelector(`[data-field='semePianta'][data-uid='${suid}']`).value;
+    piantaSeme(suid, nome);
+    return;
+  }
+  const rPianta = azione("[data-action='raccogli-pianta']");
+  if(rPianta){ raccogliPianta(rPianta.dataset.uid, rPianta.dataset.pid); return; }
+
+  // --- Bottega Artistica ---
+  const cOpera = azione("[data-action='crea-opera']");
+  if(cOpera){
+    const suid = cOpera.dataset.uid;
+    const stile = document.querySelector(`[data-field='operaStile'][data-uid='${suid}']`).value;
+    const materiali = {};
+    (OPERA_ARTE_CFG.materialiAmmessi||[]).forEach(m=>{
+      const el = document.querySelector(`[data-field='operaMat-${m}'][data-uid='${suid}']`);
+      materiali[m] = el ? Number(el.value)||0 : 0;
+    });
+    creaOperaArte(suid, stile, materiali);
+    return;
+  }
+  const calcPrestigio = azione("[data-action='calcola-prestigio']");
+  if(calcPrestigio){
+    const suid = calcPrestigio.dataset.uid;
+    const regione = document.querySelector(`[data-field='prestigioRegione'][data-uid='${suid}']`).value;
+    const pct = calcolaPrestigioArtistico(regione);
+    const out = document.getElementById(`prestigioRisultato-${suid}`);
+    if(out) out.textContent = `${pct>=0?"+":""}${pct}% verso ${regione}`;
+    return;
+  }
+
+  // --- Studio Diplomatico ---
+  const tFaz = azione("[data-action='toggle-fazione']");
+  if(tFaz){ toggleFazioneSelezionata(tFaz.dataset.uid, tFaz.dataset.fazione); return; }
+
+  const oComp = azione("[data-action='ottieni-companion']");
+  if(oComp){
+    const suid = oComp.dataset.uid;
+    const nome = document.querySelector(`[data-field='companionNome'][data-uid='${suid}']`).value.trim();
+    const lv = Number(document.querySelector(`[data-field='companionLivello'][data-uid='${suid}']`).value) || 1;
+    if(!nome){ showToast("Inserisci un nome per il Companion"); return; }
+    ottieniCompanion(suid, nome, lv);
+    return;
+  }
+  const rComp = azione("[data-action='rimuovi-companion']");
+  if(rComp){ rimuoviCompanion(rComp.dataset.uid, rComp.dataset.cid); return; }
+
+  // --- Sala Arcana ---
+  const aRit = azione("[data-action='avvia-rituale']");
+  if(aRit){
+    const suid = aRit.dataset.uid;
+    const pers = document.querySelector(`[data-field='ritualePersonaggio'][data-uid='${suid}']`).value.trim();
+    const inc = document.querySelector(`[data-field='ritualeIncantesimo'][data-uid='${suid}']`).value.trim();
+    const lv = Number(document.querySelector(`[data-field='ritualeLivello'][data-uid='${suid}']`).value) || 0;
+    avviaRituale(suid, pers, inc, lv);
+    return;
+  }
+  const anRit = azione("[data-action='annulla-rituale']");
+  if(anRit){ annullaRituale(anRit.dataset.uid); return; }
+
+  // --- Avamposto ---
+  const salvaDist = azione("[data-action='salva-distanza-avamposto']");
+  if(salvaDist){
+    const suid = salvaDist.dataset.uid;
+    const km = document.querySelector(`[data-field='avampostoDistanza'][data-uid='${suid}']`).value;
+    impostaDistanzaAvamposto(suid, km);
+    return;
+  }
+
+  // --- Campo d'Addestramento ---
+  const aAddest = azione("[data-action='avvia-addestramento']");
+  if(aAddest){
+    const suid = aAddest.dataset.uid;
+    const nome = document.querySelector(`[data-field='unitaNome'][data-uid='${suid}']`).value.trim();
+    if(!nome){ showToast("Inserisci il nome dell'unità"); return; }
+    avviaAddestramento(suid, nome);
+    return;
+  }
+  const cAddest = azione("[data-action='completa-addestramento']");
+  if(cAddest){ completaAddestramento(cAddest.dataset.uid, cAddest.dataset.uid2); return; }
+
+  // --- Porto Militare / Eliporto Arcano ---
+  const regNav = azione("[data-action='registra-acquisto-navale']");
+  if(regNav){
+    const suid = regNav.dataset.uid;
+    const costo = document.querySelector(`[data-field='navaleCosto'][data-uid='${suid}']`).value;
+    registraAcquistoNavale(suid, costo);
+    return;
+  }
+
+  // --- Sala da Guerra ---
+  const salvaNote = azione("[data-action='salva-note-guerra']");
+  if(salvaNote){
+    const suid = salvaNote.dataset.uid;
+    const nota = document.querySelector(`[data-field='salaGuerraNote'][data-uid='${suid}']`).value;
+    salvaNoteGuerra(suid, nota);
+    return;
+  }
+
+  // --- Impresa ---
+  const regGuadagno = azione("[data-action='registra-guadagno-impresa']");
+  if(regGuadagno){
+    const suid = regGuadagno.dataset.uid;
+    const spesa = document.querySelector(`[data-field='impresaSpesa'][data-uid='${suid}']`).value;
+    registraGuadagnoImpresa(suid, spesa);
+    return;
+  }
+  const aggStrumento = azione("[data-action='aggiungi-strumento-impresa']");
+  if(aggStrumento){
+    const suid = aggStrumento.dataset.uid;
+    const input = document.querySelector(`[data-field='impresaStrumentoNuovo'][data-uid='${suid}']`);
+    aggiungiStrumentoImpresa(suid, input.value);
+    input.value = "";
+    return;
+  }
+  const rimStrumento = azione("[data-action='rimuovi-strumento-impresa']");
+  if(rimStrumento){
+    rimuoviStrumentoImpresa(rimStrumento.dataset.uid, rimStrumento.dataset.strumento);
+    return;
+  }
+  const regVendita = azione("[data-action='registra-vendita-impresa']");
+  if(regVendita){
+    const suid = regVendita.dataset.uid;
+    const valore = document.querySelector(`[data-field='impresaValoreVendita'][data-uid='${suid}']`).value;
+    registraVenditaImpresa(suid, valore);
+    return;
+  }
+});
+
+document.getElementById("sottomeccanicheBody").addEventListener("change", e=>{
+  const rif = e.target.closest("[data-action='toggle-rifornimento-ridotto']");
+  if(rif){ toggleRifornimentoRidotto(rif.dataset.uid); return; }
+  const statoGuerra = e.target.closest("[data-action='cambia-stato-guerra']");
+  if(statoGuerra){ cambiaStatoGuerra(statoGuerra.dataset.uid, statoGuerra.value); return; }
+  const selVendita = e.target.closest("[data-action='seleziona-struttura-vendita-impresa']");
+  if(selVendita){ selezionaStrutturaVenditaImpresa(selVendita.dataset.uid, selVendita.value); return; }
 });
 
 document.getElementById("magazzinoBody").addEventListener("change", e=>{
@@ -2343,7 +3670,8 @@ document.getElementById("resetBtn").addEventListener("click", ()=>{
   if(!confirm("Vuoi davvero azzerare tutto il registro del QG? L'operazione non è reversibile. (Consiglio: esporta prima un backup)")) return;
   state = {
     nome:"Il mio Quartier Generale", fondatore:"", cofondatore:"", classe:"Nessuna", livello:1,
-    oro:0, membri:[], strutture:[], materiali:{}, lavoratori:0, rotte:[], magazzinoScontati:[], movimenti:[]
+    oro:0, membri:[], strutture:[], materiali:{}, lavoratori:0, rotte:[], magazzinoScontati:[], movimenti:[],
+    riservaBancaria:0, registroAltriQG:[]
   };
   renderAll();
   saveState();
