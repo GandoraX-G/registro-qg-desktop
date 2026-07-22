@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro del Quartier Generale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/css/main.css">
+<link rel="stylesheet" href="./assets/css/layout.css">
+<link rel="stylesheet" href="./assets/css/dashboard.css">
+<link rel="stylesheet" href="./assets/css/cards.css">
+<link rel="stylesheet" href="./assets/css/tables.css">
+<link rel="stylesheet" href="./assets/css/forms.css">
+<link rel="stylesheet" href="./assets/css/modal.css">
+<link rel="stylesheet" href="./assets/css/utilities.css">
+</head>
+<body>
+
+<div id="loading" class="loading-screen">
+  <div class="loading-spinner"></div>
+  <div>Aprendo il registro del Quartier Generale...</div>
+  <div class="loading-sub">Cronache di Unshast</div>
+</div>
+
+<div id="storageWarning" class="storage-warning">
+  Il salvataggio locale non è disponibile (modalità privata?). Usa "Esporta backup" spesso per non perdere i dati.
+</div>
+
+<div class="app" id="app" style="display:none;">
+
+  <header class="top-header">
+    <div class="header-brand">
+      <span class="header-logo">QG</span>
+      <span class="header-title">Registro del Quartier Generale</span>
+    </div>
+    <div class="header-stats">
+      <span class="header-stat"><span id="topbar-gold" class="mono">0 mo</span></span>
+      <span class="header-stat"><span id="topbar-month" class="mono">Mese 1</span></span>
+      <span class="header-stat"><span id="topbar-season" class="mono">Primavera</span></span>
+    </div>
+    <div class="header-actions">
+      <button id="theme-toggle" class="btn btn-icon" title="Tema chiaro/scuro">&#127761;</button>
+      <button id="btn-export" class="btn btn-outline btn-sm">Esporta</button>
+      <button id="btn-import" class="btn btn-outline btn-sm">Importa</button>
+      <input type="file" id="import-file" accept="application/json" style="display:none;">
+      <div id="saveDot" class="save-dot"><span id="saveText" class="save-text">Salvato</span></div>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">QG</div>
+      <div class="sidebar-brand-text">
+        Registro del QG
+        <small>Cronache di Unshast</small>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-item active" data-tab="panoramica">
+        <span class="sidebar-icon">&#9670;</span> Panoramica
+      </div>
+      <div class="sidebar-item" data-tab="strutture">
+        <span class="sidebar-icon">&#9638;</span> Strutture
+      </div>
+      <div class="sidebar-item" data-tab="magazzino">
+        <span class="sidebar-icon">&#9878;</span> Magazzino
+      </div>
+      <div class="sidebar-item" data-tab="rotte">
+        <span class="sidebar-icon">&#9873;</span> Rotte
+      </div>
+      <div class="sidebar-item" data-tab="finanze">
+        <span class="sidebar-icon">&#9636;</span> Finanze
+      </div>
+    </div>
+
+    <div class="sidebar-foot">
+      <small>I dati vengono salvati automaticamente su questo dispositivo.</small>
+    </div>
+  </nav>
+
+  <main class="content">
+
+    <!-- ==================== PANORAMICA ==================== -->
+    <div class="content-panel active" data-panel="panoramica">
+
+      <div class="panel-header">
+        <div>
+          <h1 id="qg-name-display" class="panel-title">Il mio Quartier Generale</h1>
+          <p id="qg-class-display" class="panel-sub">Nessuna classe · Livello 1</p>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-card"><div class="stat-value mono" id="dash-gold">0</div><div class="stat-label">Oro (mo)</div></div>
+          <div class="stat-card"><div class="stat-value mono" id="dash-points">0/44</div><div class="stat-label">Punti QG</div></div>
+          <div class="stat-card"><div class="stat-value mono" id="dash-buildings">0</div><div class="stat-label">Strutture</div></div>
+          <div class="stat-card"><div class="stat-value mono" id="dash-staff">0</div><div class="stat-label">Personale</div></div>
+          <div class="stat-card"><div class="stat-value mono"><span id="dash-month">1</span> · <span id="dash-season">Primavera</span></div><div class="stat-label">Calendario</div></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">Dati del Quartier Generale</h3>
+          <div class="form-group">
+            <label>Nome del QG</label>
+            <input type="text" id="dash-in-nome" placeholder="es. Bastione della Torcia">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Fondatore</label>
+              <input type="text" id="dash-in-fondatore" placeholder="Nome personaggio">
+            </div>
+            <div class="form-group">
+              <label>Co-fondatore</label>
+              <input type="text" id="dash-in-cofondatore" placeholder="Nome personaggio">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Classe del QG</label>
+              <div class="form-flex">
+                <select id="dash-in-classe" class="form-select">
+                  <option value="Nessuna">Senza Classe</option>
+                  <option value="Produzione">Produzione</option>
+                  <option value="Vendita">Vendita</option>
+                  <option value="Militare">Militare</option>
+                </select>
+                <button type="button" id="dash-btn-sblocca-classe" class="btn btn-outline btn-sm" style="display:none;" title="Correzione manuale eccezionale">Sblocca</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Livello QG <span class="hint">(calcolato automaticamente)</span></label>
+              <select id="dash-in-livello" class="form-select" disabled>
+                <option value="1">Livello 1 (personaggi Lv 3-6)</option>
+                <option value="2">Livello 2 (personaggi Lv 7-10)</option>
+                <option value="3">Livello 3 (personaggi Lv 11-14)</option>
+                <option value="4">Livello 4 (personaggi Lv 15-17)</option>
+                <option value="5">Livello 5 (personaggi Lv 18-20)</option>
+                <option value="6">Livello 6 (personaggi Lv 21+)</option>
+              </select>
+            </div>
+          </div>
+          <p class="hint">La classe si assegna automaticamente alla prima struttura specializzata. Il livello si calcola dai membri.</p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Tesoreria</h3>
+          <div class="form-group">
+            <label>Oro in cassa (mo)</label>
+            <input type="number" id="dash-in-oro" value="0">
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1;">
+              <label>Movimento rapido</label>
+              <input type="number" id="dash-in-movimento" placeholder="es. 50 oppure -20">
+            </div>
+            <div class="form-group" style="flex:0 0 auto;">
+              <button id="dash-btn-movimento" class="btn btn-primary">Applica</button>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <label>Punti QG</label>
+          <div class="progress-wrap">
+            <div class="progress-bar" id="dash-points-bar" style="width:0%;"></div>
+            <div class="progress-label" id="dash-points-label">0 / 44</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Membri del QG</h3>
+        <table class="table">
+          <thead><tr><th>Personaggio</th><th>Livello</th><th></th></tr></thead>
+          <tbody id="dash-members-body"></tbody>
+        </table>
+        <div class="form-row" style="margin-top:10px;">
+          <div class="form-group">
+            <input type="text" id="dash-in-member-name" placeholder="Nome personaggio">
+          </div>
+          <div class="form-group" style="max-width:100px;">
+            <input type="number" id="dash-in-member-level" placeholder="Lv" min="1" max="30">
+          </div>
+          <div class="form-group" style="flex:0 0 auto;">
+            <button id="dash-btn-add-member" class="btn btn-outline">+ Aggiungi</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">Panoramica QG</h3>
+          <table class="table">
+            <tbody id="dash-overview-body"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Strutture per Categoria</h3>
+          <table class="table">
+            <thead><tr><th>Categoria</th><th>Costruite</th><th>Punti</th></tr></thead>
+            <tbody id="dash-summary-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Attività Recenti</h3>
+        <table class="table">
+          <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo</th></tr></thead>
+          <tbody id="dash-activities-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== STRUTTURE ==================== -->
+    <div class="content-panel" data-panel="strutture">
+
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Strutture</h1>
+          <p class="panel-sub">Catalogo edilizio del Quartier Generale</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Costruisci una nuova struttura</h3>
+        <div class="form-group">
+          <input type="text" id="struct-search" class="form-input" placeholder="Cerca struttura per nome o materiale...">
+        </div>
+        <div id="struct-filters" class="filter-bar"></div>
+        <div id="struct-catalog" class="catalog-grid"></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <h3 class="card-title">Strutture costruite</h3>
+        <table class="table">
+          <thead><tr><th>Struttura</th><th>Categoria</th><th>Livello</th><th>Punti</th><th></th></tr></thead>
+          <tbody id="struct-owned-body"></tbody>
+        </table>
+        <div id="struct-owned-empty" class="empty-state" style="display:none;">
+          <div class="empty-icon">&#9878;</div>
+          Le fondamenta del tuo Quartier Generale sono ancora vuote.
+        </div>
+      </div>
+
+      <div id="struct-sub-wrap" style="display:none;">
+        <div class="divider"></div>
+        <div class="card">
+          <h3 class="card-title">Sotto-meccaniche attive <span class="badge" id="struct-sub-count">0</span></h3>
+          <div id="struct-sub-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MAGAZZINO ==================== -->
+    <div class="content-panel" data-panel="magazzino">
+
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Magazzino</h1>
+          <p class="panel-sub">Materie prime e beni di scambio</p>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-card"><div class="stat-value mono" id="wh-total-value">0 mo</div><div class="stat-label">Valore totale</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Acquista materiali</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Materiale</label>
+            <select id="wh-purchase-material" class="form-select"></select>
+          </div>
+          <div class="form-group">
+            <label>Quantità (U)</label>
+            <input type="number" id="wh-purchase-qty" class="form-input" min="1" value="1">
+          </div>
+          <div class="form-group">
+            <label>Provenienza</label>
+            <select id="wh-purchase-source" class="form-select">
+              <option value="bazaar">Bazaar (prezzo pieno)</option>
+              <option value="qg20">Altro QG (-20%)</option>
+              <option value="mag30" id="wh-purchase-discount-option" style="display:none;">Magazzino (-30%)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="align-items:center; margin-top:8px;">
+          <div class="stat-card" style="min-width:150px;"><div class="stat-value mono" id="wh-purchase-cost">0 mo</div><div class="stat-label">Costo totale</div></div>
+          <div class="form-group" style="flex:0 0 auto;">
+            <button id="wh-purchase-btn" class="btn btn-primary">Acquista</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="wh-discounted-wrap" style="display:none;">
+        <h3 class="card-title">Materiali scontati dal tuo Magazzino</h3>
+        <p class="hint">Scegli fino a 5 materie prime con sconto al 30%.</p>
+        <div id="wh-discounted-grid" class="chip-grid"></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Inventario</h3>
+        <table class="table">
+          <thead><tr><th>Materiale</th><th>Prezzo</th><th>Quantità</th><th>Valore</th></tr></thead>
+          <tbody id="wh-inventory-body"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Lavoratori</h3>
+        <div class="form-row" style="align-items:flex-end;">
+          <div class="form-group">
+            <label>Lavoratori assunti</label>
+            <input type="number" id="wh-workers" class="form-input" value="0" min="0">
+          </div>
+          <div class="form-group" style="flex:0 0 auto;">
+            <button id="wh-workers-adjust-btn" class="btn btn-outline">Adegua al fabbisogno</button>
+          </div>
+        </div>
+        <p class="hint">Personale richiesto: <span class="mono" id="wh-workers-need">0</span> <span id="wh-workers-deficit" style="display:none; color:var(--danger);"></span></p>
+      </div>
+    </div>
+
+    <!-- ==================== ROTTE ==================== -->
+    <div class="content-panel" data-panel="rotte">
+
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Rotte Commerciali</h1>
+          <p class="panel-sub">Collegamenti tra Porta Ethea e le strutture esterne</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Nuova rotta</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome rotta / destinazione</label>
+            <input type="text" id="route-name" class="form-input" placeholder="es. Rotta per Samat">
+          </div>
+          <div class="form-group">
+            <label>Distanza totale (km)</label>
+            <input type="number" id="route-distance" class="form-input" min="0">
+          </div>
+          <div class="form-group">
+            <label>Avamposto a difesa</label>
+            <select id="route-outpost" class="form-select"><option value="">— nessuno —</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Carico abituale <span class="hint">(opzionale)</span></label>
+            <select id="route-cargo-material" class="form-select"><option value="">— nessuno —</option></select>
+          </div>
+          <div class="form-group">
+            <label>Quantità carico</label>
+            <input type="number" id="route-cargo-qty" class="form-input" min="0" placeholder="es. 40">
+          </div>
+          <div class="form-group" style="flex:0 0 auto;">
+            <button id="route-add-btn" class="btn btn-primary">+ Aggiungi rotta</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Rotte attive</h3>
+        <table class="table">
+          <thead><tr><th>Rotta</th><th>Distanza</th><th>Difesa</th><th>Carico</th><th>Costo/mese</th><th>Rischio</th><th></th></tr></thead>
+          <tbody id="route-body"></tbody>
+        </table>
+        <div id="route-empty" class="empty-state" style="display:none;">
+          <div class="empty-icon">&#9873;</div>
+          Nessuna rotta commerciale registrata.
+        </div>
+        <div class="divider"></div>
+        <div class="stat-strip">
+          <div class="stat-card"><div class="stat-value mono" id="route-total-km">0 km</div><div class="stat-label">Distanza totale</div></div>
+          <div class="stat-card"><div class="stat-value mono" id="route-total-cost">0 mo</div><div class="stat-label">Costo mensile</div></div>
+        </div>
+        <p id="route-warning" class="hint" style="display:none; color:var(--danger);">Hai superato i 400 km totali consigliati.</p>
+      </div>
+    </div>
+
+    <!-- ==================== FINANZE ==================== -->
+    <div class="content-panel" data-panel="finanze">
+
+      <div class="panel-header">
+        <div>
+          <h1 class="panel-title">Finanze</h1>
+          <p class="panel-sub">Bilancio mensile, costi ricorrenti e storico movimenti</p>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-card"><div class="stat-value mono" id="fin-cost-fixed">0 mo</div><div class="stat-label">Costi fissi</div></div>
+          <div class="stat-card"><div class="stat-value mono" id="fin-cost-variable">0 mo</div><div class="stat-label">Costi variabili</div></div>
+          <div class="stat-card"><div class="stat-value mono" id="fin-cost-total">0 mo</div><div class="stat-label">Totale/mese</div></div>
+          <div class="stat-card"><div class="stat-value mono" id="fin-available">0 mo</div><div class="stat-label">Disponibile</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Riserva Bancaria</h3>
+        <p class="hint">Soglia personale: le azioni volontarie non useranno questa riserva.</p>
+        <div class="form-row" style="align-items:center;">
+          <div class="form-group">
+            <label>Riserva fissa (mo)</label>
+            <input type="number" min="0" id="fin-reserve" class="form-input" value="0" style="max-width:150px;">
+          </div>
+          <div class="stat-card"><div class="stat-value mono" id="fin-reserve-current">0 mo</div><div class="stat-label">Riserva attuale</div></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">Costi Fissi</h3>
+          <table class="table">
+            <thead><tr><th>Voce</th><th>Base</th><th>Importo</th></tr></thead>
+            <tbody id="fin-fixed-body"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Costi Variabili</h3>
+          <table class="table">
+            <thead><tr><th>Voce</th><th>Base</th><th>Importo</th></tr></thead>
+            <tbody id="fin-variable-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Chiusura del mese</h3>
+        <p class="hint">Applica produzione, token, rischio rotte e upkeep in un click.</p>
+        <div class="form-row" style="align-items:center;">
+          <div class="stat-card"><div class="stat-value mono" id="fin-month">Mese 1</div><div class="stat-label">Mese corrente</div></div>
+          <div class="form-group">
+            <label>Stagione</label>
+            <select id="fin-season" class="form-select">
+              <option value="Primavera">Primavera</option>
+              <option value="Estate">Estate</option>
+              <option value="Autunno">Autunno</option>
+              <option value="Inverno">Inverno</option>
+            </select>
+          </div>
+          <div class="stat-card" style="min-width:160px;"><div class="stat-value mono" id="fin-after-close">0 mo</div><div class="stat-label">Dopo chiusura</div></div>
+          <div class="form-group" style="flex:0 0 auto;">
+            <button id="fin-close-month-btn" class="btn btn-primary">Chiudi mese</button>
+          </div>
+        </div>
+        <p id="fin-close-warning" class="hint" style="display:none; color:var(--danger);">La tesoreria andrà in negativo dopo la chiusura.</p>
+        <div id="fin-report-box" style="display:none; margin-top:14px;">
+          <h4 style="margin:0 0 6px;">Resoconto dell'ultima chiusura</h4>
+          <pre id="fin-report-text" class="mono" style="white-space:pre-wrap; background:var(--surface-2,#0002); padding:10px 12px; border-radius:8px; max-height:280px; overflow:auto;"></pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Storico movimenti</h3>
+        <table class="table">
+          <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo</th></tr></thead>
+          <tbody id="fin-movements-body"></tbody>
+        </table>
+        <div id="fin-movements-empty" class="empty-state" style="display:none;">
+          <div class="empty-icon">&#9636;</div>
+          Nessun movimento registrato.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Registro Altri QG</h3>
+        <p class="hint">Movimenti economici verso altri Quartier Generali.</p>
+        <div id="fin-altriqg-summary"></div>
+        <table class="table">
+          <thead><tr><th>QG</th><th>Tipo</th><th>Importo</th><th>Nota</th><th>Stato</th><th></th></tr></thead>
+          <tbody id="fin-altriqg-body"></tbody>
+        </table>
+        <div id="fin-altriqg-empty" class="empty-state" style="display:none;">
+          <div class="empty-icon">&#129309;</div>
+          Nessuna voce registrata.
+        </div>
+        <div class="form-row" style="align-items:flex-end; margin-top:10px;">
+          <div class="form-group">
+            <label>QG</label>
+            <input type="text" id="fin-altriqg-name" class="form-input" placeholder="es. QG di Samat">
+          </div>
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="fin-altriqg-type" class="form-select">
+              <option value="da_ricevere">Da ricevere</option>
+              <option value="da_dare">Da dare</option>
+              <option value="entrata">Entrata</option>
+              <option value="uscita">Uscita</option>
+            </select>
+          </div>
+          <div class="form-group" style="max-width:130px;">
+            <label>Importo (mo)</label>
+            <input type="number" min="0" id="fin-altriqg-amount" class="form-input" value="0">
+          </div>
+          <div class="form-group">
+            <label>Nota</label>
+            <input type="text" id="fin-altriqg-note" class="form-input" placeholder="es. quota rotta">
+          </div>
+          <div class="form-group" style="flex:0 0 auto;">
+            <button id="fin-altriqg-add-btn" class="btn btn-outline">+ Aggiungi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ==================== TOAST ==================== -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- ==================== GUIDE MODAL ==================== -->
+<div id="guide-overlay" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <button id="guide-close" class="modal-close" title="Chiudi">✕</button>
+    <h3>Guida al Quartier Generale</h3>
+    <p class="hint">Meccanica di gioco e funzionamento del Registro — Cronache di Unshast</p>
+
+    <details open>
+      <summary>Cos'è e come si apre un QG</summary>
+      <div class="guide-body">
+        Il QG è la base operativa del gruppo: produce risorse, genera oro, offre servizi e va gestito mese per mese.<br><br>
+        <b>Apertura</b>: servono 2 personaggi (Fondatore + Co-fondatore) e <b>300 mo</b> di capitale. Si parte Senza Classe, a Livello 1.
+      </div>
+    </details>
+
+    <details>
+      <summary>Classi e Livello del QG</summary>
+      <div class="guide-body">
+        La <b>Classe</b> (Produzione / Vendita / Militare) si ottiene automaticamente alla prima struttura specializzata.<br><br>
+        Il <b>Livello</b> (1-6) si calcola dai personaggi membri (Lv 3-6 → QG Lv.1, 7-10 → Lv.2, 11-14 → Lv.3, 15-17 → Lv.4, 18-20 → Lv.5, 21+ → Lv.6). Limite attuale: <b>Livello 3</b>.
+      </div>
+    </details>
+
+    <details>
+      <summary>Punti QG</summary>
+      <div class="guide-body">
+        Budget totale: <b>44 punti</b>.
+        <ul>
+          <li>Generali e classe propria: 2 punti</li>
+          <li>Classe diversa: 4 punti</li>
+          <li>Esenti (Avamposto, Impresa): 0 punti</li>
+        </ul>
+      </div>
+    </details>
+
+    <div style="margin-top:16px; text-align:center;">
+      <button id="guide-dismiss" class="btn btn-primary">Ho capito, chiudi</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="./assets/js/app.js"></script>
+</body>
+</html>
