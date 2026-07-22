@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build:
     runs-on: windows-latest
@@ -28,5 +32,6 @@ jobs:
 
       - name: Attesta la provenienza dell'artifact
         uses: actions/attest-build-provenance@v2
+        continue-on-error: true
         with:
           subject-path: src-tauri/target/release/bundle/nsis/*.exe
