@@ -23,6 +23,17 @@
   <div class="loading-sub">Cronache di Unshast</div>
 </div>
 
+<script>
+window.addEventListener('error', function(e) {
+  var el = document.getElementById('loading');
+  if (el) el.innerHTML = '<p style="color:red;font-size:14px;">Errore JS: ' + (e.message || e.filename || 'sconosciuto') + '</p><p style="color:#888;font-size:12px;">' + (e.filename || '') + ' riga ' + (e.lineno || '') + '</p>';
+});
+window.addEventListener('unhandledrejection', function(e) {
+  var el = document.getElementById('loading');
+  if (el) el.innerHTML = '<p style="color:red;font-size:14px;">Promise rejected: ' + (e.reason || 'sconosciuto') + '</p>';
+});
+</script>
+
 <div id="storageWarning" class="storage-warning">
   Il salvataggio locale non è disponibile (modalità privata?). Usa "Esporta backup" spesso per non perdere i dati.
 </div>
@@ -48,6 +59,7 @@
     </div>
   </header>
 
+  <div class="app-body">
   <nav class="sidebar">
     <div class="sidebar-brand">
       <div class="sidebar-logo">QG</div>
@@ -509,6 +521,7 @@
     </div>
 
   </main>
+  </div>
 </div>
 
 <!-- ==================== TOAST ==================== -->
