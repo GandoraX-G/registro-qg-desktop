@@ -268,3 +268,27 @@ textarea {
   color: var(--text-tertiary);
   line-height: 1.4;
 }
+
+/* ========== BRASS BUTTON ========== */
+.btn-brass {
+  background: linear-gradient(180deg, #C9A84C, #B9924F 55%, #8B6D3F);
+  color: #2c1d12;
+  border-color: #8B6D3F;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 2px 4px rgba(0,0,0,.2);
+}
+.btn-brass:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 3px 8px rgba(0,0,0,.28);
+}
+
+/* ========== ROW LAYOUT ========== */
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.row > * {
+  flex: 1;
+  min-width: 110px;
+}

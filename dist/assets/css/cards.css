@@ -277,3 +277,55 @@
   background: var(--primary-light);
   color: var(--primary);
 }
+
+/* ========== SUB-CARD (Collapsible Mechanic Panels) ========== */
+.card.sub-card {
+  padding: 0;
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+.sub-card.cat-generali { border-left-color: var(--tag-generali-bg); }
+.sub-card.cat-produzione { border-left-color: var(--tag-produzione-bg); }
+.sub-card.cat-vendita { border-left-color: var(--tag-vendita-bg); }
+.sub-card.cat-militare { border-left-color: var(--tag-militare-bg); }
+.sub-card > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-family: var(--cinzel);
+  font-size: 13px;
+  color: var(--text);
+  transition: background-color var(--transition);
+}
+.sub-card > summary::-webkit-details-marker { display: none; }
+.sub-card > summary::before {
+  content: "\25B8";
+  color: var(--primary);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: transform 150ms;
+}
+.sub-card[open] > summary::before { transform: rotate(90deg); }
+.sub-card > summary:hover { background: var(--surface-hover); }
+.sub-card-body { padding: 0 18px 16px 18px; }
+
+/* ========== CATALOG EMPTY ========== */
+.catalog-empty {
+  grid-column: 1 / -1;
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--text-tertiary);
+  font-style: italic;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-hover);
+}
+.catalog-empty .icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  opacity: 0.5;
+}

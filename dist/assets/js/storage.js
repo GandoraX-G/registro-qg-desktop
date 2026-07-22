@@ -252,7 +252,7 @@ export function setStorageCallbacks(renderAllFn, showToastFn) {
   _showToast = showToastFn;
 }
 function renderAll() { if (_renderAll) _renderAll(); }
-function showToast(msg) { if (_showToast) _showToast(msg); }
+function showToast(msg, type) { if (_showToast) _showToast(msg, type); }
 
 let saveTimeout = null;
 function saveState(){
@@ -393,7 +393,6 @@ export {
   storageOk,
   classeSbloccataManualmente,
   sottomeccanicaAperta,
-  uid,
   storageAvailable,
   loadState,
   validaStato,

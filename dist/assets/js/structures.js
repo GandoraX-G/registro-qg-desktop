@@ -1,4 +1,4 @@
-import { state, CATALOGO, MATERIALI_PREZZI, PUNTI_QG_MAX, LIVELLO_STRUTTURA_MAX, RARITA_POZIONI, ARGOMENTI_BIBLIOTECA, TEMI_BIBLIOTECA_SCELTE, PIANTE_SPECIALI, OPERA_ARTE_CFG, STUDIO_DIPLOMATICO_CFG, SALA_ARCANA_CFG, AVAMPOSTO_CFG, CAMPO_ADDESTRAMENTO_CFG, SALA_DA_GUERRA_CFG, IMPRESA_CFG, currentTab, catFilter, structSearchTerm, sottomeccanicaAperta, CATEGORIE, setCatFilter, setStructSearchTerm } from './storage.js';
+import { state, CATALOGO, MATERIALI_PREZZI, PUNTI_QG_MAX, LIVELLO_STRUTTURA_MAX, RARITA_POZIONI, ARGOMENTI_BIBLIOTECA, TEMI_BIBLIOTECA_SCELTE, PIANTE_SPECIALI, OPERA_ARTE_CFG, STUDIO_DIPLOMATICO_CFG, SALA_ARCANA_CFG, AVAMPOSTO_CFG, CAMPO_ADDESTRAMENTO_CFG, SALA_DA_GUERRA_CFG, IMPRESA_CFG, catFilter, structSearchTerm, sottomeccanicaAperta, CATEGORIE, setCatFilter, setStructSearchTerm } from './storage.js';
 import { uid, escapeHtml, fmtMo, puntiCosto, puntiSpesiTotali, haRaffineria, scelteProduzioneMiniera, scelteProduzioneAttivaMiniera, registraMovimento, oroDisponibile } from './utils.js';
 import { showToast } from './modal.js';
 import { opzioniDispiegamentoAvamposto, costoDispiegamentoAvamposto, labelTipoDispiegamento, statoIniziale, raggioAvamposto, haUnitaAllenate, scontoNavaleTotale, hasEliportoArcano, unitaMaxAddestrabili, struttureVenditaDisponibili, calcolaRicavoImpresa, ottieniCharm, usaCharm, costruisciCatalizzatore, caricaCatalizzatore, trasferisciCatalizzatore, costoCatalizzatore, gsMassimoCatalizzatore, aggiungiPozione, rimuoviPozione, totalePerRarita, usaCalderone, toggleTemaBiblioteca, aggiungiTemaPersonalizzato, avviaIndagineTema, aggiungiSottospecieBestiario, aggiungiMaterialeBestiario, avviaIndagineBestiario, rimuoviIndagine, piantaSeme, raccogliPianta, creaOperaArte, calcolaPrestigioArtistico, toggleFazioneSelezionata, ottieniCompanion, rimuoviCompanion, livelloIncantesimoMax, costoRituale, avviaRituale, annullaRituale, costoRifornimentoAvamposto, guadagnoPassivoAvamposto, impostaDistanzaAvamposto, toggleRifornimentoRidotto, avviaAddestramento, completaAddestramento, registraAcquistoNavale, cambiaStatoGuerra, salvaNoteGuerra, selezionaStrutturaVenditaImpresa, registraGuadagnoImpresa, aggiungiStrumentoImpresa, rimuoviStrumentoImpresa, registraVenditaImpresa, validaTipoDispiegamentoAvamposto } from './military.js';
@@ -511,7 +511,7 @@ export function initStructureEvents() {
     if (!s) return;
     s.produzioneScelta = sel.value;
     saveState();
-    showToast(`La Miniera estrarr&agrave; ${sel.value} dal prossimo "Chiudi mese"`);
+    showToast(`La Miniera estrarrà ${sel.value} dal prossimo "Chiudi mese"`);
   });
 
   document.getElementById('struct-sub-body').addEventListener('toggle', e => {
@@ -538,7 +538,7 @@ export function initStructureEvents() {
       const nome = document.querySelector(`[data-field='pozNome'][data-uid='${suid}']`).value.trim();
       const rarita = document.querySelector(`[data-field='pozRarita'][data-uid='${suid}']`).value;
       const quantita = Number(document.querySelector(`[data-field='pozQuantita'][data-uid='${suid}']`).value) || 0;
-      if (!nome || quantita <= 0) { showToast('Inserisci nome e quantit&agrave; della pozione'); return; }
+      if (!nome || quantita <= 0) { showToast('Inserisci nome e quantità della pozione'); return; }
       aggiungiPozione(suid, nome, rarita, quantita);
       return;
     }
@@ -674,7 +674,7 @@ export function initStructureEvents() {
     if (aAddest) {
       const suid = aAddest.dataset.uid;
       const nome = document.querySelector(`[data-field='unitaNome'][data-uid='${suid}']`).value.trim();
-      if (!nome) { showToast('Inserisci il nome dell\'unit&agrave;'); return; }
+      if (!nome) { showToast('Inserisci il nome dell\'unità'); return; }
       avviaAddestramento(suid, nome);
       return;
     }
@@ -837,6 +837,7 @@ function smantellaStruttura(uidStr) {
   if (idx < 0) return;
   const s = state.strutture[idx];
   const c = CATALOGO.find(x => x.id === s.catId);
+  if (!confirm(`Sei sicuro di voler smantellare ${c.nome} Liv.${s.livello}? L'operazione non è reversibile.`)) return;
   if (c.id === 'avamposto') {
     c.materiali.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) + mat.u; });
     const rotteScollegate = state.rotte.filter(r => r.avampostoUid === uidStr).length;

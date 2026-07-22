@@ -6,6 +6,7 @@ import { renderRotte, initRouteEvents } from './routes.js';
 import { renderFinanze, initFinanceEvents, setFinanceRenderCallbacks } from './finance.js';
 import { showToast, initToast } from './modal.js';
 import { setRenderCallbacks as militarySetRenderCallbacks } from './military.js';
+import { copySummary } from './utils.js';
 
 /* ============================================================
    GLOBAL RENDER
@@ -84,15 +85,25 @@ function updateThemeButton() {
 function initGuide() {
   const hidden = localStorage.getItem(GUIDE_KEY) === '1';
   const overlay = document.getElementById('guide-overlay');
-  if (overlay) overlay.style.display = hidden ? 'none' : 'flex';
+  if (overlay) {
+    overlay.style.display = hidden ? 'none' : 'flex';
+    if (!hidden) overlay.classList.add('visible');
+  }
 
   document.getElementById('guide-close')?.addEventListener('click', closeGuide);
   document.getElementById('guide-dismiss')?.addEventListener('click', closeGuide);
+  document.getElementById('btn-guide')?.addEventListener('click', openGuide);
+  overlay?.addEventListener('click', e => { if (e.target === overlay) closeGuide(); });
+}
+
+function openGuide() {
+  const overlay = document.getElementById('guide-overlay');
+  if (overlay) { overlay.style.display = 'flex'; overlay.classList.add('visible'); }
 }
 
 function closeGuide() {
   const overlay = document.getElementById('guide-overlay');
-  if (overlay) overlay.style.display = 'none';
+  if (overlay) { overlay.style.display = 'none'; overlay.classList.remove('visible'); }
   localStorage.setItem(GUIDE_KEY, '1');
 }
 
@@ -129,10 +140,28 @@ function initImportExport() {
    ============================================================ */
 function initKeyboard() {
   document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT';
+    if (e.key === 'Escape') {
+      closeGuide();
+      return;
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      switchTab('strutture');
+      setTimeout(() => document.getElementById('struct-search')?.focus(), 100);
+      return;
+    }
+    if (isInput) return;
     const map = { '1': 'panoramica', '2': 'strutture', '3': 'magazzino', '4': 'rotte', '5': 'finanze' };
     if (map[e.key]) { switchTab(map[e.key]); e.preventDefault(); }
   });
+}
+
+/* ============================================================
+   COPY SUMMARY
+   ============================================================ */
+function initCopySummary() {
+  document.getElementById('btn-copy-summary')?.addEventListener('click', copySummary);
 }
 
 /* ============================================================
@@ -144,6 +173,7 @@ async function init() {
   initTheme();
   initNavigation();
   initGuide();
+  initCopySummary();
   initImportExport();
   initKeyboard();
 
