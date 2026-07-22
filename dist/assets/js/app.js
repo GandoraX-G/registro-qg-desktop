@@ -109,6 +109,19 @@ function initImportExport() {
     if (file) importBackup(file);
     e.target.value = '';
   });
+  document.getElementById('btn-reset')?.addEventListener('click', () => {
+    if (!confirm('Vuoi davvero azzerare tutto il registro del QG? L\'operazione non è reversibile. (Consiglio: esporta prima un backup)')) return;
+    Object.assign(state, {
+      nome: 'Il mio Quartier Generale', fondatore: '', cofondatore: '', classe: 'Nessuna', livello: 1,
+      oro: 0, membri: [], strutture: [], materiali: {}, lavoratori: 0, rotte: [],
+      magazzinoScontati: [], movimenti: [], riservaBancaria: 0, registroAltriQG: [],
+      calendario: { mese: 1, stagione: 'Primavera' }, clima: 'Mite',
+      token: { miniera: 0, pesca: 0, concime: 0 }, resocontoUltimoMese: null
+    });
+    renderAll();
+    saveState();
+    showToast('Registro azzerato');
+  });
 }
 
 /* ============================================================
