@@ -40,8 +40,8 @@ export async function loadState(){
   }catch(e){
     console.log("Nessun registro salvato in precedenza, o dati corrotti: si parte da zero.", e);
   }
-  validaStato();
   migraRotteLegacy();
+  validaStato();
   document.getElementById("loading").style.display = "none";
   document.getElementById("app").style.display = "flex";
   callRenderAll();

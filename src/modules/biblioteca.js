@@ -37,8 +37,9 @@ export function aggiungiTemaPersonalizzato(uidStr, nome){
 export function avviaIndagineTema(uidStr, tema, personaggio){
   const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="biblioteca");
   if(!s || !tema || !personaggio) return;
-  s.indagini.push({ id: uid(), tipo: "tema", argomento: tema, personaggio, meseScadenza: state.calendario.mese + 1 });
-  showToast(`Indagine avviata: +5 alle prove su "${tema}" per ${personaggio} fino al mese ${state.calendario.mese+1}`);
+  if(!s.indagini) s.indagini = [];
+  s.indagini.push({ id: uid(), tipo: "tema", argomento: tema, personaggio, meseScadenza: (state.calendario.mese % 12) + 1 });
+  showToast(`Indagine avviata: +5 alle prove su "${tema}" per ${personaggio} fino al mese ${(state.calendario.mese % 12) + 1}`);
   renderAll(); saveState();
 }
 
@@ -64,8 +65,9 @@ export function avviaIndagineBestiario(uidStr, voceId, personaggio){
   const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="biblioteca");
   const v = s && s.bestiario.find(b=>b.id===voceId);
   if(!s || !v || v.materiali<3 || !personaggio) return;
-  s.indagini.push({ id: uid(), tipo: "bestiario", argomento: v.nome, personaggio, meseScadenza: state.calendario.mese + 1 });
-  showToast(`Indagine sul Bestiario avviata: +1d6 contro ${v.nome} per ${personaggio} fino al mese ${state.calendario.mese+1}`);
+  if(!s.indagini) s.indagini = [];
+  s.indagini.push({ id: uid(), tipo: "bestiario", argomento: v.nome, personaggio, meseScadenza: (state.calendario.mese % 12) + 1 });
+  showToast(`Indagine sul Bestiario avviata: +1d6 contro ${v.nome} per ${personaggio} fino al mese ${(state.calendario.mese % 12) + 1}`);
   renderAll(); saveState();
 }
 

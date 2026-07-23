@@ -1,5 +1,5 @@
 export function showToast(msg, type = 'success') {
-  const container = document.getElementById('toast-container');
+  const container = document.getElementById('toast');
   if (!container) return;
   const t = document.createElement('div');
   const typeClass = type === 'warning' ? 'toast-warning' : type === 'danger' ? 'toast-danger' : 'toast-success';

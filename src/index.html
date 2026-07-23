@@ -608,14 +608,16 @@
     <section id="tab-panoramica">
       <div class="topbar">
         <div>
-          <div class="qg-title" id="qgTitleDisplay">Il mio Quartier Generale</div>
-          <div class="qg-sub" id="qgSubDisplay">Nessuna classe · Livello 1</div>
+          <div class="qg-title" id="qg-name-display">Il mio Quartier Generale</div>
+          <div class="qg-sub" id="qg-class-display">Nessuna classe · Livello 1</div>
         </div>
         <div class="stat-strip">
-          <div class="stat-chip"><div class="v mono" id="chipOro">0</div><div class="l">Oro (mo)</div></div>
-          <div class="stat-chip"><div class="v mono" id="chipPunti">0/44</div><div class="l">Punti QG</div></div>
-          <div class="stat-chip"><div class="v mono" id="chipStrutture">0</div><div class="l">Strutture</div></div>
-          <div class="stat-chip"><div class="v mono" id="chipPersonale">0</div><div class="l">Personale</div></div>
+          <div class="stat-chip"><div class="v mono" id="dash-gold">0</div><div class="l">Oro (mo)</div></div>
+          <div class="stat-chip"><div class="v mono" id="dash-points">0/44</div><div class="l">Punti QG</div></div>
+          <div class="stat-chip"><div class="v mono" id="dash-buildings">0</div><div class="l">Strutture</div></div>
+          <div class="stat-chip"><div class="v mono" id="dash-staff">0</div><div class="l">Personale</div></div>
+          <div class="stat-chip"><div class="v mono" id="dash-month">1</div><div class="l">Mese</div></div>
+          <div class="stat-chip"><div class="v mono" id="dash-season">Primavera</div><div class="l">Stagione</div></div>
         </div>
       </div>
 
@@ -623,28 +625,28 @@
         <div class="card">
           <h2 class="section-title">Dati del Quartier Generale</h2>
           <div class="row">
-            <div><label>Nome del QG</label><input type="text" id="inNome" placeholder="es. Bastione della Torcia"></div>
+            <div><label>Nome del QG</label><input type="text" id="dash-in-nome" placeholder="es. Bastione della Torcia"></div>
           </div>
           <div class="row">
-            <div><label>Fondatore</label><input type="text" id="inFondatore" placeholder="Nome personaggio"></div>
-            <div><label>Co-fondatore</label><input type="text" id="inCofondatore" placeholder="Nome personaggio"></div>
+            <div><label>Fondatore</label><input type="text" id="dash-in-fondatore" placeholder="Nome personaggio"></div>
+            <div><label>Co-fondatore</label><input type="text" id="dash-in-cofondatore" placeholder="Nome personaggio"></div>
           </div>
           <div class="row">
             <div>
               <label>Classe del QG</label>
               <div style="display:flex; gap:6px; align-items:center;">
-                <select id="inClasse" style="flex:1;">
+                <select id="dash-in-classe" style="flex:1;">
                   <option value="Nessuna">Senza Classe</option>
                   <option value="Produzione">Produzione</option>
                   <option value="Vendita">Vendita</option>
                   <option value="Militare">Militare</option>
                 </select>
-                <button type="button" class="btn btn-outline btn-sm" id="btnSbloccaClasse" style="flex:0 0 auto; display:none;" title="Consente una correzione manuale eccezionale">🔓</button>
+                <button type="button" class="btn btn-outline btn-sm" id="dash-btn-sblocca-classe" style="flex:0 0 auto; display:none;" title="Consente una correzione manuale eccezionale">🔓</button>
               </div>
             </div>
             <div>
               <label>Livello del QG <span style="font-weight:400;opacity:.7;">(calcolato automaticamente)</span></label>
-              <select id="inLivello" disabled>
+              <select id="dash-in-livello" disabled>
                 <option value="1">Livello 1 (personaggi Lv 3–6)</option>
                 <option value="2">Livello 2 (personaggi Lv 7–10)</option>
                 <option value="3">Livello 3 (personaggi Lv 11–14)</option>
@@ -661,29 +663,37 @@
           <h2 class="section-title">Tesoreria</h2>
           <label>Oro in cassa (mo)</label>
           <div class="row">
-            <div><input type="number" id="inOro" value="0"></div>
+            <div><input type="number" id="dash-in-oro" value="0"></div>
           </div>
           <div class="row" style="margin-top:8px;">
-            <div><label>Movimento rapido</label><input type="number" id="inMovimento" placeholder="es. 50 oppure -20"></div>
-            <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnMovimento" style="margin-bottom:1px;">Applica</button></div>
+            <div><label>Movimento rapido</label><input type="number" id="dash-in-movimento" placeholder="es. 50 oppure -20"></div>
+            <div style="flex:0 0 auto;"><button class="btn btn-brass" id="dash-btn-movimento" style="margin-bottom:1px;">Applica</button></div>
           </div>
           <div class="divider"></div>
           <label style="margin-top:0;">Punti QG</label>
-          <div class="progress-wrap"><div class="progress-bar" id="puntiBar" style="width:0%;"></div><div class="progress-label" id="puntiBarLabel">0 / 44</div></div>
+          <div class="progress-wrap"><div class="progress-bar" id="dash-points-bar" style="width:0%;"></div><div class="progress-label" id="dash-points-label">0 / 44</div></div>
           <div class="hint">Generali e strutture della tua classe costano 2 punti; strutture specializzate di classe diversa costano 4 punti. Superati i 44 punti spesi non potrai costruire altro (le costruzioni esenti, come Avamposti e Imprese aggiuntive, non consumano punti).</div>
         </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Riepilogo QG</h2>
+        <table>
+          <thead><tr><th>Campo</th><th>Valore</th></tr></thead>
+          <tbody id="dash-overview-body"></tbody>
+        </table>
       </div>
 
       <div class="card">
         <h2 class="section-title">Membri del QG</h2>
         <table>
           <thead><tr><th>Personaggio</th><th>Livello</th><th></th></tr></thead>
-          <tbody id="membriBody"></tbody>
+          <tbody id="dash-members-body"></tbody>
         </table>
         <div class="row" style="margin-top:10px;">
-          <div><input type="text" id="inMembroNome" placeholder="Nome personaggio"></div>
-          <div style="max-width:100px;"><input type="number" id="inMembroLivello" placeholder="Lv" min="1" max="30"></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-outline" id="btnAddMembro">+ Aggiungi</button></div>
+          <div><input type="text" id="dash-in-member-name" placeholder="Nome personaggio"></div>
+          <div style="max-width:100px;"><input type="number" id="dash-in-member-level" placeholder="Lv" min="1" max="30"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline" id="dash-btn-add-member">+ Aggiungi</button></div>
         </div>
       </div>
 
@@ -691,7 +701,15 @@
         <h2 class="section-title">Riepilogo Strutture per Categoria</h2>
         <table>
           <thead><tr><th>Categoria</th><th>Costruite</th><th>Costo punti</th></tr></thead>
-          <tbody id="riepilogoBody"></tbody>
+          <tbody id="dash-summary-body"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Attivit&agrave; recenti</h2>
+        <table>
+          <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo dopo</th></tr></thead>
+          <tbody id="dash-activities-body"></tbody>
         </table>
       </div>
     </section>
@@ -707,24 +725,30 @@
 
       <h2 class="section-title">Costruisci una nuova struttura</h2>
       <div class="search-bar">
-        <input type="text" id="structSearch" placeholder="Cerca struttura per nome o materiale..." data-tooltip="Ctrl+K per cercare">
+        <input type="text" id="struct-search" placeholder="Cerca struttura per nome o materiale..." data-tooltip="Ctrl+K per cercare">
       </div>
-      <div class="cat-filters" id="catFilters"></div>
-      <div class="structure-catalog" id="catalogGrid"></div>
+      <div class="cat-filters" id="struct-filters"></div>
+      <div class="structure-catalog" id="struct-catalog"></div>
 
       <div class="divider" style="margin-top:26px;"></div>
 
       <h2 class="section-title">Strutture costruite</h2>
       <table>
         <thead><tr><th>Struttura</th><th>Categoria</th><th>Livello</th><th>Punti spesi</th><th></th></tr></thead>
-        <tbody id="strutturePossedute"></tbody>
+        <tbody id="struct-owned-body"></tbody>
       </table>
-      <div id="struttureEmpty" class="empty" style="display:none;">Le fondamenta del tuo Quartier Generale sono ancora vuote. Scegli una struttura dal catalogo qui sopra per dare inizio alla costruzione.</div>
+      <div id="struct-owned-empty" class="empty" style="display:none;">Le fondamenta del tuo Quartier Generale sono ancora vuote. Scegli una struttura dal catalogo qui sopra per dare inizio alla costruzione.</div>
 
-      <div id="sottomeccanicheWrap" style="display:none;">
+      <div id="struct-sub-wrap" style="display:none;">
         <div class="divider" style="margin-top:26px;"></div>
-        <h2 class="section-title">Sotto-meccaniche attive <span class="tag tag-generali" id="sottomeccanicheCount" style="margin-left:2px;">0</span></h2>
-        <div id="sottomeccanicheBody"></div>
+        <h2 class="section-title">Sotto-meccaniche attive <span class="tag tag-generali" id="struct-sub-count" style="margin-left:2px;">0</span></h2>
+        <div id="struct-sub-body"></div>
+      </div>
+
+      <div id="struct-sat-wrap" style="display:none;">
+        <div class="divider" style="margin-top:26px;"></div>
+        <h2 class="section-title">Satelliti <span class="tag tag-generali" id="struct-sat-count" style="margin-left:2px;">0</span></h2>
+        <div id="struct-sat-body"></div>
       </div>
     </section>
 
@@ -736,7 +760,7 @@
           <div class="qg-sub">Materie prime e beni di scambio</div>
         </div>
         <div class="stat-strip">
-          <div class="stat-chip"><div class="v mono" id="chipValoreMagazzino">0 mo</div><div class="l">Valore totale</div></div>
+          <div class="stat-chip"><div class="v mono" id="wh-total-value">0 mo</div><div class="l">Valore totale</div></div>
         </div>
       </div>
 
@@ -745,39 +769,39 @@
         <div class="row">
           <div>
             <label>Materiale</label>
-            <select id="acqMateriale"></select>
+            <select id="wh-purchase-material"></select>
           </div>
           <div>
-            <label>Quantità (U)</label>
-            <input type="number" id="acqQuantita" min="1" value="1">
+            <label>Quantit&agrave; (U)</label>
+            <input type="number" id="wh-purchase-qty" min="1" value="1">
           </div>
           <div>
             <label>Provenienza</label>
-            <select id="acqProvenienza">
+            <select id="wh-purchase-source">
               <option value="bazaar">Bazaar (prezzo pieno)</option>
               <option value="qg20">Acquisto da un altro QG (−20%)</option>
-              <option value="mag30" id="acqOpzioneMag30" style="display:none;">Materiale scontato dal tuo Magazzino (−30%)</option>
+              <option value="mag30" id="wh-purchase-discount-option" style="display:none;">Materiale scontato dal tuo Magazzino (−30%)</option>
             </select>
           </div>
         </div>
         <div class="row" style="margin-top:8px; align-items:center;">
-          <div class="stat-chip" style="min-width:150px;"><div class="v mono" id="acqCostoPreview">0 mo</div><div class="l">Costo totale</div></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnAcquista">Acquista e aggiungi al magazzino</button></div>
+          <div class="stat-chip" style="min-width:150px;"><div class="v mono" id="wh-purchase-cost">0 mo</div><div class="l">Costo totale</div></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="wh-purchase-btn">Acquista e aggiungi al magazzino</button></div>
         </div>
         <div class="hint">Lo sconto del 20% si applica quando il materiale viene comprato da un altro QG invece che al Bazaar (la Corona di Samat copre la differenza al venditore). Il 30% è disponibile solo per i materiali che il tuo Magazzino ha scelto come scontati (vedi sotto) — non incide sul <em>costo di costruzione</em> delle strutture, che resta sempre quello fisso di catalogo.</div>
       </div>
 
-      <div class="card" id="cardMagazzinoScontati" style="display:none;">
+      <div class="card" id="wh-discounted-wrap" style="display:none;">
         <h2 class="section-title">Materiali scontati dal tuo Magazzino</h2>
         <div class="hint" style="margin-top:0;">Scegli fino a 5 materie prime: quando le acquisti (o un altro QG le acquista da te), lo sconto sale dal 20% al 30%.</div>
-        <div id="magazzinoScontatiGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
+        <div id="wh-discounted-grid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
       </div>
 
       <div class="card">
         <h2 class="section-title">Inventario</h2>
         <table>
-          <thead><tr><th>Materiale</th><th>Prezzo unitario</th><th>Quantità (U)</th><th>Valore</th><th></th></tr></thead>
-          <tbody id="magazzinoBody"></tbody>
+          <thead><tr><th>Materiale</th><th>Prezzo unitario</th><th>Quantit&agrave; (U)</th><th>Valore</th><th></th></tr></thead>
+          <tbody id="wh-inventory-body"></tbody>
         </table>
         <div class="hint">Il prezzo unitario segue il listino ufficiale di Unshast (mo per unità di materiale). Ricorda: acquistando da un altro QG ricevi uno sconto del 20% (fino al 30% se il materiale è tra quelli scontati dal tuo Magazzino).</div>
       </div>
@@ -785,10 +809,10 @@
       <div class="card">
         <h2 class="section-title">Lavoratori</h2>
         <div class="row" style="align-items:flex-end;">
-          <div><label>Lavoratori assunti</label><input type="number" id="inLavoratori" value="0" min="0"></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-outline" id="btnAdeguaLavoratori" style="margin-bottom:1px;">⟳ Adegua al fabbisogno</button></div>
+          <div><label>Lavoratori assunti</label><input type="number" id="wh-workers" value="0" min="0"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline" id="wh-workers-adjust-btn" style="margin-bottom:1px;">⟳ Adegua al fabbisogno</button></div>
         </div>
-        <div class="hint">Ogni lavoratore costa 1 mo al mese. Personale totale richiesto dalle strutture costruite: <span class="mono" id="personaleRichiestoLabel">0</span>. <span id="lavoratoriDeficit" style="display:none; color:var(--red-dk); font-weight:600;"></span></div>
+        <div class="hint">Ogni lavoratore costa 1 mo al mese. Personale totale richiesto dalle strutture costruite: <span class="mono" id="wh-workers-need">0</span>. <span id="wh-workers-deficit" style="display:none; color:var(--red-dk); font-weight:600;"></span></div>
       </div>
     </section>
 
@@ -804,14 +828,14 @@
       <div class="card">
         <h2 class="section-title">Nuova rotta</h2>
         <div class="row">
-          <div><label>Nome rotta / destinazione</label><input type="text" id="rNome" placeholder="es. Rotta per Samat"></div>
-          <div><label>Distanza totale (km)</label><input type="number" id="rDistanza" min="0"></div>
-          <div><label>Avamposto a difesa</label><select id="rAvamposto"><option value="">— nessuno —</option></select></div>
+          <div><label>Nome rotta / destinazione</label><input type="text" id="route-name" placeholder="es. Rotta per Samat"></div>
+          <div><label>Distanza totale (km)</label><input type="number" id="route-distance" min="0"></div>
+          <div><label>Avamposto a difesa</label><select id="route-outpost"><option value="">— nessuno —</option></select></div>
         </div>
         <div class="row">
-          <div><label>Carico abituale <span style="font-weight:400;opacity:.7;">(opzionale)</span></label><select id="rCaricoMateriale"><option value="">— nessuno dichiarato —</option></select></div>
-          <div><label>Quantità carico</label><input type="number" id="rCaricoQuantita" min="0" placeholder="es. 40"></div>
-          <div style="flex:0 0 auto; align-self:flex-end;"><button class="btn btn-brass" id="btnAddRotta">+ Aggiungi rotta</button></div>
+          <div><label>Carico abituale <span style="font-weight:400;opacity:.7;">(opzionale)</span></label><select id="route-cargo-material"><option value="">— nessuno dichiarato —</option></select></div>
+          <div><label>Quantit&agrave; carico</label><input type="number" id="route-cargo-qty" min="0" placeholder="es. 40"></div>
+          <div style="flex:0 0 auto; align-self:flex-end;"><button class="btn btn-brass" id="route-add-btn">+ Aggiungi rotta</button></div>
         </div>
         <div class="hint">Ogni 1° del mese il QG paga 5 mo ogni 100 km di rotta. Un Avamposto può difendere una sola rotta alla volta, entro un raggio di 400 km × il suo livello: oltre il raggio, o senza Avamposto assegnato, esiste il 5% di probabilità (+5% ogni 100 km scoperti) che metà delle risorse trasportate vadano perse a fine mese. Il "carico abituale" è opzionale: se lo dichiari, un attacco riuscito sottrae davvero metà di quella quantità dal magazzino; altrimenti l'attacco viene comunque tirato e registrato nel resoconto, ma senza sottrarre nulla. Gli Avamposti si costruiscono dalla scheda Strutture.</div>
       </div>
@@ -820,15 +844,15 @@
         <h2 class="section-title">Rotte attive</h2>
         <table>
           <thead><tr><th>Rotta</th><th>Distanza</th><th>Difesa</th><th>Carico</th><th>Costo/mese</th><th>Rischio perdita</th><th></th></tr></thead>
-          <tbody id="rotteBody"></tbody>
+          <tbody id="route-body"></tbody>
         </table>
-        <div id="rotteEmpty" class="empty" style="display:none;">Nessuna rotta commerciale registrata.</div>
+        <div id="route-empty" class="empty" style="display:none;">Nessuna rotta commerciale registrata.</div>
         <div class="divider"></div>
         <div class="row">
-          <div class="stat-chip" style="min-width:160px;"><div class="v mono" id="chipKmTotali">0 km</div><div class="l">Distanza totale coperta</div></div>
-          <div class="stat-chip" style="min-width:160px;"><div class="v mono" id="chipCostoRotte">0 mo</div><div class="l">Costo mensile rotte</div></div>
+          <div class="stat-chip" style="min-width:160px;"><div class="v mono" id="route-total-km">0 km</div><div class="l">Distanza totale coperta</div></div>
+          <div class="stat-chip" style="min-width:160px;"><div class="v mono" id="route-total-cost">0 mo</div><div class="l">Costo mensile rotte</div></div>
         </div>
-        <div class="hint" id="rotteWarning" style="display:none; color:var(--red-dk); font-weight:600;">⚠ Hai superato i 400 km totali consigliati per un QG ai livelli iniziali.</div>
+        <div class="hint" id="route-warning" style="display:none; color:var(--red-dk); font-weight:600;">⚠ Hai superato i 400 km totali consigliati per un QG ai livelli iniziali.</div>
       </div>
     </section>
 
@@ -840,10 +864,10 @@
           <div class="qg-sub">Bilancio mensile, costi ricorrenti e storico movimenti</div>
         </div>
         <div class="stat-strip">
-          <div class="stat-chip"><div class="v mono" id="chipCostiFissi">0 mo</div><div class="l">Costi fissi/mese</div></div>
-          <div class="stat-chip"><div class="v mono" id="chipCostiVariabili">0 mo</div><div class="l">Costi variabili/mese</div></div>
-          <div class="stat-chip"><div class="v mono" id="chipCostiTotali">0 mo</div><div class="l">Totale/mese</div></div>
-          <div class="stat-chip"><div class="v mono" id="chipOroDisponibile">0 mo</div><div class="l">Disponibile oltre riserva</div></div>
+          <div class="stat-chip"><div class="v mono" id="fin-cost-fixed">0 mo</div><div class="l">Costi fissi/mese</div></div>
+          <div class="stat-chip"><div class="v mono" id="fin-cost-variable">0 mo</div><div class="l">Costi variabili/mese</div></div>
+          <div class="stat-chip"><div class="v mono" id="fin-cost-total">0 mo</div><div class="l">Totale/mese</div></div>
+          <div class="stat-chip"><div class="v mono" id="fin-available">0 mo</div><div class="l">Disponibile oltre riserva</div></div>
         </div>
       </div>
 
@@ -851,18 +875,18 @@
         <h2 class="section-title">Riserva Bancaria</h2>
         <div class="hint" style="margin-top:0;">Un importo fisso di tesoreria che le azioni volontarie dell'app (costruzioni, acquisti, potenziamenti) non useranno come fondi disponibili. Non è una regola del regolamento: è una soglia personale di comodo. L'upkeep obbligatorio di fine mese la ignora — se lo intacca, la chiusura del mese te lo segnala comunque.</div>
         <div class="row" style="align-items:center;">
-          <div><label>Riserva fissa (mo)</label><input type="number" min="0" id="inRiservaBancaria" value="0" style="max-width:150px;"></div>
-          <div class="stat-chip"><div class="v mono" id="chipRiservaAttuale">0 mo</div><div class="l">Riserva attuale</div></div>
+          <div><label>Riserva fissa (mo)</label><input type="number" min="0" id="fin-reserve" value="0" style="max-width:150px;"></div>
+          <div class="stat-chip"><div class="v mono" id="fin-reserve-current">0 mo</div><div class="l">Riserva attuale</div></div>
         </div>
       </div>
 
       <div class="grid2">
         <div class="card">
           <h2 class="section-title">Costi Fissi</h2>
-          <div class="hint" style="margin-top:0;">Spese ricorrenti indipendenti dall'attività del mese: si pagano finché le condizioni restano invariate.</div>
+          <div class="hint" style="margin-top:0;">Spese ricorrenti indipendenti dall'attivit&agrave; del mese: si pagano finch&eacute; le condizioni restano invariate.</div>
           <table>
             <thead><tr><th>Voce</th><th>Base di calcolo</th><th>Importo/mese</th></tr></thead>
-            <tbody id="costiFissiBody"></tbody>
+            <tbody id="fin-fixed-body"></tbody>
           </table>
         </div>
 
@@ -871,8 +895,30 @@
           <div class="hint" style="margin-top:0;">Spese legate a scelte operative del QG: cambiano in base a rotte attive, distanze e copertura.</div>
           <table>
             <thead><tr><th>Voce</th><th>Base di calcolo</th><th>Importo/mese</th></tr></thead>
-            <tbody id="costiVariabiliBody"></tbody>
+            <tbody id="fin-variable-body"></tbody>
           </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Token</h2>
+        <div class="hint" style="margin-top:0;">Token generati dalla chiusura mensile. Scegli quanti spendere prima di chiudere il mese.</div>
+        <div class="row" style="flex-wrap:wrap; gap:12px;">
+          <div id="fin-token-concime-wrap" style="display:none;">
+            <label>Token Concime (disponibili: <span id="fin-token-concime-count">0</span>)</label>
+            <input type="number" id="fin-token-concime-input" min="0" value="0" style="max-width:80px;">
+            <div class="hint">Ogni token = +10 Beni vegetali (da Campo Coltivato/Giardino)</div>
+          </div>
+          <div id="fin-token-miniera-wrap" style="display:none;">
+            <label>Token Miniera (disponibili: <span id="fin-token-miniera-count">0</span>)</label>
+            <input type="number" id="fin-token-miniera-input" min="0" max="3" value="0" style="max-width:80px;">
+            <div class="hint">Max 3 per chiusura. Tira d6/d10/d12 (1/2/3 token)</div>
+          </div>
+          <div id="fin-token-pesca-wrap" style="display:none;">
+            <label>Token Pesca (disponibili: <span id="fin-token-pesca-count">0</span>)</label>
+            <input type="number" id="fin-token-pesca-input" min="0" max="3" value="0" style="max-width:80px;">
+            <div class="hint">Max 3 per chiusura. Tira d6/d10/d12 (1/2/3 token)</div>
+          </div>
         </div>
       </div>
 
@@ -880,23 +926,23 @@
         <h2 class="section-title">Chiusura del mese</h2>
         <div class="hint" style="margin-top:0;">Applica produzione delle strutture, genera i Token mensili, tira il rischio-attacco su ogni rotta e applica l'upkeep (stipendi + rotte) alla tesoreria — tutto in un click.</div>
         <div class="row" style="align-items:center;">
-          <div class="stat-chip"><div class="v mono" id="chipMeseAttuale">Mese 1</div><div class="l">Mese corrente</div></div>
+          <div class="stat-chip"><div class="v mono" id="fin-month">Mese 1</div><div class="l">Mese corrente</div></div>
           <div>
             <label>Stagione <span style="font-weight:400;opacity:.7;">(avanza da sola ogni 3 mesi; correggila qui se serve)</span></label>
-            <select id="inStagione">
+            <select id="fin-season">
               <option value="Primavera">Primavera (+10 Campo Coltivato)</option>
               <option value="Estate">Estate (+5 Campo Coltivato)</option>
               <option value="Autunno">Autunno (−5 Campo Coltivato)</option>
               <option value="Inverno">Inverno (−10 Campo Coltivato)</option>
             </select>
           </div>
-          <div class="stat-chip" style="min-width:180px;"><div class="v mono" id="chipSaldoDopoChiusura">0 mo</div><div class="l">Oro dopo la chiusura</div></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="btnChiudiMese">📕 Chiudi mese</button></div>
+          <div class="stat-chip" style="min-width:180px;"><div class="v mono" id="fin-after-close">0 mo</div><div class="l">Oro dopo la chiusura</div></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="fin-close-month-btn">📕 Chiudi mese</button></div>
         </div>
-        <div class="hint" id="chiusuraAvviso" style="display:none; color:var(--red-dk); font-weight:600;">⚠ La tesoreria andrà in negativo dopo la chiusura di questo mese.</div>
-        <div id="resocontoMeseBox" style="display:none; margin-top:14px;">
+        <div class="hint" id="fin-close-warning" style="display:none; color:var(--red-dk); font-weight:600;">⚠ La tesoreria andrà in negativo dopo la chiusura di questo mese.</div>
+        <div id="fin-report-box" style="display:none; margin-top:14px;">
           <h3 style="margin:0 0 6px;">Resoconto dell'ultima chiusura</h3>
-          <pre id="resocontoMeseTesto" class="mono" style="white-space:pre-wrap; background:var(--panel-2,#0002); padding:10px 12px; border-radius:8px; max-height:280px; overflow:auto;"></pre>
+          <pre id="fin-report-text" class="mono" style="white-space:pre-wrap; background:var(--panel-2,#0002); padding:10px 12px; border-radius:8px; max-height:280px; overflow:auto;"></pre>
         </div>
       </div>
 
@@ -904,34 +950,34 @@
         <h2 class="section-title">Storico movimenti</h2>
         <table>
           <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo dopo</th></tr></thead>
-          <tbody id="movimentiBody"></tbody>
+          <tbody id="fin-movements-body"></tbody>
         </table>
-        <div id="movimentiEmpty" class="empty" style="display:none;">Nessun movimento registrato ancora. Ogni acquisto, costruzione o chiusura mese verrà annotato qui automaticamente.</div>
+        <div id="fin-movements-empty" class="empty" style="display:none;">Nessun movimento registrato ancora. Ogni acquisto, costruzione o chiusura mese verrà annotato qui automaticamente.</div>
       </div>
 
       <div class="card">
         <h2 class="section-title">Registro Altri QG</h2>
         <div class="hint" style="margin-top:0;">Tiene traccia dei movimenti economici con altri Quartier Generali (non è una meccanica del regolamento, solo un promemoria contabile). "Da ricevere"/"Da dare" sono crediti/debiti aperti: restano in sospeso finché non premi "Salda", poi l'importo viene applicato alla tesoreria. "Entrata"/"Uscita" sono invece movimenti già avvenuti: vengono applicati subito alla tesoreria al momento in cui li registri, come una spesa/entrata qualsiasi, ma restano annotati qui per tenere lo storico ordinato per QG.</div>
-        <div id="altriQgRiepilogo" style="margin-bottom:10px;"></div>
+        <div id="fin-altriqg-summary" style="margin-bottom:10px;"></div>
         <table>
           <thead><tr><th>QG</th><th>Tipo</th><th>Importo</th><th>Nota</th><th>Stato</th><th></th></tr></thead>
-          <tbody id="altriQgBody"></tbody>
+          <tbody id="fin-altriqg-body"></tbody>
         </table>
-        <div id="altriQgEmpty" class="empty" style="display:none;">Nessuna voce registrata.</div>
+        <div id="fin-altriqg-empty" class="empty" style="display:none;">Nessuna voce registrata.</div>
         <div class="row" style="align-items:flex-end; margin-top:10px;">
-          <div><label>QG</label><input type="text" id="altriQgNome" placeholder="es. QG di Samat"></div>
+          <div><label>QG</label><input type="text" id="fin-altriqg-name" placeholder="es. QG di Samat"></div>
           <div>
             <label>Tipo</label>
-            <select id="altriQgTipo">
+            <select id="fin-altriqg-type">
               <option value="da_ricevere">Da ricevere (credito aperto)</option>
               <option value="da_dare">Da dare (debito aperto)</option>
               <option value="entrata">Entrata (già incassata)</option>
               <option value="uscita">Uscita (già pagata)</option>
             </select>
           </div>
-          <div style="max-width:130px;"><label>Importo (mo)</label><input type="number" min="0" id="altriQgImporto" value="0"></div>
-          <div><label>Nota</label><input type="text" id="altriQgNota" placeholder="es. quota rotta condivisa"></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" id="btnAggiungiAltriQg">+ Aggiungi voce</button></div>
+          <div style="max-width:130px;"><label>Importo (mo)</label><input type="number" min="0" id="fin-altriqg-amount" value="0"></div>
+          <div><label>Nota</label><input type="text" id="fin-altriqg-note" placeholder="es. quota rotta condivisa"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" id="fin-altriqg-add-btn">+ Aggiungi voce</button></div>
         </div>
       </div>
     </section>

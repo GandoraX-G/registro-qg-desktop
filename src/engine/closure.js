@@ -52,7 +52,8 @@ function eseguiChiusuraMese(){
   state.tokenConcimeDaSpendere = 0;
 
   function spendTokenDice(tokenType, label) {
-    const maxSpent = Math.min(state.token[tokenType] || 0, Number(state[tokenType + 'DaSpendere']) || 0, 3);
+    const key = 'token' + tokenType.charAt(0).toUpperCase() + tokenType.slice(1) + 'DaSpendere';
+    const maxSpent = Math.min(state.token[tokenType] || 0, Number(state[key]) || 0, 3);
     if (maxSpent <= 0) return;
     state.token[tokenType] -= maxSpent;
     const sides = maxSpent === 1 ? 6 : maxSpent === 2 ? 10 : 12;
@@ -89,6 +90,7 @@ function eseguiChiusuraMese(){
   let indaginiScadute = 0;
   state.strutture.forEach(s=>{
     if(s.catId!=="biblioteca") return;
+    if(!s.indagini) s.indagini = [];
     const primaCount = s.indagini.length;
     s.indagini = s.indagini.filter(i=>i.meseScadenza > state.calendario.mese);
     indaginiScadute += primaCount - s.indagini.length;
@@ -156,7 +158,7 @@ function eseguiChiusuraMese(){
 
   const stagionePrecedente = state.calendario.stagione;
   state.calendario.mese++;
-  if(state.calendario.mese % 3 === 1 && state.calendario.mese>1){
+    if(state.calendario.mese % 3 === 1 && state.calendario.mese>1){
     state.calendario.stagione = prossimaStagione(stagionePrecedente);
   }
   righe.push(`Si passa al mese ${state.calendario.mese} (${state.calendario.stagione}).`);

@@ -3,6 +3,7 @@ import { saveState } from '../core/persistence.js';
 import { showToast } from '../ui/toast.js';
 import { uid, fmtMo } from '../utils/format.js';
 import { registraMovimento, oroDisponibile } from '../engine/finance.js';
+import { haRaffineria } from '../engine/production.js';
 
 let _renderAll, _renderSottomeccaniche;
 export function setFattoriaRenderCallbacks(ra, rs) { _renderAll = ra; _renderSottomeccaniche = rs; }

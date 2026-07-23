@@ -32,7 +32,10 @@ export function importBackup(file){
       Object.assign(state, {
         nome:"Il mio Quartier Generale", fondatore:"", cofondatore:"", classe:"Nessuna", livello:1,
         oro:0, membri:[], strutture:[], materiali:{}, lavoratori:0, rotte:[], magazzinoScontati:[], movimenti:[],
-        riservaBancaria:0, registroAltriQG:[]
+        riservaBancaria:0, registroAltriQG:[],
+        calendario:{ mese:1, stagione:"Primavera" }, clima:"Mite",
+        token:{ miniera:0, pesca:0, concime:0 }, tokenConcimeDaSpendere:0, tokenMinieraDaSpendere:0, tokenPescaDaSpendere:0,
+        satelliti:[], resocontoUltimoMese:null
       }, parsed);
       saveState();
       callRenderAll();

@@ -58,7 +58,8 @@ export function aggiungiStrumentoImpresa(uidStr, nome){
   if(!nomeOk){ showToast("Inserisci il nome dello strumento ⚠"); return; }
   const max = (IMPRESA_CFG.strumentiPerLivello ?? 2) * s.livello;
   if((s.strumenti||[]).length >= max){ showToast(`Massimo ${max} strumenti a questo livello ⚠`); return; }
-  if(s.strumenti.includes(nomeOk)){ showToast("Strumento già selezionato"); return; }
+  if((s.strumenti||[]).includes(nomeOk)){ showToast("Strumento già selezionato"); return; }
+  s.strumenti = s.strumenti || [];
   s.strumenti.push(nomeOk);
   renderSottomeccaniche();
   saveState();

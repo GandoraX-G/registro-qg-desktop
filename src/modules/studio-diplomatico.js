@@ -25,6 +25,7 @@ export function toggleFazioneSelezionata(uidStr, fazione){
 export function ottieniCompanion(uidStr, nome, livelloTarget){
   const s = state.strutture.find(x=>x.uid===uidStr && x.catId==="studio_diplomatico");
   if(!s || !nome) return;
+  livelloTarget = Math.max(1, Number(livelloTarget) || 1);
   if(s.fazioniSelezionate.length===0){ showToast("Seleziona almeno una fazione prima di ottenere un Companion ⚠"); return; }
   const base = STUDIO_DIPLOMATICO_CFG.costoCompanionBaseMo ?? 50;
   const extra = STUDIO_DIPLOMATICO_CFG.costoCompanionPerLivelloExtraMo ?? 50;
