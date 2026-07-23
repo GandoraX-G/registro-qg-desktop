@@ -1,19 +1,25 @@
-# Build output
+# Rust / Cargo
 src-tauri/target/
 src-tauri/gen/
 
-# OS files
+# Build output
+dist/
+
+# Node
+node_modules/
+
+# OS
 .DS_Store
 Thumbs.db
 Desktop.ini
 
-# Editor
+# Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# Dependencies (no node_modules needed — vanilla JS)
-node_modules/
-package-lock.json
+# Logs
+*.log
+npm-debug.log*
