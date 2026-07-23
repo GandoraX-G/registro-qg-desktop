@@ -8,7 +8,7 @@ import { renderDashboard, initDashboardEvents } from './dashboard.js';
 import { renderFinanze, initFinanceEvents } from './finance.js';
 import { renderCatalogo, renderStrutturePossedute, renderSottomeccaniche, renderSatelliti, initStructureEvents } from './structures.js';
 import { renderMagazzino, initWarehouseEvents } from './warehouse.js';
-import { renderRotte, initRouteEvents } from './routes.js';
+import { renderRotte, initRoutesEvents } from './routes.js';
 
 /* ============================================================
    GLOBAL RENDER

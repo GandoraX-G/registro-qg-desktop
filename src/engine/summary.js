@@ -4,7 +4,7 @@ import { fmtMo } from '../utils/format.js';
 import { puntiSpesiTotali, personaleRichiesto } from './qg.js';
 import { costoMensileRotte, costiFissiMensili, costiVariabiliMensili, costoMensileTotale } from './finance.js';
 import { kmDifesiRotta } from '../modules/outpost.js';
-import { showToast } from '../ui/modal.js';
+import { showToast } from '../ui/toast.js';
 
 function buildSummaryText(){
   const righe = [];

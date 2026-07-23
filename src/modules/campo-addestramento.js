@@ -1,4 +1,5 @@
-import { state, CAMPO_ADDESTRAMENTO_CFG } from '../core/config.js';
+import { state } from '../core/state.js';
+import { CAMPO_ADDESTRAMENTO_CFG } from '../core/config.js';
 import { saveState } from '../core/persistence.js';
 import { showToast } from '../ui/toast.js';
 import { uid, fmtMo } from '../utils/format.js';

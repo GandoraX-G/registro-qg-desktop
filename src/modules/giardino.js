@@ -1,4 +1,5 @@
-import { state, PIANTE_SPECIALI } from '../core/config.js';
+import { state } from '../core/state.js';
+import { PIANTE_SPECIALI } from '../core/config.js';
 import { saveState } from '../core/persistence.js';
 import { showToast } from '../ui/toast.js';
 import { uid, fmtMo } from '../utils/format.js';

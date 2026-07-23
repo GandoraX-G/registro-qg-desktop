@@ -4,7 +4,8 @@ import { showToast } from './toast.js';
 import { uid, fmtMo } from '../utils/format.js';
 import { COSTO_ROTTA_MO_PER_100KM, MATERIALI_PREZZI } from '../core/config.js';
 import { escapeHtml } from '../utils/format.js';
-import { calcRischio, costoMensileRotte } from '../engine/risk.js';
+import { calcRischio } from '../engine/risk.js';
+import { costoMensileRotte } from '../engine/finance.js';
 import { popolaSelectAvamposti, kmDifesiRotta } from '../modules/outpost.js';
 
 function popolaSelectCaricoMateriali() {

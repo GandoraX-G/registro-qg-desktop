@@ -4,7 +4,7 @@ import { showToast } from './toast.js';
 import { fmtMo } from '../utils/format.js';
 import { CATALOGO, MATERIALI_PREZZI, SCONTO_ACQUISTO_ALTRO_QG, SCONTO_ACQUISTO_MAGAZZINO } from '../core/config.js';
 import { registraMovimento, oroDisponibile } from '../engine/finance.js';
-import { valoreMagazzino, personaleRichiesto } from '../utils/dom.js';
+import { valoreMagazzino, personaleRichiesto } from '../engine/qg.js';
 
 let _renderAll, _renderTopbar, _renderFinanze;
 export function setWarehouseCallbacks(callbacks) {
