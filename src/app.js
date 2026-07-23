@@ -101,14 +101,7 @@ function initGuide() {
    ============================================================ */
 function initImportExport() {
   document.getElementById('exportBtn')?.addEventListener('click', exportBackup);
-  document.getElementById('importBtn')?.addEventListener('click', () => {
-    document.getElementById('importFile')?.click();
-  });
-  document.getElementById('importFile')?.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (file) importBackup(file);
-    e.target.value = '';
-  });
+  document.getElementById('importBtn')?.addEventListener('click', () => importBackup());
   document.getElementById('resetBtn')?.addEventListener('click', () => {
     if (!confirm('Vuoi davvero azzerare tutto il registro del QG? L\'operazione non è reversibile. (Consiglio: esporta prima un backup)')) return;
     Object.assign(state, {
