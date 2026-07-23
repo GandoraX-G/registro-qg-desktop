@@ -23,13 +23,6 @@ import { livelloIncantesimoMax, avviaRituale, annullaRituale } from '../modules/
 import { TIPI_ANIMALI, CARNE_PER_ANIMALE, aggiungiAnimale, rimuoviAnimale, sacrificaAnimale } from '../modules/fattoria.js';
 import { ALBERI_LUOGO, scegliAlberoSegheria, ottieniSemeOLio } from '../modules/segheria.js';
 
-let _renderAll;
-export function setRenderAll(fn) { _renderAll = fn; }
-let _renderDashboard;
-export function setRenderDashboard(fn) { _renderDashboard = fn; }
-
-function renderAll() { if (_renderAll) _renderAll(); }
-function renderDashboard() { if (_renderDashboard) _renderDashboard(); }
 
 const SATELLITE_CATALOG_IDS = ['campo_coltivato', 'miniera', 'pescheria', 'segheria', 'fattoria'];
 

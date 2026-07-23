@@ -1,12 +1,12 @@
 import { caricaConfig } from './core/config.js';
-import { state, currentTab, setCurrentTab, THEME_KEY, GUIDE_KEY } from './core/state.js';
+import { state, currentTab, setCurrentTab, THEME_KEY, GUIDE_KEY, setRenderAll, setRenderDashboard } from './core/state.js';
 import { saveState, loadState } from './core/persistence.js';
 import { exportBackup, importBackup } from './core/backup.js';
 import { showToast } from './ui/toast.js';
 import { copySummary } from './engine/summary.js';
 import { renderDashboard, initDashboardEvents } from './ui/dashboard.js';
 import { renderFinanze, initFinanceEvents } from './ui/finance.js';
-import { renderCatalogo, renderStrutturePossedute, renderSottomeccaniche, renderSatelliti, initStructureEvents, setRenderAll, setRenderDashboard } from './ui/structures.js';
+import { renderCatalogo, renderStrutturePossedute, renderSottomeccaniche, renderSatelliti, initStructureEvents } from './ui/structures.js';
 import { renderMagazzino, initWarehouseEvents, setWarehouseCallbacks } from './ui/warehouse.js';
 import { renderRotte, initRoutesEvents } from './ui/routes.js';
 
