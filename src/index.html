@@ -862,72 +862,16 @@
           <div class="qg-title">Finanze</div>
           <div class="qg-sub">Bilancio mensile, costi ricorrenti e storico movimenti</div>
         </div>
-        <div class="stat-strip">
-          <div class="stat-chip"><div class="v mono" id="fin-cost-fixed">0 mo</div><div class="l">Costi fissi/mese</div></div>
-          <div class="stat-chip"><div class="v mono" id="fin-cost-variable">0 mo</div><div class="l">Costi variabili/mese</div></div>
-          <div class="stat-chip"><div class="v mono" id="fin-cost-total">0 mo</div><div class="l">Totale/mese</div></div>
-          <div class="stat-chip"><div class="v mono" id="fin-available">0 mo</div><div class="l">Disponibile oltre riserva</div></div>
-        </div>
       </div>
 
-      <div class="card">
-        <h2 class="section-title">Riserva Bancaria</h2>
-        <div class="hint" style="margin-top:0;">Un importo fisso di tesoreria che le azioni volontarie dell'app (costruzioni, acquisti, potenziamenti) non useranno come fondi disponibili. Non è una regola del regolamento: è una soglia personale di comodo. L'upkeep obbligatorio di fine mese la ignora — se lo intacca, la chiusura del mese te lo segnala comunque.</div>
-        <div class="row" style="align-items:center;">
-          <div><label>Riserva fissa (mo)</label><input type="number" min="0" id="fin-reserve" value="0" style="max-width:150px;"></div>
-          <div class="stat-chip"><div class="v mono" id="fin-reserve-current">0 mo</div><div class="l">Riserva attuale</div></div>
-        </div>
-      </div>
-
-      <div class="grid2">
-        <div class="card">
-          <h2 class="section-title">Costi Fissi</h2>
-          <div class="hint" style="margin-top:0;">Spese ricorrenti indipendenti dall'attivit&agrave; del mese: si pagano finch&eacute; le condizioni restano invariate.</div>
-          <table>
-            <thead><tr><th>Voce</th><th>Base di calcolo</th><th>Importo/mese</th></tr></thead>
-            <tbody id="fin-fixed-body"></tbody>
-          </table>
-        </div>
-
-        <div class="card">
-          <h2 class="section-title">Costi Variabili</h2>
-          <div class="hint" style="margin-top:0;">Spese legate a scelte operative del QG: cambiano in base a rotte attive, distanze e copertura.</div>
-          <table>
-            <thead><tr><th>Voce</th><th>Base di calcolo</th><th>Importo/mese</th></tr></thead>
-            <tbody id="fin-variable-body"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2 class="section-title">Token</h2>
-        <div class="hint" style="margin-top:0;">Token generati dalla chiusura mensile. Scegli quanti spendere prima di chiudere il mese.</div>
-        <div class="row" style="flex-wrap:wrap; gap:12px;">
-          <div id="fin-token-concime-wrap" style="display:none;">
-            <label>Token Concime (disponibili: <span id="fin-token-concime-count">0</span>)</label>
-            <input type="number" id="fin-token-concime-input" min="0" value="0" style="max-width:80px;">
-            <div class="hint">Ogni token = +10 Beni vegetali (da Campo Coltivato/Giardino)</div>
-          </div>
-          <div id="fin-token-miniera-wrap" style="display:none;">
-            <label>Token Miniera (disponibili: <span id="fin-token-miniera-count">0</span>)</label>
-            <input type="number" id="fin-token-miniera-input" min="0" max="3" value="0" style="max-width:80px;">
-            <div class="hint">Max 3 per chiusura. Tira d6/d10/d12 (1/2/3 token)</div>
-          </div>
-          <div id="fin-token-pesca-wrap" style="display:none;">
-            <label>Token Pesca (disponibili: <span id="fin-token-pesca-count">0</span>)</label>
-            <input type="number" id="fin-token-pesca-input" min="0" max="3" value="0" style="max-width:80px;">
-            <div class="hint">Max 3 per chiusura. Tira d6/d10/d12 (1/2/3 token)</div>
-          </div>
-        </div>
-      </div>
-
+      <!-- ── 1. CHIUSURA MESE (token inclusi) ── -->
       <div class="card">
         <h2 class="section-title">Chiusura del mese</h2>
-        <div class="hint" style="margin-top:0;">Applica produzione delle strutture, genera i Token mensili, tira il rischio-attacco su ogni rotta e applica l'upkeep (stipendi + rotte) alla tesoreria — tutto in un click.</div>
-        <div class="row" style="align-items:center;">
+        <div class="hint" style="margin-top:0;">Applica produzione, token, rischio rotte e upkeep — tutto in un click. Allocare i token prima della chiusura.</div>
+        <div class="row" style="align-items:center; margin-bottom:12px;">
           <div class="stat-chip"><div class="v mono" id="fin-month">Mese 1</div><div class="l">Mese corrente</div></div>
           <div>
-            <label>Stagione <span style="font-weight:400;opacity:.7;">(avanza da sola ogni 3 mesi; correggila qui se serve)</span></label>
+            <label>Stagione</label>
             <select id="fin-season">
               <option value="Primavera">Primavera (+10 Campo Coltivato)</option>
               <option value="Estate">Estate (+5 Campo Coltivato)</option>
@@ -938,47 +882,96 @@
           <div class="stat-chip" style="min-width:180px;"><div class="v mono" id="fin-after-close">0 mo</div><div class="l">Oro dopo la chiusura</div></div>
           <div style="flex:0 0 auto;"><button class="btn btn-brass" id="fin-close-month-btn">📕 Chiudi mese</button></div>
         </div>
+        <div id="fin-tokens-row" class="row" style="flex-wrap:wrap; gap:16px; display:none;">
+          <div id="fin-token-concime-wrap" style="display:none;">
+            <label>Concime <span class="fin-tok-count">(<span id="fin-token-concime-count">0</span> disp.)</span></label>
+            <input type="number" id="fin-token-concime-input" min="0" value="0" style="max-width:70px;">
+            <div class="hint">+10 Beni vegetali / token</div>
+          </div>
+          <div id="fin-token-miniera-wrap" style="display:none;">
+            <label>Miniera <span class="fin-tok-count">(<span id="fin-token-miniera-count">0</span> disp.)</span></label>
+            <input type="number" id="fin-token-miniera-input" min="0" max="3" value="0" style="max-width:70px;">
+            <div class="hint">Max 3 · tira d6/d10/d12</div>
+          </div>
+          <div id="fin-token-pesca-wrap" style="display:none;">
+            <label>Pesca <span class="fin-tok-count">(<span id="fin-token-pesca-count">0</span> disp.)</span></label>
+            <input type="number" id="fin-token-pesca-input" min="0" max="3" value="0" style="max-width:70px;">
+            <div class="hint">Max 3 · tira d6/d10/d12</div>
+          </div>
+        </div>
         <div class="hint" id="fin-close-warning" style="display:none; color:var(--red-dk); font-weight:600;">⚠ La tesoreria andrà in negativo dopo la chiusura di questo mese.</div>
-        <div id="fin-report-box" style="display:none; margin-top:14px;">
-          <h3 style="margin:0 0 6px;">Resoconto dell'ultima chiusura</h3>
+        <div id="fin-report-box" style="display:none; margin-top:12px;">
+          <h3 style="margin:0 0 6px;">Resoconto ultima chiusura</h3>
           <pre id="fin-report-text" class="mono" style="white-space:pre-wrap; background:var(--panel-2,#0002); padding:10px 12px; border-radius:8px; max-height:280px; overflow:auto;"></pre>
         </div>
       </div>
 
+      <!-- ── 2. RIEPILOGO COSTI (fissi + variabili unificati) ── -->
       <div class="card">
-        <h2 class="section-title">Storico movimenti</h2>
+        <h2 class="section-title">Riepilogo costi mensili</h2>
+        <div class="hint" style="margin-top:0;">Costi fissi (stipendi) e variabili (rotte) in un'unica tabella.</div>
         <table>
-          <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo dopo</th></tr></thead>
-          <tbody id="fin-movements-body"></tbody>
+          <thead><tr><th>Tipo</th><th>Voce</th><th>Base di calcolo</th><th style="text-align:right">Importo/mese</th></tr></thead>
+          <tbody id="fin-cost-body"></tbody>
+          <tfoot><tr><td colspan="3" style="text-align:right; font-weight:700;">Totale</td><td class="mono" style="text-align:right; font-weight:700;" id="fin-cost-total">0 mo</td></tr></tfoot>
         </table>
-        <div id="fin-movements-empty" class="empty" style="display:none;">Nessun movimento registrato ancora. Ogni acquisto, costruzione o chiusura mese verrà annotato qui automaticamente.</div>
-      </div>
-
-      <div class="card">
-        <h2 class="section-title">Registro Altri QG</h2>
-        <div class="hint" style="margin-top:0;">Tiene traccia dei movimenti economici con altri Quartier Generali (non è una meccanica del regolamento, solo un promemoria contabile). "Da ricevere"/"Da dare" sono crediti/debiti aperti: restano in sospeso finché non premi "Salda", poi l'importo viene applicato alla tesoreria. "Entrata"/"Uscita" sono invece movimenti già avvenuti: vengono applicati subito alla tesoreria al momento in cui li registri, come una spesa/entrata qualsiasi, ma restano annotati qui per tenere lo storico ordinato per QG.</div>
-        <div id="fin-altriqg-summary" style="margin-bottom:10px;"></div>
-        <table>
-          <thead><tr><th>QG</th><th>Tipo</th><th>Importo</th><th>Nota</th><th>Stato</th><th></th></tr></thead>
-          <tbody id="fin-altriqg-body"></tbody>
-        </table>
-        <div id="fin-altriqg-empty" class="empty" style="display:none;">Nessuna voce registrata.</div>
-        <div class="row" style="align-items:flex-end; margin-top:10px;">
-          <div><label>QG</label><input type="text" id="fin-altriqg-name" placeholder="es. QG di Samat"></div>
-          <div>
-            <label>Tipo</label>
-            <select id="fin-altriqg-type">
-              <option value="da_ricevere">Da ricevere (credito aperto)</option>
-              <option value="da_dare">Da dare (debito aperto)</option>
-              <option value="entrata">Entrata (già incassata)</option>
-              <option value="uscita">Uscita (già pagata)</option>
-            </select>
-          </div>
-          <div style="max-width:130px;"><label>Importo (mo)</label><input type="number" min="0" id="fin-altriqg-amount" value="0"></div>
-          <div><label>Nota</label><input type="text" id="fin-altriqg-note" placeholder="es. quota rotta condivisa"></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" id="fin-altriqg-add-btn">+ Aggiungi voce</button></div>
+        <div class="row" style="margin-top:8px; gap:16px; justify-content:flex-end;">
+          <div class="stat-chip" style="border:none; background:none; padding:0;"><div class="v mono" id="fin-available">0 mo</div><div class="l">Disponibile oltre riserva</div></div>
         </div>
       </div>
+
+      <!-- ── 3. STORICO MOVIMENTI (pieghevole) ── -->
+      <details class="card sub-card">
+        <summary>Storico movimenti</summary>
+        <div class="sub-card-body">
+          <table>
+            <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo dopo</th></tr></thead>
+            <tbody id="fin-movements-body"></tbody>
+          </table>
+          <div id="fin-movements-empty" class="empty" style="display:none;">Nessun movimento registrato ancora.</div>
+        </div>
+      </details>
+
+      <!-- ── 4. REGISTRO ALTRI QG (pieghevole) ── -->
+      <details class="card sub-card">
+        <summary>Registro Altri QG</summary>
+        <div class="sub-card-body">
+          <div class="hint" style="margin-top:0;">Promemoria contabile. "Da ricevere"/"Da dare" = crediti/debiti aperti (Salda per applicare). "Entrata"/"Uscita" = movimenti già applicati alla tesoreria.</div>
+          <div id="fin-altriqg-summary" style="margin-bottom:10px;"></div>
+          <table>
+            <thead><tr><th>QG</th><th>Tipo</th><th>Importo</th><th>Nota</th><th>Stato</th><th></th></tr></thead>
+            <tbody id="fin-altriqg-body"></tbody>
+          </table>
+          <div id="fin-altriqg-empty" class="empty" style="display:none;">Nessuna voce registrata.</div>
+          <div class="row" style="align-items:flex-end; margin-top:10px;">
+            <div><label>QG</label><input type="text" id="fin-altriqg-name" placeholder="es. QG di Samat"></div>
+            <div>
+              <label>Tipo</label>
+              <select id="fin-altriqg-type">
+                <option value="da_ricevere">Da ricevere (credito)</option>
+                <option value="da_dare">Da dare (debito)</option>
+                <option value="entrata">Entrata (incassata)</option>
+                <option value="uscita">Uscita (pagata)</option>
+              </select>
+            </div>
+            <div style="max-width:130px;"><label>Importo (mo)</label><input type="number" min="0" id="fin-altriqg-amount" value="0"></div>
+            <div><label>Nota</label><input type="text" id="fin-altriqg-note" placeholder="es. quota rotta condivisa"></div>
+            <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" id="fin-altriqg-add-btn">+ Aggiungi</button></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- ── 5. RISERVA BANCARIA (pieghevole, in fondo) ── -->
+      <details class="card sub-card">
+        <summary>Riserva Bancaria</summary>
+        <div class="sub-card-body">
+          <div class="hint" style="margin-top:0;">Soglia personale: le azioni volontarie dell'app (costruzioni, acquisti) non useranno questi fondi. L'upkeep obbligatorio la ignora — se lo intacca, la chiusura lo segnala.</div>
+          <div class="row" style="align-items:center;">
+            <div><label>Riserva fissa (mo)</label><input type="number" min="0" id="fin-reserve" value="0" style="max-width:150px;"></div>
+            <div class="stat-chip"><div class="v mono" id="fin-reserve-current">0 mo</div><div class="l">Riserva attuale</div></div>
+          </div>
+        </div>
+      </details>
     </section>
 
   </div>

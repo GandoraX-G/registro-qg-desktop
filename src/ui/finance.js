@@ -7,7 +7,7 @@ import { fmtMo, escapeHtml, uid } from '../utils/format.js';
 import { showToast } from '../ui/toast.js';
 
 /* ============================================================
-   FINANZE — costi fissi/variabili e storico movimenti
+   FINANZE — costi unificati, chiusura mese, storico, altri QG
    ============================================================ */
 export function renderFinanze() {
   document.getElementById('fin-month').textContent = `Mese ${state.calendario.mese}`;
@@ -18,75 +18,66 @@ export function renderFinanze() {
     document.getElementById('fin-report-text').textContent = state.resocontoUltimoMese;
   }
 
-  // Token Concime: mostra/nascondi il pannello di spesa
-  const tokenConcimeDisponibili = state.token.concime || 0;
-  const wrapConcime = document.getElementById('fin-token-concime-wrap');
-  if (wrapConcime) {
-    if (tokenConcimeDisponibili > 0) {
-      wrapConcime.style.display = 'block';
-      document.getElementById('fin-token-concime-count').textContent = tokenConcimeDisponibili;
-      const inputConcime = document.getElementById('fin-token-concime-input');
-      inputConcime.max = tokenConcimeDisponibili;
-      if (Number(inputConcime.value) > tokenConcimeDisponibili) inputConcime.value = tokenConcimeDisponibili;
-    } else {
-      wrapConcime.style.display = 'none';
-    }
+  /* ── Token concime/miniera/pesca ── */
+  const tokC = state.token.concime || 0;
+  const tokM = state.token.miniera || 0;
+  const tokP = state.token.pesca || 0;
+  const hasTokens = tokC + tokM + tokP > 0;
+  const tokensRow = document.getElementById('fin-tokens-row');
+  if (tokensRow) tokensRow.style.display = hasTokens ? 'flex' : 'none';
+
+  const wrapC = document.getElementById('fin-token-concime-wrap');
+  if (wrapC) {
+    wrapC.style.display = tokC > 0 ? 'block' : 'none';
+    document.getElementById('fin-token-concime-count').textContent = tokC;
+    const inp = document.getElementById('fin-token-concime-input');
+    inp.max = tokC;
+    if (Number(inp.value) > tokC) inp.value = tokC;
   }
 
-  // Token Miniera
-  const tokenMinieraDisponibili = state.token.miniera || 0;
-  const wrapMiniera = document.getElementById('fin-token-miniera-wrap');
-  if (wrapMiniera) {
-    if (tokenMinieraDisponibili > 0) {
-      wrapMiniera.style.display = 'block';
-      document.getElementById('fin-token-miniera-count').textContent = tokenMinieraDisponibili;
-      const inputMiniera = document.getElementById('fin-token-miniera-input');
-      inputMiniera.max = Math.min(tokenMinieraDisponibili, 3);
-      if (Number(inputMiniera.value) > tokenMinieraDisponibili) inputMiniera.value = tokenMinieraDisponibili;
-    } else {
-      wrapMiniera.style.display = 'none';
-    }
+  const wrapM = document.getElementById('fin-token-miniera-wrap');
+  if (wrapM) {
+    wrapM.style.display = tokM > 0 ? 'block' : 'none';
+    document.getElementById('fin-token-miniera-count').textContent = tokM;
+    const inp = document.getElementById('fin-token-miniera-input');
+    inp.max = Math.min(tokM, 3);
+    if (Number(inp.value) > tokM) inp.value = tokM;
   }
 
-  // Token Pesca
-  const tokenPescaDisponibili = state.token.pesca || 0;
-  const wrapPesca = document.getElementById('fin-token-pesca-wrap');
-  if (wrapPesca) {
-    if (tokenPescaDisponibili > 0) {
-      wrapPesca.style.display = 'block';
-      document.getElementById('fin-token-pesca-count').textContent = tokenPescaDisponibili;
-      const inputPesca = document.getElementById('fin-token-pesca-input');
-      inputPesca.max = Math.min(tokenPescaDisponibili, 3);
-      if (Number(inputPesca.value) > tokenPescaDisponibili) inputPesca.value = tokenPescaDisponibili;
-    } else {
-      wrapPesca.style.display = 'none';
-    }
+  const wrapP = document.getElementById('fin-token-pesca-wrap');
+  if (wrapP) {
+    wrapP.style.display = tokP > 0 ? 'block' : 'none';
+    document.getElementById('fin-token-pesca-count').textContent = tokP;
+    const inp = document.getElementById('fin-token-pesca-input');
+    inp.max = Math.min(tokP, 3);
+    if (Number(inp.value) > tokP) inp.value = tokP;
   }
 
+  /* ── Riepilogo costi unificato ── */
   const fissi = costiFissiDettaglio();
   const variabili = costiVariabiliDettaglio();
   const totFissi = costiFissiMensili();
   const totVariabili = costiVariabiliMensili();
   const totale = totFissi + totVariabili;
 
-  const fBody = document.getElementById('fin-fixed-body');
-  fBody.innerHTML = '';
+  const cBody = document.getElementById('fin-cost-body');
+  cBody.innerHTML = '';
   fissi.forEach(r => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(r.voce)}</td><td class="mono">${escapeHtml(r.base)}</td><td class="mono">${fmtMo(r.importo)} mo</td>`;
-    fBody.appendChild(tr);
+    tr.innerHTML = `<td><span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;background:rgba(80,120,180,.12);color:var(--blue-dk);">Fisso</span></td><td>${escapeHtml(r.voce)}</td><td class="mono">${escapeHtml(r.base)}</td><td class="mono" style="text-align:right">${fmtMo(r.importo)} mo</td>`;
+    cBody.appendChild(tr);
   });
-
-  const vBody = document.getElementById('fin-variable-body');
-  vBody.innerHTML = '';
   variabili.forEach(r => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(r.voce)}</td><td class="mono">${escapeHtml(r.base)}</td><td class="mono">${fmtMo(r.importo)} mo</td>`;
-    vBody.appendChild(tr);
+    tr.innerHTML = `<td><span style="display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;background:rgba(160,120,60,.12);color:var(--amber-dk);">Variabile</span></td><td>${escapeHtml(r.voce)}</td><td class="mono">${escapeHtml(r.base)}</td><td class="mono" style="text-align:right">${fmtMo(r.importo)} mo</td>`;
+    cBody.appendChild(tr);
   });
+  if (fissi.length === 0 && variabili.length === 0) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="4" class="empty">Nessun costo attivo</td>`;
+    cBody.appendChild(tr);
+  }
 
-  document.getElementById('fin-cost-fixed').textContent = fmtMo(totFissi) + ' mo';
-  document.getElementById('fin-cost-variable').textContent = fmtMo(totVariabili) + ' mo';
   document.getElementById('fin-cost-total').textContent = fmtMo(totale) + ' mo';
   document.getElementById('fin-available').textContent = fmtMo(oroDisponibile()) + ' mo';
 
@@ -100,14 +91,15 @@ export function renderFinanze() {
   const avviso = document.getElementById('fin-close-warning');
   if (saldoDopo < 0) {
     avviso.style.display = 'block';
-    avviso.textContent = '⚠ La tesoreria andrà in negativo dopo la chiusura di questo mese.';
+    avviso.textContent = '\u26a0 La tesoreria andr\u00e0 in negativo dopo la chiusura di questo mese.';
   } else if (saldoDopo < (state.riservaBancaria || 0)) {
     avviso.style.display = 'block';
-    avviso.textContent = `⚠ Dopo la chiusura la tesoreria (${fmtMo(saldoDopo)} mo) scenderà sotto la riserva bancaria fissata (${fmtMo(state.riservaBancaria)} mo).`;
+    avviso.textContent = `\u26a0 Dopo la chiusura la tesoreria (${fmtMo(saldoDopo)} mo) scender\u00e0 sotto la riserva bancaria fissata (${fmtMo(state.riservaBancaria)} mo).`;
   } else {
     avviso.style.display = 'none';
   }
 
+  /* ── Storico movimenti ── */
   const mBody = document.getElementById('fin-movements-body');
   const mEmpty = document.getElementById('fin-movements-empty');
   mBody.innerHTML = '';
@@ -124,6 +116,7 @@ export function renderFinanze() {
     });
   }
 
+  /* ── Registro Altri QG ── */
   const aBody = document.getElementById('fin-altriqg-body');
   const aEmpty = document.getElementById('fin-altriqg-empty');
   const aRiepilogo = document.getElementById('fin-altriqg-summary');
@@ -147,7 +140,7 @@ export function renderFinanze() {
       const tipoCls = positivo ? 'amount-pos' : 'amount-neg';
       const azioni = (!v.saldato && (v.tipo === 'da_ricevere' || v.tipo === 'da_dare')) ?
         `<button class="btn btn-brass btn-sm" data-action="salda-altriqg" data-uid="${v.uid}">Salda</button>` : '';
-      const stato = v.saldato ? (v.tipo === 'entrata' || v.tipo === 'uscita' ? '✓ Registrato' : '✓ Saldato') : 'Aperto';
+      const stato = v.saldato ? (v.tipo === 'entrata' || v.tipo === 'uscita') ? '\u2713 Registrato' : '\u2713 Saldato' : 'Aperto';
       tr.innerHTML = `<td>${escapeHtml(v.nome)}</td><td class="${tipoCls}">${tipoLabel}</td><td class="mono">${fmtMo(v.importo)} mo</td><td>${escapeHtml(v.nota || '')}</td><td>${stato}</td><td style="white-space:nowrap;">${azioni} <button class="btn btn-danger btn-sm" data-action="rimuovi-altriqg" data-uid="${v.uid}">Rimuovi</button></td>`;
       aBody.appendChild(tr);
     });
@@ -170,43 +163,30 @@ export function renderFinanze() {
       return `<tr><td>${escapeHtml(nome)}</td><td class="mono ${clsScambiato}">${r.scambiato >= 0 ? '+' : ''}${fmtMo(r.scambiato)} mo</td><td class="mono ${clsAperto}">${r.aperto >= 0 ? '+' : ''}${fmtMo(r.aperto)} mo</td></tr>`;
     }).join('');
     aRiepilogo.innerHTML = `
-      <div class="hint" style="margin:0 0 4px;">Riepilogo per QG — "Scambiato" = movimenti già applicati alla tesoreria, "Aperto" = crediti (+) o debiti (−) ancora da saldare.</div>
+      <div class="hint" style="margin:0 0 4px;">Riepilogo per QG — "Scambiato" = movimenti gi\u00e0 applicati alla tesoreria, "Aperto" = crediti (+) o debiti (\u2212) ancora da saldare.</div>
       <table><thead><tr><th>QG</th><th>Scambiato</th><th>Aperto</th></tr></thead><tbody>${righeRiepilogo}</tbody></table>`;
   }
 }
 
 /* ============================================================
-   REGISTRO ALTRI QG — movimenti economici verso altri Quartier Generali
-   ------------------------------------------------------------
-   Non è una meccanica del regolamento: è un promemoria contabile
-   richiesto dall'utente. Due modalità:
-   - "da_ricevere"/"da_dare": crediti/debiti aperti. Restano in sospeso
-     finché non si preme "Salda", che applica l'importo alla tesoreria
-     e li segna come chiusi.
-   - "entrata"/"uscita": movimenti già avvenuti, applicati subito alla
-     tesoreria alla registrazione (richiesto dall'utente per poter
-     segnare anche le spese/entrate reali già scambiate coi vari QG,
-     non solo i crediti/debiti in sospeso).
-   Nessuna voce viene mai rimossa automaticamente, per lasciare una
-   traccia storica; il riepilogo per QG in cima alla tabella aggrega
-   "scambiato" (movimenti realmente applicati) e "aperto" (sospesi).
+   REGISTRO ALTRI QG — movimenti economici verso altri QG
    ============================================================ */
 export function aggiungiAltriQg(nome, tipo, importo, nota) {
   const nomeOk = (nome || '').trim();
   const imp = Math.max(0, Number(importo) || 0);
-  if (!nomeOk) { showToast('Inserisci il nome del QG ⚠'); return; }
-  if (imp <= 0) { showToast('Inserisci un importo valido ⚠'); return; }
+  if (!nomeOk) { showToast('Inserisci il nome del QG \u26a0'); return; }
+  if (imp <= 0) { showToast('Inserisci un importo valido \u26a0'); return; }
   const tipiValidi = ['da_ricevere', 'da_dare', 'entrata', 'uscita'];
   if (!tipiValidi.includes(tipo)) tipo = 'da_ricevere';
   const notaOk = (nota || '').trim();
 
   if (tipo === 'entrata' || tipo === 'uscita') {
     if (tipo === 'uscita' && oroDisponibile() < imp) {
-      showToast('Oro insufficiente in tesoreria (oltre la riserva bancaria) ⚠');
+      showToast('Oro insufficiente in tesoreria (oltre la riserva bancaria) \u26a0');
       return;
     }
     const importoMovimento = tipo === 'entrata' ? imp : -imp;
-    registraMovimento(`Registro Altri QG — ${nomeOk} (${tipo === 'entrata' ? 'entrata' : 'uscita'})${notaOk ? ': ' + notaOk : ''}`, importoMovimento);
+    registraMovimento(`Registro Altri QG \u2014 ${nomeOk} (${tipo === 'entrata' ? 'entrata' : 'uscita'})${notaOk ? ': ' + notaOk : ''}`, importoMovimento);
     state.registroAltriQG.push({ uid: uid(), nome: nomeOk, tipo, importo: imp, nota: notaOk, saldato: true });
     showToast(tipo === 'entrata' ? 'Entrata registrata e applicata alla tesoreria' : 'Uscita registrata e applicata alla tesoreria');
     callRenderAll();
@@ -222,11 +202,11 @@ export function saldaAltriQg(uidStr) {
   const v = state.registroAltriQG.find(x => x.uid === uidStr);
   if (!v || v.saldato) return;
   if (v.tipo === 'da_dare' && oroDisponibile() < v.importo) {
-    showToast('Oro insufficiente in tesoreria (oltre la riserva bancaria) ⚠');
+    showToast('Oro insufficiente in tesoreria (oltre la riserva bancaria) \u26a0');
     return;
   }
   const importoMovimento = v.tipo === 'da_ricevere' ? v.importo : -v.importo;
-  registraMovimento(`Registro Altri QG — ${v.nome} (${v.tipo === 'da_ricevere' ? 'ricevuto' : 'pagato'})${v.nota ? ': ' + v.nota : ''}`, importoMovimento);
+  registraMovimento(`Registro Altri QG \u2014 ${v.nome} (${v.tipo === 'da_ricevere' ? 'ricevuto' : 'pagato'})${v.nota ? ': ' + v.nota : ''}`, importoMovimento);
   v.saldato = true;
   showToast('Voce saldata e applicata alla tesoreria');
   callRenderAll();
@@ -285,19 +265,16 @@ export function initFinanceEvents() {
     const anteprima = calcolaProduzioneMensile().length + state.rotte.length + costoMensileTotale();
     if (anteprima <= 0 && state.strutture.length === 0) { showToast('Nessuna struttura o rotta attiva: niente da chiudere'); return; }
     if (!confirm(`Chiudere ${state.calendario.stagione}, mese ${state.calendario.mese}? Verranno applicate produzione, token, rischio rotte e upkeep.`)) return;
-    // Imposta quanti Token Concime spendere (lette dal pannello UI)
     const inputConcime = document.getElementById('fin-token-concime-input');
     if (inputConcime) {
       state.tokenConcimeDaSpendere = Math.max(0, Math.min(state.token.concime || 0, Number(inputConcime.value) || 0));
       inputConcime.value = 0;
     }
-    // Token Miniera (max 3)
     const inputMiniera = document.getElementById('fin-token-miniera-input');
     if (inputMiniera) {
       state.tokenMinieraDaSpendere = Math.max(0, Math.min(state.token.miniera || 0, 3, Number(inputMiniera.value) || 0));
       inputMiniera.value = 0;
     }
-    // Token Pesca (max 3)
     const inputPesca = document.getElementById('fin-token-pesca-input');
     if (inputPesca) {
       state.tokenPescaDaSpendere = Math.max(0, Math.min(state.token.pesca || 0, 3, Number(inputPesca.value) || 0));
