@@ -36,11 +36,8 @@ jobs:
       - name: Build Vite frontend
         run: npm run build
 
-      - name: Installa Tauri CLI
-        run: cargo install tauri-cli
-
       - name: Compila l'app Windows
-        run: cargo tauri build
+        run: npx tauri build
 
       - name: Carica l'installer come artifact scaricabile
         uses: actions/upload-artifact@v4
