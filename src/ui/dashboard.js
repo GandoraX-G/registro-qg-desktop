@@ -12,10 +12,6 @@ let classeSbloccataManualmente = false;
 export function renderDashboard() {
   state.livello = calcolaLivelloQGDaMembri();
 
-  document.getElementById('dash-gold').textContent = fmtMo(state.oro);
-  document.getElementById('dash-points').textContent = `${puntiSpesiTotali()}/${PUNTI_QG_MAX}`;
-  document.getElementById('dash-buildings').textContent = state.strutture.length;
-  document.getElementById('dash-staff').textContent = personaleRichiesto();
   document.getElementById('dash-month').textContent = state.calendario.mese;
   document.getElementById('dash-season').textContent = state.calendario.stagione;
 

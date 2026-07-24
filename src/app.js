@@ -162,6 +162,10 @@ async function init() {
   document.getElementById('ttSwitch')?.addEventListener('click', toggleTheme);
   document.getElementById('copySummaryBtn')?.addEventListener('click', copySummary);
 
+  document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+    document.querySelector('.app')?.classList.toggle('sidebar-collapsed');
+  });
+
   switchTab(currentTab || 'panoramica');
 
   document.getElementById('loading').style.display = 'none';
