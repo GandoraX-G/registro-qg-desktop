@@ -37,7 +37,7 @@ jobs:
         run: npm run build
 
       - name: Installa Tauri CLI
-        run: cargo install tauri-cli --locked
+        run: cargo install tauri-cli
 
       - name: Compila l'app Windows
         run: cargo tauri build

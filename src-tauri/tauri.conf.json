@@ -3,7 +3,6 @@
   "productName": "Registro del Quartier Generale",
   "version": "1.0.0",
   "identifier": "com.gandora.registroqg",
-  "copyright": "© 2026 GandoraX-G",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
