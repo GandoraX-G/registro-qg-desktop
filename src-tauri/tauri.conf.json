@@ -27,9 +27,6 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
-    "icon": ["icons/icon.ico"],
-    "nsis": {
-      "installMode": "perUser"
-    }
+    "icon": ["icons/icon.ico"]
   }
 }
