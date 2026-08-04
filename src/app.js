@@ -143,6 +143,7 @@ async function init() {
 
   initTheme();
   initNavigation();
+  initSidebar();
   initGuide();
   initImportExport();
   initKeyboard();
@@ -156,8 +157,45 @@ async function init() {
   document.getElementById('ttSwitch')?.addEventListener('click', toggleTheme);
   document.getElementById('copySummaryBtn')?.addEventListener('click', copySummary);
 
+  switchTab(currentTab || 'panoramica');
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'grid';
+}
+
+/* ============================================================
+   SIDEBAR TOGGLE + MOBILE
+   ============================================================ */
+function initSidebar() {
   document.getElementById('sidebarToggle')?.addEventListener('click', () => {
     document.querySelector('.app')?.classList.toggle('sidebar-collapsed');
+  });
+
+  const hamburger = document.getElementById('hamburgerBtn');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileOverlay');
+
+  function openMobileSidebar() {
+    sidebar?.classList.add('open');
+    overlay?.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMobileSidebar() {
+    sidebar?.classList.remove('open');
+    overlay?.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  hamburger?.addEventListener('click', () => {
+    if (sidebar?.classList.contains('open')) closeMobileSidebar();
+    else openMobileSidebar();
+  });
+  overlay?.addEventListener('click', closeMobileSidebar);
+
+  document.querySelectorAll('.nav-item[data-tab]').forEach(el => {
+    el.addEventListener('click', () => {
+      if (window.innerWidth <= 960) closeMobileSidebar();
+    });
   });
 
   const mql = window.matchMedia('(max-width:1200px)');
@@ -169,11 +207,6 @@ async function init() {
   };
   autoCollapse(mql);
   mql.addEventListener('change', autoCollapse);
-
-  switchTab(currentTab || 'panoramica');
-
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('app').style.display = 'grid';
 }
 
 init().catch(err => {
