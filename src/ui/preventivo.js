@@ -55,7 +55,6 @@ function getDisponibilita() {
 }
 
 function renderPreventivo() {
-  const body = document.getElementById('prev-body');
   const summaryOro = document.getElementById('prev-summary-oro');
   const summaryPunti = document.getElementById('prev-summary-punti');
   const summaryPersonale = document.getElementById('prev-summary-personale');
@@ -65,7 +64,7 @@ function renderPreventivo() {
   const tableBody = document.getElementById('prev-table-body');
   const compareBody = document.getElementById('prev-compare-body');
 
-  if (!body) return;
+  if (!summaryOro) return;
 
   const { oroTotale, puntiTotale, personaleTotale, materialiTutti } = calcolaTotale();
   const disp = getDisponibilita();
