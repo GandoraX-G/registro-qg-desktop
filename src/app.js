@@ -9,6 +9,7 @@ import { renderFinanze, initFinanceEvents } from './ui/finance.js';
 import { renderCatalogo, renderStrutturePossedute, renderSottomeccaniche, renderSatelliti, initStructureEvents } from './ui/structures.js';
 import { renderMagazzino, initWarehouseEvents, setWarehouseCallbacks } from './ui/warehouse.js';
 import { renderRotte, initRoutesEvents } from './ui/routes.js';
+import { renderPreventivo, renderCatalogoPreventivo, initPreventivoEvents, loadSavedPreventivo } from './ui/preventivo.js';
 
 /* ============================================================
    GLOBAL RENDER
@@ -21,6 +22,7 @@ function renderAll() {
     case 'magazzino': renderMagazzino(); break;
     case 'rotte': renderRotte(); break;
     case 'finanze': renderFinanze(); break;
+    case 'preventivo': renderCatalogoPreventivo(); renderPreventivo(); break;
   }
 }
 
@@ -32,7 +34,7 @@ function switchTab(tabId) {
   document.querySelectorAll('.nav-item').forEach(el => {
     el.classList.toggle('active', el.dataset.tab === tabId);
   });
-  ['panoramica', 'strutture', 'magazzino', 'rotte', 'finanze'].forEach(t => {
+  ['panoramica', 'strutture', 'magazzino', 'rotte', 'finanze', 'preventivo'].forEach(t => {
     const panel = document.getElementById('tab-' + t);
     if (panel) panel.style.display = (t === tabId) ? 'block' : 'none';
   });
@@ -123,7 +125,7 @@ function initKeyboard() {
       setTimeout(() => document.getElementById('struct-search')?.focus(), 100);
       return;
     }
-    const map = { '1': 'panoramica', '2': 'strutture', '3': 'magazzino', '4': 'rotte', '5': 'finanze' };
+    const map = { '1': 'panoramica', '2': 'strutture', '3': 'magazzino', '4': 'rotte', '5': 'finanze', '6': 'preventivo' };
     if (map[e.key]) { switchTab(map[e.key]); e.preventDefault(); }
   });
 }
@@ -153,6 +155,8 @@ async function init() {
   initWarehouseEvents();
   initRoutesEvents();
   initFinanceEvents();
+  initPreventivoEvents();
+  loadSavedPreventivo();
 
   document.getElementById('ttSwitch')?.addEventListener('click', toggleTheme);
   document.getElementById('copySummaryBtn')?.addEventListener('click', copySummary);

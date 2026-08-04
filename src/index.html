@@ -814,6 +814,10 @@
         <span class="nav-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
         Finanze
       </div>
+      <div class="nav-item" data-tab="preventivo">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+        Preventivo
+      </div>
     </nav>
 
     <div class="theme-toggle" id="themeToggle" title="Cambia tema chiaro/scuro">
@@ -1240,6 +1244,79 @@
       </details>
     </section>
 
+    <!-- ================= PREVENTIVO ================= -->
+    <section id="tab-preventivo" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Preventivo Costi</div>
+          <div class="qg-sub">Pianifica la costruzione di strutture e calcola i costi totali</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Riepilogo Preventivo</h2>
+        <div class="row" style="flex-wrap:wrap; gap:16px;">
+          <div class="stat-chip" style="min-width:120px;"><div class="v mono" id="prev-summary-oro">0 mo</div><div class="l">Costo totale oro</div></div>
+          <div class="stat-chip" style="min-width:120px;"><div class="v mono" id="prev-summary-punti">0 / 44</div><div class="l">Punti QG</div></div>
+          <div class="stat-chip" style="min-width:120px;"><div class="v mono" id="prev-summary-personale">0 uomini</div><div class="l">Personale</div></div>
+          <div class="stat-chip" style="min-width:200px; text-align:left;"><div class="l" style="margin-bottom:4px;">Materiali totali</div><div id="prev-summary-materials" style="display:flex;flex-wrap:wrap;gap:2px;"></div></div>
+        </div>
+        <div class="row" style="margin-top:12px; justify-content:flex-end; gap:8px;">
+          <button class="btn btn-outline btn-sm" id="prev-save-btn">Salva preventivo</button>
+          <button class="btn btn-outline btn-sm" id="prev-load-btn">Carica preventivo</button>
+          <button class="btn btn-danger btn-sm" id="prev-clear-btn">Svuota</button>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card" id="prev-catalog-card">
+          <h2 class="section-title">Catalogo strutture</h2>
+          <div class="search-bar">
+            <input type="text" id="prev-search" placeholder="Cerca struttura per nome o categoria...">
+          </div>
+          <div class="structure-catalog" id="prev-catalog-grid" style="max-height:400px; overflow-y:auto;"></div>
+        </div>
+
+        <div>
+          <div class="card" id="prev-list" style="display:none;">
+            <h2 class="section-title">Strutture nel preventivo</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Struttura</th>
+                  <th>Categoria</th>
+                  <th>Pt</th>
+                  <th>Costo/u</th>
+                  <th>Qta</th>
+                  <th>Tot oro</th>
+                  <th>Tot pt</th>
+                  <th>Pers.</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="prev-table-body"></tbody>
+            </table>
+          </div>
+          <div id="prev-empty" class="card">
+            <div class="empty">Seleziona strutture dal catalogo per iniziare a compilare il preventivo.</div>
+          </div>
+          <div class="card">
+            <h2 class="section-title">Confronto con disponibilit&agrave; attuale</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Risorsa</th>
+                  <th>Necessaria</th>
+                  <th>Disponibile</th>
+                  <th>Differenza</th>
+                </tr>
+              </thead>
+              <tbody id="prev-compare-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 </div>
 
