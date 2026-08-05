@@ -26,7 +26,6 @@ export const state = {
 };
 
 export const STORAGE_KEY = "qg_registro_v1";
-export const THEME_KEY = "qg_tema";
 export const GUIDE_KEY = "qg_guida_nascosta";
 
 export let currentTab = "panoramica";

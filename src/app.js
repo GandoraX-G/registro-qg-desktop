@@ -1,5 +1,5 @@
 import { caricaConfig } from './core/config.js';
-import { state, currentTab, setCurrentTab, THEME_KEY, GUIDE_KEY, setRenderAll, setRenderDashboard, setRenderSottomeccaniche } from './core/state.js';
+import { state, currentTab, setCurrentTab, GUIDE_KEY, setRenderAll, setRenderDashboard, setRenderSottomeccaniche } from './core/state.js';
 import { saveState, loadState } from './core/persistence.js';
 import { exportBackup, importBackup } from './core/backup.js';
 import { showToast } from './ui/toast.js';
@@ -45,32 +45,6 @@ function initNavigation() {
   document.querySelectorAll('.nav-item[data-tab]').forEach(el => {
     el.addEventListener('click', () => switchTab(el.dataset.tab));
   });
-}
-
-/* ============================================================
-   THEME
-   ============================================================ */
-function initTheme() {
-  const saved = localStorage.getItem(THEME_KEY);
-  if (saved === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  }
-  updateThemeButton();
-}
-
-function updateThemeButton() {
-  const sw = document.getElementById('ttSwitch');
-  const label = document.getElementById('themeLabel');
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  if (sw) sw.classList.toggle('on', isDark);
-  if (label) label.textContent = isDark ? 'Tema Scuro' : 'Tema Chiaro';
-}
-
-function toggleTheme() {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  localStorage.setItem(THEME_KEY, isDark ? 'light' : 'dark');
-  updateThemeButton();
 }
 
 /* ============================================================
@@ -149,7 +123,6 @@ async function init() {
 
   await loadState();
 
-  initTheme();
   initNavigation();
   initSidebar();
   initGuide();
@@ -164,7 +137,6 @@ async function init() {
   initPreventivoEvents();
   loadSavedPreventivo();
 
-  document.getElementById('ttSwitch')?.addEventListener('click', toggleTheme);
   document.getElementById('copySummaryBtn')?.addEventListener('click', copySummary);
 
   switchTab(currentTab || 'panoramica');

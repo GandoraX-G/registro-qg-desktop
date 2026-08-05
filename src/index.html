@@ -14,7 +14,7 @@
   @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
   @keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 
-  :root, :root[data-theme="light"]{
+  :root{
     --wood-1:#130e09;
     --wood-2:#1a1309;
     --wood-3:#2a1e10;
@@ -71,59 +71,6 @@
     --radius-lg:14px;
     --transition-fast:.15s ease;
     --transition-med:.25s ease;
-  }
-  :root[data-theme="dark"]{
-    --wood-1:#0a0805;
-    --wood-2:#110c07;
-    --wood-3:#1e160e;
-    --brass:#b9924f;
-    --brass-bright:#eac588;
-    --brass-dark:#5e421c;
-    --brass-text:#2c1d12;
-    --parchment:#161210;
-    --parchment-2:#1e1914;
-    --parchment-deep:#120f0b;
-    --parchment-edge:#3d3222;
-    --ink:#eddcb8;
-    --ink-soft:#a89872;
-    --line:#4a3d28;
-    --green:#7fae72;
-    --green-dk:#5c8a51;
-    --red:#d4796a;
-    --red-dk:#b85c4d;
-    --red-soft:#d4796a;
-    --red-hover:#e8a090;
-    --red-bg:rgba(138,58,46,.18);
-    --blue:#7fa0bd;
-    --blue-dk:#5c839e;
-    --amber:#d4a24a;
-    --amber-dk:#b98730;
-    --input-bg:#1a150f;
-    --panel-bg:rgba(20,16,10,.6);
-    --progress-track:#2a2218;
-    --kbd-bg:rgba(255,255,255,.06);
-    --kbd-border:rgba(255,255,255,.12);
-    --table-border:rgba(184,166,116,.15);
-    --table-stripe:rgba(90,74,55,.04);
-    --table-hover:rgba(185,146,79,.08);
-    --btn-outline-hover:rgba(255,255,255,.05);
-    --btn-danger-hover:rgba(138,58,46,.15);
-    --focus-ring:rgba(185,146,79,.25);
-    --sidebar-btn-border:rgba(185,146,79,.12);
-    --sidebar-btn-border-hover:rgba(185,146,79,.22);
-    --modal-overlay:rgba(0,0,0,.75);
-    --shadow-sm:0 1px 3px rgba(0,0,0,.2);
-    --shadow:0 4px 12px rgba(0,0,0,.3), 0 1px 3px rgba(0,0,0,.2);
-    --shadow-lift:0 12px 28px rgba(0,0,0,.4), 0 2px 6px rgba(0,0,0,.25);
-    --shadow-inset:inset 0 1px 0 rgba(255,255,255,.03), inset 0 -1px 2px rgba(0,0,0,.3);
-    --sidebar-bg:linear-gradient(180deg, #110c07 0%, #0a0805 100%);
-    --sidebar-border:rgba(185,146,79,.1);
-    --sidebar-hover:rgba(185,146,79,.06);
-    --sidebar-active:rgba(185,146,79,.12);
-    --nav-text:#a89872;
-    --nav-text-hover:var(--brass-bright);
-    --nav-active-text:var(--brass-bright);
-    --footer-text:#6e5e42;
   }
 
   *,*::before,*::after{box-sizing:border-box;}
@@ -301,34 +248,6 @@
     margin-top:4px;
   }
 
-  /* Theme toggle */
-  .theme-toggle{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    padding:10px 14px;
-    margin:8px 10px 0;
-    border:1px solid var(--sidebar-border);
-    border-radius:var(--radius-sm);
-    background:var(--sidebar-hover);
-  }
-  .theme-toggle .tt-label{
-    font-size:11px;
-    color:var(--nav-text);
-    letter-spacing:.03em;
-  }
-  .tt-switch{
-    position:relative; width:40px; height:22px; border-radius:11px; cursor:pointer;
-    background:var(--wood-3); border:1px solid var(--sidebar-btn-border); flex-shrink:0;
-    box-shadow:inset 0 1px 3px rgba(0,0,0,.3);
-    transition:background var(--transition-fast);
-  }
-  .tt-switch .tt-knob{
-    position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
-    background:linear-gradient(135deg, var(--brass-bright), var(--brass));
-    box-shadow:0 1px 3px rgba(0,0,0,.4);
-    transition:left var(--transition-fast);
-  }
-  .tt-switch.on .tt-knob{left:20px;}
-
   /* Sidebar toggle */
   .sidebar-toggle{
     display:flex; align-items:center; justify-content:center; gap:6px;
@@ -350,7 +269,6 @@
   .app.sidebar-collapsed .nav-icon{font-size:18px;opacity:1;}
   .app.sidebar-collapsed .nav-item.active::before{display:none;}
   .app.sidebar-collapsed .sidebar-foot{display:none;}
-  .app.sidebar-collapsed .theme-toggle{display:none;}
   .app.sidebar-collapsed .sidebar-toggle .toggle-icon{transform:rotate(180deg);}
   .app.sidebar-collapsed .sidebar-toggle span:not(.toggle-icon){display:none;}
 
@@ -849,11 +767,6 @@
         Preventivo
       </div>
     </nav>
-
-    <div class="theme-toggle" id="themeToggle" title="Cambia tema chiaro/scuro">
-      <span class="tt-label" id="themeLabel">Tema Chiaro</span>
-      <div class="tt-switch" id="ttSwitch"><div class="tt-knob"></div></div>
-    </div>
 
     <div class="sidebar-toggle" id="sidebarToggle" data-tooltip="Comprimi sidebar">
       <span class="toggle-icon">&#9664;</span> <span>Comprimi</span>
