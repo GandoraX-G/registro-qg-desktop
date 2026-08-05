@@ -1,3 +1,5 @@
+const activeToasts = [];
+
 export function showToast(msg, type = 'success') {
   const container = document.getElementById('toast');
   if (!container) return;
@@ -7,13 +9,13 @@ export function showToast(msg, type = 'success') {
   t.textContent = msg;
   container.appendChild(t);
   requestAnimationFrame(() => t.classList.add('show'));
-  clearTimeout(showToast._t);
+
   const dur = type === 'warning' || type === 'danger' ? 6000 : 2500;
-  showToast._t = setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     t.classList.remove('show');
     setTimeout(() => t.remove(), 300);
+    const idx = activeToasts.indexOf(timeoutId);
+    if (idx !== -1) activeToasts.splice(idx, 1);
   }, dur);
-}
-
-export function initToast() {
+  activeToasts.push(timeoutId);
 }

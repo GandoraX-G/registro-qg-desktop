@@ -525,7 +525,7 @@ export function renderSottomeccaniche() {
       const haRaff = haRaffineria();
       const bentiAttivi = benti.filter(b => b.giorniRimasti > 0);
       const portataRows = PORTATE_LOCANDA.map(p => {
-        const canOrder = (state.materiali[p.materiali.split(',')[0].trim()] || 0) > 0;
+        const canOrder = p.materiali.split(',').every(m => (state.materiali[m.trim()] || 0) > 0);
         return `<tr>
           <td><b>${p.nome}</b></td><td>${escapeHtml(p.materiali)}</td><td>${p.cottura}</td>
           <td>${p.effettoPortata} (${p.durata})</td>
@@ -1230,7 +1230,7 @@ function smantellaStruttura(uidStr) {
   // Restituisci materiali (usando lo stesso set scelto alla costruzione)
   let matSetSm = c.materiali;
   if (s.materialiScelte === 'alternativi' && c.materialiOppure && c.materialiOppure.length > 0) matSetSm = c.materialiOppure;
-  matSetSm.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) + mat.u; });
+  matSetSm.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) + mat.u * s.livello; });
   if (c.id === 'avamposto') {
     const rotteScollegate = state.rotte.filter(r => r.avampostoUid === uidStr).length;
     state.rotte.forEach(r => { if (r.avampostoUid === uidStr) r.avampostoUid = null; });

@@ -77,15 +77,21 @@ function toggleTheme() {
    GUIDE MODAL
    ============================================================ */
 function initGuide() {
+  const guideDontShow = document.getElementById('guideDontShow');
+
+  function closeGuide() {
+    document.getElementById('guideModalBg').style.display = 'none';
+    if (guideDontShow?.checked) {
+      localStorage.setItem(GUIDE_KEY, '1');
+    }
+  }
+
   document.getElementById('guideBtn')?.addEventListener('click', () => {
     document.getElementById('guideModalBg').style.display = 'flex';
+    if (guideDontShow) guideDontShow.checked = false;
   });
-  document.getElementById('guideCloseX')?.addEventListener('click', () => {
-    document.getElementById('guideModalBg').style.display = 'none';
-  });
-  document.getElementById('guideCloseBtn')?.addEventListener('click', () => {
-    document.getElementById('guideModalBg').style.display = 'none';
-  });
+  document.getElementById('guideCloseX')?.addEventListener('click', closeGuide);
+  document.getElementById('guideCloseBtn')?.addEventListener('click', closeGuide);
   document.getElementById('guideModalBg')?.addEventListener('click', e => {
     if (e.target.id === 'guideModalBg') e.target.style.display = 'none';
   });
@@ -165,14 +171,23 @@ async function init() {
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = 'grid';
+
+  if (!localStorage.getItem(GUIDE_KEY)) {
+    setTimeout(() => {
+      document.getElementById('guideModalBg').style.display = 'flex';
+    }, 500);
+  }
 }
 
 /* ============================================================
    SIDEBAR TOGGLE + MOBILE
    ============================================================ */
+let sidebarManuallyToggled = false;
+
 function initSidebar() {
   document.getElementById('sidebarToggle')?.addEventListener('click', () => {
     document.querySelector('.app')?.classList.toggle('sidebar-collapsed');
+    sidebarManuallyToggled = true;
   });
 
   const hamburger = document.getElementById('hamburgerBtn');
@@ -204,6 +219,7 @@ function initSidebar() {
 
   const mql = window.matchMedia('(max-width:1200px)');
   const autoCollapse = (e) => {
+    if (sidebarManuallyToggled) return;
     const app = document.querySelector('.app');
     if (!app) return;
     if (e.matches) app.classList.add('sidebar-collapsed');

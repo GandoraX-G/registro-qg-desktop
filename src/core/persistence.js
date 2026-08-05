@@ -43,7 +43,7 @@ export async function loadState(){
   migraRotteLegacy();
   validaStato();
   document.getElementById("loading").style.display = "none";
-  document.getElementById("app").style.display = "flex";
+  document.getElementById("app").style.display = "grid";
   callRenderAll();
 }
 
