@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Registro QG">
-<link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/icons/icon_128x128.png">
+<link rel="manifest" href="/registro-qg-desktop/manifest.json">
+<link rel="apple-touch-icon" href="/registro-qg-desktop/icons/icon_128x128.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -1410,7 +1410,8 @@
 <script type="module" src="./app.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    const swPath = window.__TAURI__ ? '/sw.js' : '/registro-qg-desktop/sw.js';
+    navigator.serviceWorker.register(swPath).catch(() => {});
   }
 </script>
 </body>

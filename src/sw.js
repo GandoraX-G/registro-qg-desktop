@@ -1,4 +1,4 @@
-const CACHE_NAME = 'registro-qg-v1';
+const CACHE_NAME = 'registro-qg-v2';
 
 self.addEventListener('install', () => self.skipWaiting());
 

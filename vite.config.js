@@ -7,6 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: 'src',
+  base: '/registro-qg-desktop/',
   build: {
     outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,
@@ -18,7 +19,7 @@ export default defineConfig({
         { src: 'data/regolamento.json', dest: 'data' },
         { src: 'manifest.json', dest: '.' },
         { src: 'sw.js', dest: '.' },
-        { src: '../src-tauri/icons/*', dest: 'icons' }
+        { src: 'icons/*', dest: 'icons' }
       ]
     })
   ],
