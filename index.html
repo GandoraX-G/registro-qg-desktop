@@ -624,6 +624,8 @@
     color:var(--brass-bright); display:flex; flex-direction:column;
     align-items:center; justify-content:center; font-family:'Cinzel',serif; z-index:100; font-size:15px;
     letter-spacing:.04em; gap:18px;
+    padding-top:env(safe-area-inset-top, 0px);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
   }
   .loading-screen .loading-seal{
     width:60px; height:60px; border-radius:var(--radius-md);
@@ -687,27 +689,44 @@
   @media (max-width:960px){
     .grid2{grid-template-columns:1fr;}
     .app{grid-template-columns:1fr !important;}
-    .main{padding:24px 20px 60px; padding-top:24px;}
-    .main::before{left:0;}
 
+    /* Main content — safe area top per notch, bottom per home indicator */
+    .main{
+      padding:0 20px 60px;
+      padding-top:calc(20px + env(safe-area-inset-top, 0px));
+      padding-left:max(20px, env(safe-area-inset-left, 0px));
+      padding-right:max(20px, env(safe-area-inset-right, 0px));
+      padding-bottom:calc(60px + env(safe-area-inset-bottom, 0px));
+    }
+    .main::before{left:0; right:0; top:0; height:calc(200px + env(safe-area-inset-top, 0px));}
+
+    /* Sidebar — estesa dietro la status bar */
     .sidebar{
       position:fixed; top:0; left:-300px; bottom:0; width:300px;
+      padding-top:env(safe-area-inset-top, 0px);
       z-index:100; transition:left .3s cubic-bezier(.32,.72,0,1); box-shadow:none;
       will-change:left;
     }
     .sidebar.open{left:0; box-shadow:12px 0 48px rgba(0,0,0,.65);}
 
+    /* Overlay */
     .mobile-overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:99; -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);}
     .mobile-overlay.show{display:block;}
 
+    /* Header mobile — safe area top per notch */
     .mobile-header{
       display:flex !important; align-items:center; justify-content:space-between;
-      padding:14px 20px; background:var(--wood-2);
+      padding:14px 20px;
+      padding-top:calc(14px + env(safe-area-inset-top, 0px));
+      padding-left:max(20px, env(safe-area-inset-left, 0px));
+      padding-right:max(20px, env(safe-area-inset-right, 0px));
+      background:var(--wood-2);
       border-bottom:1px solid var(--sidebar-border);
       position:sticky; top:0; z-index:50;
     }
     .mobile-header .brand-text{font-family:'Cinzel',serif; font-size:14px; color:var(--brass-bright); letter-spacing:.03em; font-weight:600;}
 
+    /* Hamburger */
     .hamburger{
       display:flex; align-items:center; justify-content:center;
       width:48px; height:48px; border-radius:var(--radius-md);
@@ -717,10 +736,11 @@
     .hamburger:active{background:var(--sidebar-active); transform:scale(.95);}
     .hamburger svg{width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round;}
 
+    /* Sidebar nav */
     .nav-item{padding:14px 18px; font-size:15px; min-height:48px; border-radius:var(--radius-sm);}
     .nav-item:active{background:var(--sidebar-active);}
     .brand{padding:20px 20px 16px;}
-    .sidebar-foot{padding:16px 20px;}
+    .sidebar-foot{padding:16px 20px; padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));}
     .sidebar-foot button{min-height:44px; font-size:13px;}
 
     /* Cards */
@@ -774,10 +794,12 @@
     /* Modali → bottom sheet */
     .modal-bg{padding:0; align-items:flex-end; justify-content:stretch;}
     .modal{
-      width:100%; max-width:100%; max-height:88vh;
+      width:100%; max-width:100%; max-height:calc(88vh - env(safe-area-inset-top, 0px));
       border-radius:20px 20px 0 0; border:none;
       border-top:3px solid var(--brass);
       padding:24px 24px calc(24px + env(safe-area-inset-bottom, 0px));
+      padding-left:max(24px, env(safe-area-inset-left, 0px));
+      padding-right:max(24px, env(safe-area-inset-right, 0px));
       animation:slideUp .3s cubic-bezier(.2,.8,.2,1);
       overscroll-behavior:contain;
     }
@@ -789,9 +811,10 @@
     }
     .modal h3{font-size:18px; padding-right:32px;}
 
-    /* Toast */
+    /* Toast — safe area bottom */
     .toast{
-      left:16px; right:16px;
+      left:max(16px, env(safe-area-inset-left, 0px));
+      right:max(16px, env(safe-area-inset-right, 0px));
       bottom:calc(20px + env(safe-area-inset-bottom, 0px));
       max-width:none; font-size:14px; padding:14px 20px;
       border-radius:var(--radius-md);
@@ -801,7 +824,7 @@
     .sidebar-toggle{min-height:44px; margin:10px 10px 0;}
 
     /* Guide modal */
-    .guide-modal{max-height:90vh; border-radius:20px 20px 0 0;}
+    .guide-modal{max-height:calc(90vh - env(safe-area-inset-top, 0px)); border-radius:20px 20px 0 0;}
     .guide-modal details summary{min-height:48px; padding:16px 18px; font-size:14px;}
 
     /* Swipe hint */
@@ -826,14 +849,23 @@
 
   /* ===== MOBILE (<480px) — iPhone SE, Galaxy SMini ===== */
   @media (max-width:480px){
-    .main{padding:16px 14px 60px;}
+    .main{
+      padding-left:max(14px, env(safe-area-inset-left, 0px));
+      padding-right:max(14px, env(safe-area-inset-right, 0px));
+    }
     .card{padding:16px; margin-bottom:12px;}
     .qg-title{font-size:18px;}
     .stat-chip .v{font-size:15px;}
-    .mobile-header{padding:12px 14px;}
+    .mobile-header{
+      padding-left:max(14px, env(safe-area-inset-left, 0px));
+      padding-right:max(14px, env(safe-area-inset-right, 0px));
+    }
     .mobile-header .brand-text{font-size:13px;}
 
-    .modal{padding:20px 18px calc(20px + env(safe-area-inset-bottom, 0px));}
+    .modal{
+      padding-left:max(18px, env(safe-area-inset-left, 0px));
+      padding-right:max(18px, env(safe-area-inset-right, 0px));
+    }
     .modal h3{font-size:16px;}
 
     .topbar .qg-title{font-size:17px;}
