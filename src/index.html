@@ -2,13 +2,15 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Registro del Quartier Generale</title>
 <meta name="description" content="Gestione Quartier Generale - Cronache di Unshast">
-<meta name="theme-color" content="#b9924f">
+<meta name="theme-color" content="#130e09">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Registro QG">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-touch-fullscreen" content="yes">
 <link rel="manifest" href="/registro-qg-desktop/manifest.json">
 <link rel="apple-touch-icon" href="/registro-qg-desktop/icons/icon_128x128.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,16 +83,19 @@
   }
 
   *,*::before,*::after{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  html,body{margin:0;padding:0;font-size:16px;}
+  html{scroll-behavior:smooth; overscroll-behavior:none;}
+  html,body{margin:0;padding:0;font-size:16px; overscroll-behavior:none;}
   body{
     font-family:'Spectral', Georgia, 'Times New Roman', serif;
     color:var(--ink);
     background:var(--wood-1);
     min-height:100vh;
+    min-height:100dvh;
     transition:background-color var(--transition-med), color var(--transition-med);
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
+    overscroll-behavior:none;
+    -webkit-tap-highlight-color:transparent;
   }
 
   /* ================= APP GRID ================= */
@@ -680,7 +685,7 @@
   @media (max-width:960px){
     .grid2{grid-template-columns:1fr;}
     .app{grid-template-columns:1fr !important;}
-    .main{padding:20px 16px 48px;}
+    .main{padding:20px 16px calc(48px + env(safe-area-inset-bottom, 0px)); padding-top:calc(20px + env(safe-area-inset-top, 0px));}
     .main::before{left:0;}
     .sidebar{
       position:fixed; top:0; left:-280px; bottom:0; width:280px;
@@ -699,7 +704,7 @@
     .mobile-header{
       display:flex !important;
       align-items:center; justify-content:space-between;
-      padding:12px 16px;
+      padding:12px 16px env(safe-area-inset-top, 8px);
       background:var(--wood-2);
       border-bottom:1px solid var(--sidebar-border);
       position:sticky; top:0; z-index:50;
@@ -707,16 +712,71 @@
     .mobile-header .brand-text{font-family:'Cinzel',serif; font-size:12px; color:var(--brass-bright); letter-spacing:.03em;}
     .hamburger{
       display:flex; align-items:center; justify-content:center;
-      width:36px; height:36px; border-radius:var(--radius-sm);
+      width:44px; height:44px; border-radius:var(--radius-sm);
       background:transparent; border:1px solid var(--sidebar-border);
       color:var(--nav-text); cursor:pointer;
       transition:all var(--transition-fast);
     }
-    .hamburger:hover{background:var(--sidebar-hover); color:var(--brass-bright);}
-    .hamburger svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
-    .nav-item{padding:10px 14px; font-size:13px;}
+    .hamburger:hover,.hamburger:active{background:var(--sidebar-hover); color:var(--brass-bright);}
+    .hamburger svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+    .nav-item{padding:12px 14px; font-size:14px; min-height:44px;}
     .brand{padding:16px 16px 14px;}
     .sidebar-foot{padding:12px 16px;}
+
+    /* Touch-friendly buttons */
+    button.btn{min-height:44px; padding:10px 18px;}
+    button.btn-sm{min-height:36px; padding:8px 12px;}
+    .cat-filters button{min-height:36px; padding:8px 14px;}
+
+    /* Touch-friendly inputs */
+    input[type=text], input[type=number], select, textarea{
+      min-height:44px; font-size:16px; padding:10px 14px;
+    }
+
+    /* Tables scroll horizontally */
+    .card table{display:block; overflow-x:auto; -webkit-overflow-scrolling:touch;}
+    .card table thead{display:table-header-group;}
+    .card table tbody{display:table-row-group;}
+    .card table tr{display:flex; min-width:max-content;}
+    .card table th, .card table td{
+      flex:0 0 auto; white-space:nowrap; padding:10px 12px;
+    }
+
+    /* Better cards on mobile */
+    .card{padding:16px 18px; margin-bottom:14px;}
+    .stat-strip{gap:8px;}
+    .stat-chip{padding:8px 12px; min-width:70px;}
+    .stat-chip .v{font-size:14px;}
+
+    /* Search bar bigger touch target */
+    .search-bar input{min-height:44px; font-size:16px; padding:12px 12px 12px 40px;}
+
+    /* Topbar stacks vertically */
+    .topbar{flex-direction:column; align-items:flex-start; gap:12px;}
+    .topbar::after{display:none;}
+
+    /* Modals full-screen on mobile */
+    .modal-bg{padding:0; align-items:flex-end;}
+    .modal{
+      width:100%; max-width:100%; max-height:92vh;
+      border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+      border-bottom:none;
+      animation:slideUp .25s ease-out;
+    }
+    @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+
+    /* Toast full width */
+    .toast{left:16px; right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); max-width:none;}
+
+    /* Prevent text size adjust */
+    html{-webkit-text-size-adjust:100%;}
+
+    /* Sidebar toggle larger */
+    .sidebar-toggle{min-height:44px; margin:10px 10px 0;}
+
+    /* Guide modal scrollable */
+    .guide-modal{max-height:100vh; border-radius:0;}
+    .guide-modal details summary{min-height:44px; padding:14px 16px;}
   }
   @media (min-width:961px){
     .mobile-header{display:none !important;}
