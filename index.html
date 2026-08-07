@@ -731,7 +731,7 @@
     .card{break-inside:avoid; box-shadow:none; border:1px solid var(--line);}
   }
 </style>
-  <script type="module" crossorigin src="/registro-qg-desktop/assets/index-D4wtjFH4.js"></script>
+  <script type="module" crossorigin src="/registro-qg-desktop/assets/index-Usu6aCFE.js"></script>
 </head>
 <body>
 
@@ -1410,8 +1410,8 @@
 
 <script>
   if ('serviceWorker' in navigator) {
-    const swPath = window.__TAURI__ ? '/sw.js' : '/registro-qg-desktop/sw.js';
-    navigator.serviceWorker.register(swPath).catch(() => {});
+    const swBase = document.querySelector('link[rel="manifest"]')?.href?.replace('/manifest.json','') || '';
+    navigator.serviceWorker.register(swBase + '/sw.js').catch(() => {});
   }
 </script>
 </body>
