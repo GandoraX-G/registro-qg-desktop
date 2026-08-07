@@ -66,7 +66,7 @@ export {
 };
 
 export async function caricaConfig(){
-  const res = await fetch("./data/regolamento.json");
+  const res = await fetch("/data/regolamento.json");
   if(!res.ok) throw new Error("Impossibile caricare data/regolamento.json ("+res.status+")");
   const cfg = await res.json();
   MATERIALI_PREZZI = cfg.materiali || {};
