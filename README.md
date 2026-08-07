@@ -1,5 +1,5 @@
 # registro-qg-desktop
-App Desktop e Mobile per gestione QG Unshast (Windows, Linux, macOS, iOS, Android)
+App Desktop e Mobile per gestione QG Unshast (Windows, Linux, macOS, Android)
 
 ## Requisiti per build locale
 
@@ -11,10 +11,6 @@ App Desktop e Mobile per gestione QG Unshast (Windows, Linux, macOS, iOS, Androi
 ```bash
 sudo apt-get install libwebkit2gtk-4.1-dev libgtk-3-dev libappindicator3-dev librsvg2-dev patchelf
 ```
-
-### iOS (solo macOS)
-- Xcode 15+
-- Apple Developer Account (per distribuzione)
 
 ### Android
 - Android Studio
@@ -28,24 +24,28 @@ npm install
 npm run tauri build
 ```
 
-### Build Mobile
+### Build Android
 ```bash
-# iOS (solo macOS)
-npx tauri ios init
-npx tauri ios build
-
-# Android
 npx tauri android init
 npx tauri android build
 ```
 
 ## Output build
 
-| Piattaforma | Formato | Output |
-|-------------|---------|--------|
-| Windows | NSIS Installer | `src-tauri/target/release/bundle/nsis/*.exe` |
-| Linux | Debian Package | `src-tauri/target/release/bundle/deb/*.deb` |
-| Linux | AppImage | `src-tauri/target/release/bundle/appimage/*.AppImage` |
-| macOS | DMG | `src-tauri/target/release/bundle/dmg/*.dmg` |
-| iOS | IPA | `src-tauri/gen/apple/build/Release-iphoneos/*.ipa` |
-| Android | APK | `src-tauri/gen/android/app/build/outputs/apk/**/*.apk` |
+| Piattaforma | Formato | Installazione |
+|-------------|---------|---------------|
+| Windows | NSIS Installer | Eseguire il `.exe` |
+| Linux | Debian Package | `sudo dpkg -i *.deb` |
+| Linux | AppImage | Rendere eseguibile e lanciare |
+| macOS | DMG | Aprire il `.dmg` e trascinare in Applicazioni |
+| Android | APK | Abilitare "Sorgenti sconosciute" e installare |
+
+## Release
+
+Per pubblicare una release:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+La GitHub Action creera automaticamente una release con tutti i file per le 5 piattaforme.
