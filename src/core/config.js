@@ -66,8 +66,8 @@ export {
 };
 
 export async function caricaConfig(){
-  const base = window.__TAURI__ ? "" : "/registro-qg-desktop";
-  const res = await fetch(`${base}/data/regolamento.json`);
+  const base = import.meta.env.BASE_URL || "/";
+  const res = await fetch(`${base}data/regolamento.json`);
   if(!res.ok) throw new Error("Impossibile caricare data/regolamento.json ("+res.status+")");
   const cfg = await res.json();
   MATERIALI_PREZZI = cfg.materiali || {};

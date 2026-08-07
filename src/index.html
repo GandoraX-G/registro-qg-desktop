@@ -1410,8 +1410,8 @@
 <script type="module" src="./app.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
-    const swPath = window.__TAURI__ ? '/sw.js' : '/registro-qg-desktop/sw.js';
-    navigator.serviceWorker.register(swPath).catch(() => {});
+    const swBase = document.querySelector('link[rel="manifest"]')?.href?.replace('/manifest.json','') || '';
+    navigator.serviceWorker.register(swBase + '/sw.js').catch(() => {});
   }
 </script>
 </body>

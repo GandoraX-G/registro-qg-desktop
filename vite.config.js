@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: 'src',
-  base: '/registro-qg-desktop/',
+  base: process.env.DEPLOY_PWA ? '/registro-qg-desktop/' : '/',
   build: {
     outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,
