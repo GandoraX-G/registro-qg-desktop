@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro del Quartier Generale</title>
+<meta name="description" content="Gestione Quartier Generale - Cronache di Unshast">
+<meta name="theme-color" content="#b9924f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Registro QG">
+<link rel="manifest" href="/assets/manifest-D01E9Pkl.json">
+<link rel="apple-touch-icon" href="/icons/icon_128x128.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+  @keyframes glow{0%,100%{box-shadow:0 0 4px var(--brass)}50%{box-shadow:0 0 12px var(--brass-bright)}}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+  :root{
+    --wood-1:#130e09;
+    --wood-2:#1a1309;
+    --wood-3:#2a1e10;
+    --brass:#b9924f;
+    --brass-bright:#e6bd76;
+    --brass-dark:#6e4f22;
+    --brass-text:#2c1d12;
+    --parchment:#f5edd8;
+    --parchment-2:#ede3c8;
+    --parchment-deep:#ddd0a8;
+    --parchment-edge:#c9b88a;
+    --ink:#2a1d11;
+    --ink-soft:#6b5a42;
+    --line:#d4c49a;
+    --green:#4c6b45;
+    --green-dk:#374f31;
+    --red:#8a3a2e;
+    --red-dk:#6b2c22;
+    --red-soft:#c4877a;
+    --red-hover:#e0a89b;
+    --red-bg:rgba(138,58,46,.12);
+    --blue:#3f5568;
+    --blue-dk:#2d3f4e;
+    --amber:#a8792a;
+    --amber-dk:#8a611c;
+    --input-bg:#faf4e4;
+    --panel-bg:rgba(255,255,255,.45);
+    --progress-track:#ddd0a8;
+    --kbd-bg:rgba(0,0,0,.05);
+    --kbd-border:rgba(0,0,0,.1);
+    --table-border:rgba(184,166,116,.25);
+    --table-stripe:rgba(90,74,55,.025);
+    --table-hover:rgba(185,146,79,.06);
+    --btn-outline-hover:rgba(90,74,55,.06);
+    --btn-danger-hover:rgba(138,58,46,.08);
+    --focus-ring:rgba(185,146,79,.15);
+    --sidebar-btn-border:rgba(185,146,79,.15);
+    --sidebar-btn-border-hover:rgba(185,146,79,.25);
+    --modal-overlay:rgba(8,5,3,.7);
+    --shadow-sm:0 1px 3px rgba(35,20,8,.08);
+    --shadow:0 4px 12px rgba(35,20,8,.12), 0 1px 3px rgba(35,20,8,.08);
+    --shadow-lift:0 12px 28px rgba(24,14,5,.18), 0 2px 6px rgba(24,14,5,.1);
+    --shadow-inset:inset 0 1px 0 rgba(255,255,255,.6), inset 0 -1px 2px rgba(90,74,55,.06);
+    --sidebar-bg:linear-gradient(180deg, #1a1309 0%, #130e09 100%);
+    --sidebar-border:rgba(185,146,79,.12);
+    --sidebar-hover:rgba(185,146,79,.08);
+    --sidebar-active:rgba(185,146,79,.14);
+    --nav-text:#bfb08a;
+    --nav-text-hover:var(--brass-bright);
+    --nav-active-text:var(--brass-bright);
+    --footer-text:#7a6a4e;
+    --radius-sm:6px;
+    --radius-md:10px;
+    --radius-lg:14px;
+    --transition-fast:.15s ease;
+    --transition-med:.25s ease;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  html,body{margin:0;padding:0;font-size:16px;}
+  body{
+    font-family:'Spectral', Georgia, 'Times New Roman', serif;
+    color:var(--ink);
+    background:var(--wood-1);
+    min-height:100vh;
+    transition:background-color var(--transition-med), color var(--transition-med);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* ================= APP GRID ================= */
+  .app{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    height:100vh;
+    overflow:hidden;
+    transition:grid-template-columns var(--transition-med);
+  }
+
+  /* ================= SIDEBAR ================= */
+  .sidebar{
+    background:var(--sidebar-bg);
+    border-right:1px solid var(--sidebar-border);
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    overflow-y:auto;
+    overflow-x:hidden;
+    z-index:10;
+  }
+  .sidebar::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, transparent 5%, var(--brass) 50%, transparent 95%);
+    opacity:.4;
+    z-index:1;
+  }
+
+  /* Brand */
+  .brand{
+    display:flex; align-items:center; gap:14px;
+    padding:22px 20px 20px;
+    border-bottom:1px solid var(--sidebar-border);
+    position:relative;
+  }
+  .seal{
+    width:44px;height:44px;border-radius:var(--radius-md);
+    background:linear-gradient(135deg, var(--brass-bright), var(--brass) 50%, var(--brass-dark));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cinzel',serif; font-weight:700; font-size:15px; color:var(--brass-text);
+    box-shadow:0 2px 8px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.3);
+    flex-shrink:0;
+    animation:glow 4s ease-in-out infinite;
+  }
+  .brand-text{
+    font-family:'Cinzel',serif;
+    font-size:13px;
+    color:var(--brass-bright);
+    letter-spacing:.04em;
+    line-height:1.35;
+    font-weight:600;
+  }
+  .brand-text small{
+    display:block;
+    font-family:'Spectral',serif;
+    font-style:italic;
+    color:var(--nav-text);
+    font-size:10.5px;
+    font-weight:400;
+    letter-spacing:.02em;
+    margin-top:3px;
+    opacity:.7;
+  }
+
+  /* Navigation */
+  .sidebar nav{
+    flex:1;
+    padding:12px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:12px;
+    padding:11px 14px;
+    border-radius:var(--radius-sm);
+    color:var(--nav-text);
+    font-size:13.5px;
+    letter-spacing:.015em;
+    cursor:pointer;
+    border:none;
+    background:transparent;
+    transition:all var(--transition-fast);
+    user-select:none;
+    position:relative;
+    text-align:left;
+    width:100%;
+  }
+  .nav-item:hover{
+    background:var(--sidebar-hover);
+    color:var(--nav-text-hover);
+  }
+  .nav-item.active{
+    background:var(--sidebar-active);
+    color:var(--nav-active-text);
+    font-weight:600;
+  }
+  .nav-item.active::before{
+    content:"";
+    position:absolute; left:0; top:6px; bottom:6px; width:3px;
+    background:var(--brass);
+    border-radius:0 3px 3px 0;
+  }
+  .nav-icon{
+    width:20px;
+    height:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:.75;
+    flex-shrink:0;
+  }
+  .nav-item.active .nav-icon{opacity:1;}
+  .nav-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+  /* Sidebar footer */
+  .sidebar-foot{
+    margin-top:auto;
+    padding:14px 16px;
+    border-top:1px solid var(--sidebar-border);
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .sidebar-foot button{
+    width:100%;
+    padding:8px 12px;
+    background:transparent;
+    border:1px solid var(--sidebar-btn-border);
+    color:var(--nav-text);
+    border-radius:var(--radius-sm);
+    font-size:12px;
+    cursor:pointer;
+    font-family:'Spectral',serif;
+    transition:all var(--transition-fast);
+    letter-spacing:.01em;
+    text-align:left;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .sidebar-foot button:hover{
+    background:var(--sidebar-hover);
+    border-color:var(--sidebar-btn-border-hover);
+    color:var(--brass-bright);
+  }
+  .sidebar-foot button.btn-danger-side{
+    border-color:var(--red-bg);
+    color:var(--red-soft);
+  }
+  .sidebar-foot button.btn-danger-side:hover{
+    background:var(--red-bg);
+    color:var(--red-hover);
+  }
+  .sidebar-foot .foot-hint{
+    font-size:10px;
+    color:var(--footer-text);
+    line-height:1.5;
+    margin-top:4px;
+  }
+
+  /* Sidebar toggle */
+  .sidebar-toggle{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    padding:8px; margin:10px 10px 0; border-radius:var(--radius-sm); cursor:pointer;
+    color:var(--nav-text); font-size:11px; letter-spacing:.03em;
+    border:1px solid var(--sidebar-border); background:transparent;
+    transition:all var(--transition-fast); user-select:none;
+  }
+  .sidebar-toggle:hover{background:var(--sidebar-hover); color:var(--brass-bright);}
+  .sidebar-toggle .toggle-icon{transition:transform var(--transition-med); display:inline-block;}
+
+  /* Sidebar collapsed */
+  .app.sidebar-collapsed .sidebar{width:60px;min-width:60px;}
+  .app.sidebar-collapsed .brand-text{display:none;}
+  .app.sidebar-collapsed .brand{padding:16px 8px;justify-content:center;gap:0;}
+  .app.sidebar-collapsed .seal{width:36px;height:36px;font-size:12px;}
+  .app.sidebar-collapsed .sidebar nav{padding:8px 6px;}
+  .app.sidebar-collapsed .nav-item{justify-content:center;padding:10px 0;font-size:0;gap:0;}
+  .app.sidebar-collapsed .nav-icon{font-size:18px;opacity:1;}
+  .app.sidebar-collapsed .nav-item.active::before{display:none;}
+  .app.sidebar-collapsed .sidebar-foot{display:none;}
+  .app.sidebar-collapsed .sidebar-toggle .toggle-icon{transform:rotate(180deg);}
+  .app.sidebar-collapsed .sidebar-toggle span:not(.toggle-icon){display:none;}
+
+  /* ================= MAIN CONTENT ================= */
+  .main{
+    background:var(--parchment);
+    padding:28px 36px 64px;
+    overflow-y:auto;
+    animation:fadeInUp .35s ease-out;
+    position:relative;
+  }
+  .main::before{
+    content:"";
+    position:fixed; top:0; left:260px; right:0; height:200px;
+    background:radial-gradient(ellipse 80% 100% at 50% -20%, rgba(185,146,79,.04), transparent);
+    pointer-events:none;
+    z-index:0;
+  }
+  .app.sidebar-collapsed .main::before{left:60px;}
+
+  /* Topbar */
+  .topbar{
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:14px;
+    padding-bottom:16px; margin-bottom:24px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+    z-index:1;
+  }
+  .topbar::after{
+    content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px;
+    background:linear-gradient(90deg, var(--brass) 0%, var(--brass) 30%, transparent 100%);
+    opacity:.5;
+  }
+  .qg-title{
+    font-family:'Cinzel',serif; font-weight:700; font-size:22px; color:var(--ink);
+    letter-spacing:.01em;
+  }
+  .qg-sub{font-size:12.5px; color:var(--ink-soft); font-style:italic; margin-top:3px;}
+  .stat-strip{display:flex; gap:10px; flex-wrap:wrap;}
+  .stat-chip{
+    background:var(--panel-bg);
+    border:1px solid var(--parchment-edge);
+    border-radius:var(--radius-sm);
+    padding:8px 14px;
+    text-align:center;
+    min-width:84px;
+    backdrop-filter:blur(8px);
+    transition:transform var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  .stat-chip:hover{
+    transform:translateY(-1px);
+    box-shadow:var(--shadow-sm);
+  }
+  .stat-chip .v{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    font-size:16px;
+    color:var(--ink);
+  }
+  .stat-chip .l{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+
+  /* Section titles */
+  h2.section-title{
+    font-family:'Cinzel',serif; font-size:13px; color:var(--ink); margin:0 0 14px 0;
+    display:flex; align-items:center; gap:10px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+  h2.section-title::before{content:""; width:4px; height:4px; border-radius:50%; background:var(--brass); flex-shrink:0;}
+  h2.section-title::after{content:""; flex:1; height:1px; background:linear-gradient(90deg, var(--line), transparent);}
+
+  /* Cards */
+  .card{
+    background:var(--panel-bg);
+    border:1px solid var(--parchment-edge);
+    border-radius:var(--radius-md);
+    padding:20px 22px;
+    margin-bottom:18px;
+    box-shadow:var(--shadow-sm);
+    backdrop-filter:blur(6px);
+    transition:box-shadow var(--transition-fast), border-color var(--transition-fast);
+  }
+  .card:hover{
+    box-shadow:var(--shadow);
+    border-color:var(--sidebar-btn-border-hover);
+  }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+
+  /* Form elements */
+  label{
+    display:block; font-size:11px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink-soft); margin-bottom:4px; margin-top:10px; font-weight:500;
+  }
+  label:first-child{margin-top:0;}
+  input[type=text], input[type=number], select, textarea{
+    width:100%; padding:9px 12px; border:1px solid var(--parchment-edge); border-radius:var(--radius-sm);
+    background:var(--input-bg); color:var(--ink); font-family:'Spectral',serif; font-size:13px;
+    box-shadow:var(--shadow-inset);
+    transition:border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none; border-color:var(--brass);
+    box-shadow:var(--shadow-inset), 0 0 0 3px var(--focus-ring);
+  }
+  .row{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
+  .row > div{flex:1; min-width:110px;}
+
+  /* Buttons */
+  button.btn{
+    font-family:'Spectral',serif; font-weight:600; font-size:13px;
+    padding:9px 18px; border-radius:var(--radius-sm); cursor:pointer; border:1px solid transparent;
+    letter-spacing:.02em; position:relative; overflow:hidden;
+    transition:all var(--transition-fast);
+  }
+  button.btn:active{transform:translateY(1px); filter:brightness(.95);}
+  .btn-brass{
+    background:linear-gradient(180deg, var(--brass-bright), var(--brass) 55%, var(--brass-dark));
+    color:var(--brass-text); border-color:var(--brass-dark);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4), 0 2px 4px rgba(0,0,0,.15);
+  }
+  .btn-brass:hover{
+    filter:brightness(1.08);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 4px 10px rgba(0,0,0,.2);
+  }
+  .btn-outline{background:transparent; border-color:var(--parchment-edge); color:var(--ink-soft);}
+  .btn-outline:hover{background:var(--btn-outline-hover); border-color:var(--brass); color:var(--ink);}
+  .btn-danger{background:transparent; border-color:var(--red); color:var(--red-dk);}
+  .btn-danger:hover{background:var(--btn-danger-hover);}
+  .btn-sm{padding:5px 10px; font-size:11px;}
+  button:disabled{opacity:.4; cursor:not-allowed; filter:none !important;}
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  thead th{
+    text-align:left; font-family:'Cinzel',serif; font-size:10px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink-soft); border-bottom:2px solid var(--brass); padding:8px 10px;
+    white-space:nowrap;
+  }
+  tbody td{padding:9px 10px; border-bottom:1px solid var(--table-border); vertical-align:top;}
+  tbody tr{transition:background-color var(--transition-fast);}
+  tbody tr:nth-child(even){background:var(--table-stripe);}
+  tbody tr:hover{background:var(--table-hover);}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* Tags */
+  .tag{
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 10px 3px 8px; border-radius:20px; font-size:10px; font-weight:600;
+    letter-spacing:.03em; color:#fff;
+  }
+  .tag::before{content:""; width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.7); flex-shrink:0;}
+  .tag-generali{background:var(--blue-dk);}
+  .tag-produzione{background:var(--green-dk);}
+  .tag-vendita{background:var(--amber-dk);}
+  .tag-militare{background:var(--red-dk);}
+
+  /* Progress */
+  .progress-wrap{
+    background:var(--progress-track); border:1px solid var(--parchment-edge); border-radius:20px;
+    height:18px; overflow:hidden; position:relative;
+    box-shadow:var(--shadow-inset);
+  }
+  .progress-bar{
+    height:100%; background:linear-gradient(90deg, var(--brass-dark), var(--brass), var(--brass-bright));
+    transition:width .4s ease;
+    border-radius:20px;
+    position:relative;
+  }
+  .progress-bar::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+    background-size:200% 100%;
+    animation:shimmer 2.5s ease-in-out infinite;
+  }
+  .progress-label{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; font-family:'JetBrains Mono',monospace; color:var(--brass-text); font-weight:600;}
+
+  /* Filters */
+  .cat-filters{display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; align-items:center;}
+  .cat-filters label{margin:0 8px 0 0; text-transform:none; letter-spacing:0; font-size:11px; font-weight:500; white-space:nowrap;}
+  .cat-filters button{
+    font-family:'Spectral',serif; font-size:12px; padding:6px 14px; border-radius:20px;
+    border:1px solid var(--parchment-edge); background:transparent; color:var(--ink-soft); cursor:pointer;
+    transition:all var(--transition-fast);
+  }
+  .cat-filters button:hover{border-color:var(--brass); color:var(--ink); background:var(--table-hover);}
+  .cat-filters button.active{background:var(--ink); color:var(--parchment); border-color:var(--ink);}
+
+  /* Search */
+  .search-bar{display:flex; gap:8px; align-items:center; margin-bottom:14px;}
+  .search-bar input{
+    flex:1; padding:9px 12px 9px 36px; border:1px solid var(--parchment-edge); border-radius:var(--radius-sm);
+    background:var(--input-bg); color:var(--ink); font-family:'Spectral',serif; font-size:13px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23998866' stroke-width='1.8'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cline x1='11' y1='11' x2='15' y2='15'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:10px center;
+  }
+  .search-bar input:focus{outline:none; border-color:var(--brass); box-shadow:0 0 0 3px var(--focus-ring);}
+
+  /* Structure catalog */
+  .structure-catalog{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px;}
+  .struct-card{
+    background:var(--input-bg); border:1px solid var(--parchment-edge); border-radius:var(--radius-md); padding:14px 16px;
+    display:flex; flex-direction:column; gap:6px;
+    transition:all var(--transition-fast);
+    position:relative;
+    overflow:hidden;
+  }
+  .struct-card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--brass), transparent);
+    opacity:0; transition:opacity var(--transition-fast);
+  }
+  .struct-card:hover{
+    box-shadow:var(--shadow-lift);
+    transform:translateY(-2px);
+    border-color:var(--brass);
+  }
+  .struct-card:hover::before{opacity:1;}
+  .struct-card h4{margin:0; font-family:'Cinzel',serif; font-size:13px; color:var(--ink); display:flex; justify-content:space-between; align-items:center; gap:6px;}
+  .struct-card .meta{font-size:10.5px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace;}
+  .struct-card .desc{font-size:11.5px; color:var(--ink-soft); font-style:italic; line-height:1.5; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
+  .struct-card .desc.expanded{-webkit-line-clamp:unset; display:block;}
+  .struct-card .desc-toggle{font-size:10px; color:var(--brass); cursor:pointer; margin-top:2px; display:inline-block; user-select:none;}
+  .struct-card .desc-toggle:hover{text-decoration:underline;}
+  .struct-card .mats{font-size:10.5px; color:var(--ink);}
+  .struct-card .foot{display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:6px;}
+
+  /* Empty state */
+  .empty{padding:28px; text-align:center; color:var(--ink-soft); font-style:italic; font-size:13px; border:1px dashed var(--parchment-edge); border-radius:var(--radius-md); margin:10px 0;}
+
+  /* Risk badges */
+  .badge-risk-low{color:var(--green-dk); font-weight:600;}
+  .badge-risk-mid{color:var(--amber-dk); font-weight:600;}
+  .badge-risk-high{color:var(--red-dk); font-weight:600;}
+
+  /* Sub-mechanics (collapsible cards) */
+  .card.sub-card{
+    padding:0; border-left:4px solid var(--parchment-edge); border-radius:var(--radius-md);
+  }
+  .sub-card.cat-generali{border-left-color:var(--blue-dk);}
+  .sub-card.cat-produzione{border-left-color:var(--green-dk);}
+  .sub-card.cat-vendita{border-left-color:var(--amber-dk);}
+  .sub-card.cat-militare{border-left-color:var(--red-dk);}
+  .sub-card > summary{
+    list-style:none; cursor:pointer; user-select:none;
+    display:flex; align-items:center; gap:10px;
+    padding:14px 18px;
+    font-family:'Cinzel',serif; font-size:13.5px; color:var(--ink);
+    transition:background-color var(--transition-fast);
+  }
+  .sub-card > summary::-webkit-details-marker{display:none;}
+  .sub-card > summary::before{content:""; width:0; height:0; border-left:6px solid var(--brass); border-top:5px solid transparent; border-bottom:5px solid transparent; flex-shrink:0; transition:transform var(--transition-fast);}
+  .sub-card[open] > summary::before{transform:rotate(90deg);}
+  .sub-card > summary:hover{background:var(--table-hover);}
+  .sub-card-body{padding:0 20px 18px;}
+  .sub-card-summary{font-size:12px; color:var(--ink-soft); margin-left:auto; font-family:'JetBrains Mono',monospace; font-weight:400;}
+  .collapse-all-bar{display:flex; justify-content:flex-end; margin-bottom:8px;}
+  .collapse-all-bar button{font-family:'Spectral',serif; font-size:11px; color:var(--ink-soft); background:none; border:1px solid var(--parchment-edge); border-radius:var(--radius-sm); padding:4px 12px; cursor:pointer; transition:all var(--transition-fast);}
+  .collapse-all-bar button:hover{border-color:var(--brass); color:var(--ink);}
+
+  /* Modal */
+  .modal-bg{
+    position:fixed; inset:0; background:var(--modal-overlay); display:flex; align-items:center; justify-content:center;
+    z-index:50; padding:20px; backdrop-filter:blur(4px);
+  }
+  .modal{
+    background:var(--parchment); border:1px solid var(--parchment-edge); border-top:3px solid var(--brass);
+    border-radius:var(--radius-lg);
+    padding:28px 32px; max-width:520px; width:100%; box-shadow:0 28px 60px rgba(0,0,0,.5);
+    max-height:85vh; overflow-y:auto;
+    animation:scaleIn .2s ease-out;
+  }
+  .modal h3{font-family:'Cinzel',serif; margin-top:0; font-size:17px; padding-right:28px;}
+  .modal-close{
+    float:right; cursor:pointer; font-size:18px; color:var(--ink-soft); background:none; border:none;
+    transition:color var(--transition-fast); line-height:1; padding:4px;
+    border-radius:var(--radius-sm);
+  }
+  .modal-close:hover{color:var(--red-dk); background:var(--btn-danger-hover);}
+  .hint{font-size:11px; color:var(--ink-soft); margin-top:4px; line-height:1.5;}
+  .fin-tok-count{font-size:10px; font-weight:400; opacity:.65;}
+
+  /* Toast */
+  .toast{
+    position:fixed; bottom:24px; right:24px; background:var(--ink); color:var(--parchment);
+    padding:12px 20px; border-radius:var(--radius-md); font-size:13px; box-shadow:var(--shadow-lift); z-index:60;
+    opacity:0; transform:translateY(10px); transition:all .3s ease;
+    border-left:3px solid var(--brass);
+    max-width:440px; line-height:1.5; white-space:pre-line;
+  }
+  .toast.show{opacity:1; transform:translateY(0);}
+  .toast-warning{border-left-color:var(--amber);}
+  .toast-danger{border-left-color:var(--red);}
+
+  /* Guide modal */
+  .guide-modal{max-width:720px;}
+  .guide-modal .guide-intro{font-style:italic; color:var(--ink-soft); margin-bottom:14px; line-height:1.6; font-size:13px;}
+  .guide-modal details{
+    border:1px solid var(--parchment-edge); border-radius:var(--radius-sm); margin-bottom:8px;
+    background:var(--panel-bg); overflow:hidden;
+  }
+  .guide-modal summary{
+    font-family:'Cinzel',serif; font-size:13px; padding:12px 16px; cursor:pointer; user-select:none;
+    color:var(--ink); list-style:none; display:flex; align-items:center; gap:8px;
+    transition:background-color var(--transition-fast);
+  }
+  .guide-modal summary:hover{background:var(--table-hover);}
+  .guide-modal summary::-webkit-details-marker{display:none;}
+  .guide-modal summary::before{content:""; width:0; height:0; border-left:6px solid var(--brass); border-top:5px solid transparent; border-bottom:5px solid transparent; transition:transform var(--transition-fast);}
+  .guide-modal details[open] summary::before{transform:rotate(90deg);}
+  .guide-modal .guide-body{padding:4px 18px 16px; font-size:12.5px; line-height:1.65; color:var(--ink-soft);}
+  .guide-modal .guide-body b{color:var(--ink);}
+  .guide-modal .guide-body table{margin-top:8px; margin-bottom:4px;}
+  .guide-modal .guide-body th, .guide-modal .guide-body td{font-size:11px; padding:4px 6px;}
+  .guide-modal .guide-body ul{margin:6px 0; padding-left:18px;}
+  .guide-modal .guide-body li{margin-bottom:3px;}
+  .guide-foot{display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px; flex-wrap:wrap;}
+  .guide-foot label{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink-soft); text-transform:none; letter-spacing:0; cursor:pointer;}
+  .guide-foot input[type="checkbox"]{width:auto; accent-color:var(--brass);}
+
+  .divider{height:1px; background:linear-gradient(90deg, var(--line), transparent 70%); margin:16px 0;}
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--parchment-edge); border-radius:4px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--brass);}
+
+  /* Loading screen */
+  .loading-screen{
+    position:fixed; inset:0;
+    background:radial-gradient(ellipse 700px 400px at 50% 45%, rgba(185,146,79,.06), transparent 60%), var(--wood-1);
+    color:var(--brass-bright); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; font-family:'Cinzel',serif; z-index:100; font-size:15px;
+    letter-spacing:.04em; gap:18px;
+  }
+  .loading-screen .loading-seal{
+    width:60px; height:60px; border-radius:var(--radius-md);
+    background:linear-gradient(135deg, var(--brass-bright), var(--brass) 50%, var(--brass-dark));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel',serif; font-weight:700; font-size:19px; color:var(--brass-text);
+    box-shadow:0 4px 20px rgba(185,146,79,.25);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  .loading-screen .loading-text{opacity:.6; font-size:12px;}
+
+  .small-note{font-size:10.5px; color:var(--ink-soft); margin-top:5px;}
+  .qty-input{width:65px !important;}
+
+  .save-indicator{
+    font-size:10px; color:var(--footer-text); display:flex; align-items:center; gap:5px; margin-top:4px; min-height:14px;
+  }
+  .save-indicator .dot{width:6px;height:6px;border-radius:50%;background:#5c8a51; opacity:0; transition:opacity .3s; box-shadow:0 0 5px #5c8a51;}
+  .save-indicator .dot.show{opacity:1;}
+  .storage-warning{
+    display:none; background:var(--red-bg); border:1px solid var(--red); color:var(--red);
+    font-size:10.5px; padding:8px 10px; border-radius:var(--radius-sm); margin-top:8px; line-height:1.45;
+  }
+  .storage-warning.show{display:block;}
+  .amount-pos{color:var(--green-dk); font-weight:600;}
+  .amount-neg{color:var(--red-dk); font-weight:600;}
+
+  /* Keyboard hints */
+  .kbd{
+    display:inline-block; padding:2px 6px; font-size:9px; font-family:'JetBrains Mono',monospace;
+    background:var(--kbd-bg); border:1px solid var(--kbd-border); border-radius:4px;
+    color:var(--ink-soft); line-height:1.4; vertical-align:middle;
+  }
+
+  /* Tooltip */
+  [data-tooltip]{position:relative;}
+  [data-tooltip]:hover::after{
+    content:attr(data-tooltip);
+    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+    background:var(--ink); color:var(--parchment); padding:5px 10px; border-radius:var(--radius-sm);
+    font-size:10px; white-space:nowrap; z-index:10;
+    box-shadow:var(--shadow);
+    pointer-events:none;
+  }
+
+  /* Catalog empty */
+  .catalog-empty{
+    grid-column:1/-1;
+    padding:36px 24px; text-align:center; color:var(--ink-soft); font-style:italic;
+    border:1px dashed var(--parchment-edge); border-radius:var(--radius-md);
+    background:var(--table-stripe);
+  }
+  .catalog-empty .icon{font-size:28px; margin-bottom:10px; opacity:.4;}
+
+  /* ================= RESPONSIVE ================= */
+  @media (max-width:1200px){
+    .app:not(.sidebar-collapsed){grid-template-columns:260px 1fr;}
+  }
+  @media (max-width:960px){
+    .grid2{grid-template-columns:1fr;}
+    .app{grid-template-columns:1fr !important;}
+    .main{padding:20px 16px 48px;}
+    .main::before{left:0;}
+    .sidebar{
+      position:fixed; top:0; left:-280px; bottom:0; width:280px;
+      z-index:100;
+      transition:left var(--transition-med);
+      box-shadow:none;
+    }
+    .sidebar.open{
+      left:0;
+      box-shadow:8px 0 30px rgba(0,0,0,.6);
+    }
+    .mobile-overlay{
+      display:none; position:fixed; inset:0; background:var(--modal-overlay); z-index:99;
+    }
+    .mobile-overlay.show{display:block;}
+    .mobile-header{
+      display:flex !important;
+      align-items:center; justify-content:space-between;
+      padding:12px 16px;
+      background:var(--wood-2);
+      border-bottom:1px solid var(--sidebar-border);
+      position:sticky; top:0; z-index:50;
+    }
+    .mobile-header .brand-text{font-family:'Cinzel',serif; font-size:12px; color:var(--brass-bright); letter-spacing:.03em;}
+    .hamburger{
+      display:flex; align-items:center; justify-content:center;
+      width:36px; height:36px; border-radius:var(--radius-sm);
+      background:transparent; border:1px solid var(--sidebar-border);
+      color:var(--nav-text); cursor:pointer;
+      transition:all var(--transition-fast);
+    }
+    .hamburger:hover{background:var(--sidebar-hover); color:var(--brass-bright);}
+    .hamburger svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+    .nav-item{padding:10px 14px; font-size:13px;}
+    .brand{padding:16px 16px 14px;}
+    .sidebar-foot{padding:12px 16px;}
+  }
+  @media (min-width:961px){
+    .mobile-header{display:none !important;}
+    .mobile-overlay{display:none !important;}
+  }
+
+  /* ---------- PRINT ---------- */
+  @media print{
+    .sidebar,.mobile-header,.mobile-overlay,.toast,.modal-bg{display:none !important;}
+    .app{display:block !important;}
+    .main{padding:0 !important; overflow:visible !important;}
+    .card{break-inside:avoid; box-shadow:none; border:1px solid var(--line);}
+  }
+</style>
+  <script type="module" crossorigin src="/assets/index-CaMdGm4O.js"></script>
+</head>
+<body>
+
+<div id="mobileOverlay" class="mobile-overlay"></div>
+
+<div id="loading" class="loading-screen">
+  <div class="loading-seal">QG</div>
+  <div>Aprendo il registro del Quartier Generale...</div>
+  <div class="loading-text">Cronache di Unshast</div>
+</div>
+
+<div class="app" id="app" style="display:none;">
+  <div class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="seal">QG</div>
+      <div class="brand-text">Registro del<br>Quartier Generale<small>Cronache di Unshast</small></div>
+    </div>
+    <nav>
+      <div class="nav-item active" data-tab="panoramica">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+        Panoramica
+      </div>
+      <div class="nav-item" data-tab="strutture">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+        Strutture
+      </div>
+      <div class="nav-item" data-tab="magazzino">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+        Magazzino
+      </div>
+      <div class="nav-item" data-tab="rotte">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+        Rotte Commerciali
+      </div>
+      <div class="nav-item" data-tab="finanze">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+        Finanze
+      </div>
+      <div class="nav-item" data-tab="preventivo">
+        <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+        Preventivo
+      </div>
+    </nav>
+
+    <div class="sidebar-toggle" id="sidebarToggle" data-tooltip="Comprimi sidebar">
+      <span class="toggle-icon">&#9664;</span> <span>Comprimi</span>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="save-indicator" id="saveIndicator"><span class="dot" id="saveDot"></span><span id="saveText">In attesa di modifiche...</span></div>
+      <div class="storage-warning" id="storageWarning">Il salvataggio locale non e disponibile (modalita privata?). Usa "Esporta backup" spesso per non perdere i dati.</div>
+      <button id="exportBtn" data-tooltip="Salva una copia di sicurezza">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Esporta backup
+      </button>
+      <button id="importBtn" data-tooltip="Carica un backup precedente">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importa backup
+      </button>
+      <button id="copySummaryBtn" data-tooltip="Copia un riepilogo per Discord">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copia riepilogo
+      </button>
+      <button id="guideBtn" data-tooltip="Guida interattiva al regolamento">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Guida al QG
+      </button>
+      <button id="resetBtn" class="btn-danger-side" data-tooltip="Cancella tutto e ricomincia">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Azzera registro
+      </button>
+      <div class="foot-hint">I dati vengono salvati automaticamente. Per spostarli su un altro computer usa Esporta/Importa backup.</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="mobile-header">
+      <span class="brand-text">Registro QG</span>
+      <button class="hamburger" id="hamburgerBtn">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- ================= PANORAMICA ================= -->
+    <section id="tab-panoramica">
+      <div class="topbar">
+        <div>
+          <div class="qg-title" id="qg-name-display">Il mio Quartier Generale</div>
+          <div class="qg-sub" id="qg-class-display">Nessuna classe · Livello 1</div>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-chip"><div class="v mono" id="dash-month">1</div><div class="l">Mese</div></div>
+          <div class="stat-chip"><div class="v mono" id="dash-season">Primavera</div><div class="l">Stagione</div></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h2 class="section-title">Dati del Quartier Generale</h2>
+          <div class="row">
+            <div><label>Nome del QG</label><input type="text" id="dash-in-nome" placeholder="es. Bastione della Torcia"></div>
+          </div>
+          <div class="row">
+            <div><label>Fondatore</label><input type="text" id="dash-in-fondatore" placeholder="Nome personaggio"></div>
+            <div><label>Co-fondatore</label><input type="text" id="dash-in-cofondatore" placeholder="Nome personaggio"></div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Classe del QG</label>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <select id="dash-in-classe" style="flex:1;">
+                  <option value="Nessuna">Senza Classe</option>
+                  <option value="Produzione">Produzione</option>
+                  <option value="Vendita">Vendita</option>
+                  <option value="Militare">Militare</option>
+                </select>
+                <button type="button" class="btn btn-outline btn-sm" id="dash-btn-sblocca-classe" style="flex:0 0 auto; display:none;" title="Consente una correzione manuale eccezionale">🔓</button>
+              </div>
+            </div>
+            <div>
+              <label>Livello del QG <span style="font-weight:400;opacity:.7;">(calcolato automaticamente)</span></label>
+              <select id="dash-in-livello" disabled>
+                <option value="1">Livello 1 (personaggi Lv 3–6)</option>
+                <option value="2">Livello 2 (personaggi Lv 7–10)</option>
+                <option value="3">Livello 3 (personaggi Lv 11–14)</option>
+                <option value="4">Livello 4 (personaggi Lv 15–17)</option>
+                <option value="5">Livello 5 (personaggi Lv 18–20)</option>
+                <option value="6">Livello 6 (personaggi Lv 21+)</option>
+              </select>
+            </div>
+          </div>
+          <div class="hint">La classe si ottiene automaticamente alla costruzione della prima Struttura Specializzata (Produzione, Vendita o Militare) e da quel momento il menu si blocca, per evitare cambi non intenzionali — usa il lucchetto 🔓 per una correzione eccezionale. Il livello del QG si calcola da solo in base ai membri elencati sotto: aggiungi/aggiorna lì i personaggi per farlo cambiare. Il livello massimo attuale del gioco è 3 (Marzo 2026).</div>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Tesoreria</h2>
+          <label>Oro in cassa (mo)</label>
+          <div class="row">
+            <div><input type="number" id="dash-in-oro" value="0"></div>
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <div><label>Movimento rapido</label><input type="number" id="dash-in-movimento" placeholder="es. 50 oppure -20"></div>
+            <div style="flex:0 0 auto;"><button class="btn btn-brass" id="dash-btn-movimento" style="margin-bottom:1px;">Applica</button></div>
+          </div>
+          <div class="divider"></div>
+          <label style="margin-top:0;">Punti QG</label>
+          <div class="progress-wrap"><div class="progress-bar" id="dash-points-bar" style="width:0%;"></div><div class="progress-label" id="dash-points-label">0 / 44</div></div>
+          <div class="hint">Generali e strutture della tua classe costano 2 punti; strutture specializzate di classe diversa costano 4 punti. Superati i 44 punti spesi non potrai costruire altro (le costruzioni esenti, come Avamposti e Imprese aggiuntive, non consumano punti).</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Riepilogo QG</h2>
+        <table>
+          <thead><tr><th>Campo</th><th>Valore</th></tr></thead>
+          <tbody id="dash-overview-body"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Membri del QG</h2>
+        <table>
+          <thead><tr><th>Personaggio</th><th>Livello</th><th></th></tr></thead>
+          <tbody id="dash-members-body"></tbody>
+        </table>
+        <div class="row" style="margin-top:10px;">
+          <div><input type="text" id="dash-in-member-name" placeholder="Nome personaggio"></div>
+          <div style="max-width:100px;"><input type="number" id="dash-in-member-level" placeholder="Lv" min="1" max="30"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline" id="dash-btn-add-member">+ Aggiungi</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Riepilogo Strutture per Categoria</h2>
+        <table>
+          <thead><tr><th>Categoria</th><th>Costruite</th><th>Costo punti</th></tr></thead>
+          <tbody id="dash-summary-body"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Attivit&agrave; recenti</h2>
+        <table>
+          <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo dopo</th></tr></thead>
+          <tbody id="dash-activities-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= STRUTTURE ================= -->
+    <section id="tab-strutture" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Strutture</div>
+          <div class="qg-sub">Catalogo edilizio del Quartier Generale</div>
+        </div>
+      </div>
+
+      <h2 class="section-title">Costruisci una nuova struttura</h2>
+      <div class="search-bar">
+        <input type="text" id="struct-search" placeholder="Cerca struttura per nome o materiale..." data-tooltip="Ctrl+K per cercare">
+      </div>
+      <div class="cat-filters" id="struct-filters"></div>
+      <div class="structure-catalog" id="struct-catalog"></div>
+
+      <div class="divider" style="margin-top:26px;"></div>
+
+      <h2 class="section-title">Strutture costruite</h2>
+      <table>
+        <thead><tr><th>Struttura</th><th>Categoria</th><th>Livello</th><th>Punti spesi</th><th></th></tr></thead>
+        <tbody id="struct-owned-body"></tbody>
+      </table>
+      <div id="struct-owned-empty" class="empty" style="display:none;">Le fondamenta del tuo Quartier Generale sono ancora vuote. Scegli una struttura dal catalogo qui sopra per dare inizio alla costruzione.</div>
+
+      <div id="struct-sub-wrap" style="display:none;">
+        <div class="divider" style="margin-top:26px;"></div>
+        <h2 class="section-title">Sotto-meccaniche attive <span class="tag tag-generali" id="struct-sub-count" style="margin-left:2px;">0</span></h2>
+        <div id="struct-sub-body"></div>
+      </div>
+
+      <div id="struct-sat-wrap" style="display:none;">
+        <div class="divider" style="margin-top:26px;"></div>
+        <h2 class="section-title">Satelliti <span class="tag tag-generali" id="struct-sat-count" style="margin-left:2px;">0</span></h2>
+        <div id="struct-sat-body"></div>
+      </div>
+    </section>
+
+    <!-- ================= MAGAZZINO ================= -->
+    <section id="tab-magazzino" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Magazzino</div>
+          <div class="qg-sub">Materie prime e beni di scambio</div>
+        </div>
+        <div class="stat-strip">
+          <div class="stat-chip"><div class="v mono" id="wh-total-value">0 mo</div><div class="l">Valore totale</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Acquista materiali</h2>
+        <div class="row">
+          <div>
+            <label>Materiale</label>
+            <select id="wh-purchase-material"></select>
+          </div>
+          <div>
+            <label>Quantit&agrave; (U)</label>
+            <input type="number" id="wh-purchase-qty" min="1" value="1">
+          </div>
+          <div>
+            <label>Provenienza</label>
+            <select id="wh-purchase-source">
+              <option value="bazaar">Bazaar (prezzo pieno)</option>
+              <option value="qg20">Acquisto da un altro QG (−20%)</option>
+              <option value="mag30" id="wh-purchase-discount-option" style="display:none;">Materiale scontato dal tuo Magazzino (−30%)</option>
+            </select>
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px; align-items:center;">
+          <div class="stat-chip" style="min-width:150px;"><div class="v mono" id="wh-purchase-cost">0 mo</div><div class="l">Costo totale</div></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="wh-purchase-btn">Acquista e aggiungi al magazzino</button></div>
+        </div>
+        <div class="hint">Lo sconto del 20% si applica quando il materiale viene comprato da un altro QG invece che al Bazaar (la Corona di Samat copre la differenza al venditore). Il 30% è disponibile solo per i materiali che il tuo Magazzino ha scelto come scontati (vedi sotto) — non incide sul <em>costo di costruzione</em> delle strutture, che resta sempre quello fisso di catalogo.</div>
+      </div>
+
+      <div class="card" id="wh-discounted-wrap" style="display:none;">
+        <h2 class="section-title">Materiali scontati dal tuo Magazzino</h2>
+        <div class="hint" style="margin-top:0;">Scegli fino a 5 materie prime: quando le acquisti (o un altro QG le acquista da te), lo sconto sale dal 20% al 30%.</div>
+        <div id="wh-discounted-grid" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Inventario</h2>
+        <table>
+          <thead><tr><th>Materiale</th><th>Prezzo unitario</th><th>Quantit&agrave; (U)</th><th>Valore</th><th></th></tr></thead>
+          <tbody id="wh-inventory-body"></tbody>
+        </table>
+        <div class="hint">Il prezzo unitario segue il listino ufficiale di Unshast (mo per unità di materiale). Ricorda: acquistando da un altro QG ricevi uno sconto del 20% (fino al 30% se il materiale è tra quelli scontati dal tuo Magazzino).</div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Lavoratori</h2>
+        <div class="row" style="align-items:flex-end;">
+          <div><label>Lavoratori assunti</label><input type="number" id="wh-workers" value="0" min="0"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline" id="wh-workers-adjust-btn" style="margin-bottom:1px;">⟳ Adegua al fabbisogno</button></div>
+        </div>
+        <div class="hint">Ogni lavoratore costa 1 mo al mese. Personale totale richiesto dalle strutture costruite: <span class="mono" id="wh-workers-need">0</span>. <span id="wh-workers-deficit" style="display:none; color:var(--red-dk); font-weight:600;"></span></div>
+      </div>
+    </section>
+
+    <!-- ================= ROTTE ================= -->
+    <section id="tab-rotte" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Rotte Commerciali</div>
+          <div class="qg-sub">Collegamenti tra Porta Ethea e le strutture esterne</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Nuova rotta</h2>
+        <div style="display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:8px 12px; align-items:end;">
+          <div><label>Nome / destinazione</label><input type="text" id="route-name" placeholder="es. Rotta per Samat"></div>
+          <div><label>Distanza (km)</label><input type="number" id="route-distance" min="0" placeholder="0"></div>
+          <div><label>Costo mensile</label><div id="route-cost-preview" class="mono" style="height:32px;display:flex;align-items:center;font-size:13px;opacity:.8;">-</div></div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-brass" id="route-add-btn">+ Aggiungi</button>
+            <button class="btn btn-outline btn-sm" id="route-cancel-btn" style="display:none;">Annulla</button>
+          </div>
+          <div><label>Carico abituale</label><select id="route-cargo-material"><option value="">-- nessuno --</option></select></div>
+          <div><label>Quantita</label><input type="number" id="route-cargo-qty" min="0" placeholder="es. 40"></div>
+          <div>
+            <label>Difesa</label>
+            <div style="display:flex;gap:5px;align-items:center;">
+              <label style="display:flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;font-size:11px;"><input type="checkbox" id="route-protected" style="margin:0;"> Protetta</label>
+              <select id="route-defense-type" style="display:none;"><option value="">-- scegli --</option><option value="mio">Mio avamposto</option><option value="esterno">Esterno</option></select>
+              <select id="route-outpost" style="display:none;"><option value="">-- nessuno --</option></select>
+              <input type="number" id="route-ext-level" min="1" max="6" value="1" style="display:none;width:48px;" title="Livello">
+            </div>
+          </div>
+          <div></div>
+        </div>
+        <div class="hint" style="margin-top:8px;">Ogni 1° del mese il QG paga 5 mo ogni 100 km. Se protetta, l'avamposto difende la rotta: rischio base 5% + 5% ogni 100 km scoperti. Senza difesa, meta del carico puo essere persa. Il carico e opzionale: se dichiarato, un attacco sottrae risorse; altrimenti registrato senza perdite. Un avamposto puo difendere una sola rotta alla volta.</div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Rotte attive</h2>
+        <table>
+          <thead><tr><th>Rotta</th><th>Distanza</th><th>Difesa</th><th>Costo/mese</th><th>Rischio</th><th>Carico</th><th></th></tr></thead>
+          <tbody id="route-body"></tbody>
+        </table>
+        <div id="route-empty" class="empty" style="display:none;">Nessuna rotta commerciale registrata.</div>
+        <div class="divider"></div>
+        <div class="row">
+          <div class="stat-chip" style="min-width:140px;"><div class="v mono" id="route-total-km">0 km</div><div class="l">Distanza totale</div></div>
+          <div class="stat-chip" style="min-width:140px;"><div class="v mono" id="route-total-cost">0 mo</div><div class="l">Costo mensile</div></div>
+          <div class="stat-chip" style="min-width:140px;"><div class="v mono" id="route-expected-loss">0 mo</div><div class="l">Perdita attesa</div></div>
+        </div>
+        <div class="hint" id="route-warning" style="display:none; color:var(--red-dk); font-weight:600;">Hai superato i 400 km totali consigliati per un QG ai livelli iniziali.</div>
+      </div>
+    </section>
+
+    <!-- ================= FINANZE ================= -->
+    <section id="tab-finanze" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Finanze</div>
+          <div class="qg-sub">Bilancio mensile, costi ricorrenti e storico movimenti</div>
+        </div>
+      </div>
+
+      <!-- ── 1. CHIUSURA MESE (token inclusi) ── -->
+      <div class="card">
+        <h2 class="section-title">Chiusura del mese</h2>
+        <div class="hint" style="margin-top:0;">Applica produzione, token, rischio rotte e upkeep — tutto in un click. Allocare i token prima della chiusura.</div>
+        <div class="row" style="align-items:center; margin-bottom:12px;">
+          <div class="stat-chip"><div class="v mono" id="fin-month">Mese 1</div><div class="l">Mese corrente</div></div>
+          <div>
+            <label>Stagione</label>
+            <select id="fin-season">
+              <option value="Primavera">Primavera (+10 Campo Coltivato)</option>
+              <option value="Estate">Estate (+5 Campo Coltivato)</option>
+              <option value="Autunno">Autunno (−5 Campo Coltivato)</option>
+              <option value="Inverno">Inverno (−10 Campo Coltivato)</option>
+            </select>
+          </div>
+          <div class="stat-chip" style="min-width:180px;"><div class="v mono" id="fin-after-close">0 mo</div><div class="l">Oro dopo la chiusura</div></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-brass" id="fin-close-month-btn">📕 Chiudi mese</button></div>
+        </div>
+        <div id="fin-tokens-row" class="row" style="flex-wrap:wrap; gap:16px; display:none;">
+          <div id="fin-token-concime-wrap" style="display:none;">
+            <label>Concime <span class="fin-tok-count">(<span id="fin-token-concime-count">0</span> disp.)</span></label>
+            <input type="number" id="fin-token-concime-input" min="0" value="0" style="max-width:70px;">
+            <div class="hint">+10 Beni vegetali / token</div>
+          </div>
+          <div id="fin-token-miniera-wrap" style="display:none;">
+            <label>Miniera <span class="fin-tok-count">(<span id="fin-token-miniera-count">0</span> disp.)</span></label>
+            <input type="number" id="fin-token-miniera-input" min="0" max="3" value="0" style="max-width:70px;">
+            <div class="hint">Max 3 · tira d6/d10/d12</div>
+          </div>
+          <div id="fin-token-pesca-wrap" style="display:none;">
+            <label>Pesca <span class="fin-tok-count">(<span id="fin-token-pesca-count">0</span> disp.)</span></label>
+            <input type="number" id="fin-token-pesca-input" min="0" max="3" value="0" style="max-width:70px;">
+            <div class="hint">Max 3 · tira d6/d10/d12</div>
+          </div>
+        </div>
+        <div class="hint" id="fin-close-warning" style="display:none; color:var(--red-dk); font-weight:600;">⚠ La tesoreria andrà in negativo dopo la chiusura di questo mese.</div>
+        <div id="fin-report-box" style="display:none; margin-top:12px;">
+          <h3 style="margin:0 0 6px;">Resoconto ultima chiusura</h3>
+          <pre id="fin-report-text" class="mono" style="white-space:pre-wrap; background:var(--panel-2,#0002); padding:10px 12px; border-radius:8px; max-height:280px; overflow:auto;"></pre>
+        </div>
+      </div>
+
+      <!-- ── 2. RIEPILOGO COSTI (fissi + variabili unificati) ── -->
+      <div class="card">
+        <h2 class="section-title">Riepilogo costi mensili</h2>
+        <div class="hint" style="margin-top:0;">Costi fissi (stipendi) e variabili (rotte) in un'unica tabella.</div>
+        <table>
+          <thead><tr><th>Tipo</th><th>Voce</th><th>Base di calcolo</th><th style="text-align:right">Importo/mese</th></tr></thead>
+          <tbody id="fin-cost-body"></tbody>
+          <tfoot><tr><td colspan="3" style="text-align:right; font-weight:700;">Totale</td><td class="mono" style="text-align:right; font-weight:700;" id="fin-cost-total">0 mo</td></tr></tfoot>
+        </table>
+        <div class="row" style="margin-top:8px; gap:16px; justify-content:flex-end;">
+          <div class="stat-chip" style="border:none; background:none; padding:0;"><div class="v mono" id="fin-available">0 mo</div><div class="l">Disponibile oltre riserva</div></div>
+        </div>
+      </div>
+
+      <!-- ── 3. STORICO MOVIMENTI (pieghevole) ── -->
+      <details class="card sub-card">
+        <summary>Storico movimenti</summary>
+        <div class="sub-card-body">
+          <table>
+            <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo dopo</th></tr></thead>
+            <tbody id="fin-movements-body"></tbody>
+          </table>
+          <div id="fin-movements-empty" class="empty" style="display:none;">Nessun movimento registrato ancora.</div>
+        </div>
+      </details>
+
+      <!-- ── 4. REGISTRO SPESE (pieghevole) ── -->
+      <details class="card sub-card">
+        <summary>Registro Spese</summary>
+        <div class="sub-card-body">
+          <div class="hint" style="margin-top:0;">Promemoria contabile e spese extra. "Da ricevere"/"Da dare" = crediti/debiti aperti (Salda per applicare). "Entrata"/"Uscita" = movimenti già applicati alla tesoreria. "Spesa extra" = spese manuali (es. multe, donazioni) applicate subito alla tesoreria.</div>
+          <div id="fin-altriqg-summary" style="margin-bottom:10px;"></div>
+          <table>
+            <thead><tr><th>Spesa</th><th>Tipo</th><th>Importo</th><th>Nota</th><th>Stato</th><th></th></tr></thead>
+            <tbody id="fin-altriqg-body"></tbody>
+          </table>
+          <div id="fin-altriqg-empty" class="empty" style="display:none;">Nessuna voce registrata.</div>
+          <div class="row" style="align-items:flex-end; margin-top:10px;">
+            <div><label>Spesa / Descrizione</label><input type="text" id="fin-altriqg-name" placeholder="es. QG di Samat (opzionale per Spesa extra)"></div>
+            <div>
+              <label>Tipo</label>
+              <select id="fin-altriqg-type">
+                <option value="da_ricevere">Da ricevere (credito)</option>
+                <option value="da_dare">Da dare (debito)</option>
+                <option value="entrata">Entrata (incassata)</option>
+                <option value="uscita">Uscita (pagata)</option>
+                <option value="spesa">Spesa extra (applicata)</option>
+              </select>
+            </div>
+            <div style="max-width:130px;"><label>Importo (mo)</label><input type="number" min="0" id="fin-altriqg-amount" value="0"></div>
+            <div><label>Nota</label><input type="text" id="fin-altriqg-note" placeholder="es. quota rotta condivisa"></div>
+            <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" id="fin-altriqg-add-btn">+ Aggiungi</button></div>
+          </div>
+        </div>
+      </details>
+
+      <!-- ── 5. RISERVA BANCARIA (pieghevole, in fondo) ── -->
+      <details class="card sub-card">
+        <summary>Riserva Bancaria</summary>
+        <div class="sub-card-body">
+          <div class="hint" style="margin-top:0;">Soglia personale: le azioni volontarie dell'app (costruzioni, acquisti) non useranno questi fondi. L'upkeep obbligatorio la ignora — se lo intacca, la chiusura lo segnala.</div>
+          <div class="row" style="align-items:center;">
+            <div><label>Riserva fissa (mo)</label><input type="number" min="0" id="fin-reserve" value="0" style="max-width:150px;"></div>
+            <div class="stat-chip"><div class="v mono" id="fin-reserve-current">0 mo</div><div class="l">Riserva attuale</div></div>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= PREVENTIVO ================= -->
+    <section id="tab-preventivo" style="display:none;">
+      <div class="topbar">
+        <div>
+          <div class="qg-title">Preventivo Costi</div>
+          <div class="qg-sub">Pianifica la costruzione di strutture e calcola i costi totali</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Riepilogo Preventivo</h2>
+        <div class="row" style="flex-wrap:wrap; gap:16px;">
+          <div class="stat-chip" style="min-width:120px;"><div class="v mono" id="prev-summary-oro">0 mo</div><div class="l">Costo totale oro</div></div>
+          <div class="stat-chip" style="min-width:120px;"><div class="v mono" id="prev-summary-punti">0 / 44</div><div class="l">Punti QG</div></div>
+          <div class="stat-chip" style="min-width:120px;"><div class="v mono" id="prev-summary-personale">0 uomini</div><div class="l">Personale</div></div>
+          <div class="stat-chip" style="min-width:200px; text-align:left;"><div class="l" style="margin-bottom:4px;">Materiali totali</div><div id="prev-summary-materials" style="display:flex;flex-wrap:wrap;gap:2px;"></div></div>
+        </div>
+        <div class="row" style="margin-top:12px; justify-content:flex-end; gap:8px;">
+          <button class="btn btn-outline btn-sm" id="prev-save-btn">Salva preventivo</button>
+          <button class="btn btn-outline btn-sm" id="prev-load-btn">Carica preventivo</button>
+          <button class="btn btn-danger btn-sm" id="prev-clear-btn">Svuota</button>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card" id="prev-catalog-card">
+          <h2 class="section-title">Catalogo strutture</h2>
+          <div class="search-bar">
+            <input type="text" id="prev-search" placeholder="Cerca struttura per nome o categoria...">
+          </div>
+          <div class="structure-catalog" id="prev-catalog-grid" style="max-height:400px; overflow-y:auto;"></div>
+        </div>
+
+        <div>
+          <div class="card" id="prev-list" style="display:none;">
+            <h2 class="section-title">Strutture nel preventivo</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Struttura</th>
+                  <th>Categoria</th>
+                  <th>Pt</th>
+                  <th>Costo/u</th>
+                  <th>Qta</th>
+                  <th>Tot oro</th>
+                  <th>Tot pt</th>
+                  <th>Pers.</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="prev-table-body"></tbody>
+            </table>
+          </div>
+          <div id="prev-empty" class="card">
+            <div class="empty">Seleziona strutture dal catalogo per iniziare a compilare il preventivo.</div>
+          </div>
+          <div class="card">
+            <h2 class="section-title">Confronto con disponibilit&agrave; attuale</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Risorsa</th>
+                  <th>Necessaria</th>
+                  <th>Disponibile</th>
+                  <th>Differenza</th>
+                </tr>
+              </thead>
+              <tbody id="prev-compare-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="modal-bg" id="guideModalBg" style="display:none;">
+  <div class="modal guide-modal">
+    <button class="modal-close" id="guideCloseX" title="Chiudi">✕</button>
+    <h3>📖 Guida al Quartier Generale</h3>
+    <div class="guide-intro">Meccanica di gioco e funzionamento del Registro — Cronache di Unshast</div>
+
+    <details open>
+      <summary>Cos'è e come si apre un QG</summary>
+      <div class="guide-body">
+        Il QG è la base operativa del gruppo: produce risorse, genera oro, offre servizi e va gestito mese per mese come un vero sistema economico.<br><br>
+        <b>Apertura</b>: servono 2 personaggi (Fondatore + Co-fondatore) e <b>300 mo</b> di capitale. Si parte Senza Classe, a Livello 1.
+      </div>
+    </details>
+
+    <details>
+      <summary>Classi e Livello del QG</summary>
+      <div class="guide-body">
+        La <b>Classe</b> (Produzione / Vendita / Militare) si ottiene automaticamente alla prima struttura specializzata costruita, e dimezza il costo in punti delle strutture di quella categoria. Una volta assegnata, il menu si blocca da solo per evitare cambi accidentali — il lucchetto 🔓 che compare accanto serve solo per una correzione eccezionale (es. errore dello Staff).<br><br>
+        Il <b>Livello del QG</b> (1–6) non si imposta più a mano: si calcola da solo in base ai personaggi elencati nella lista Membri (Lv 3–6 → QG Lv.1, 7–10 → Lv.2, 11–14 → Lv.3, 15–17 → Lv.4, 18–20 → Lv.5, 21+ → Lv.6), limitato al massimo di campagna attuale (<b>Livello 3</b>). Per farlo salire, aggiorna i livelli dei membri.<br><br>
+        <b>Potenziare</b> una struttura richiede un QG di livello pari o superiore, e ripaga per intero il costo originale in oro, materiali e Punti QG.
+      </div>
+    </details>
+
+    <details>
+      <summary>Punti QG</summary>
+      <div class="guide-body">
+        Budget totale: <b>44 punti</b>.
+        <ul>
+          <li>Strutture Generali: 2 punti</li>
+          <li>Strutture della propria Classe: 2 punti</li>
+          <li>Strutture specializzate di Classe diversa: 4 punti</li>
+          <li>Strutture esenti (Impresa, Avamposto): 0 punti, e non contano nemmeno nel limite di costruzioni multiple dove previsto (es. Imprese: max 2 × Livello QG)</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>Rotte Commerciali e Avamposti</summary>
+      <div class="guide-body">
+        <b>Costo</b>: 5 mo ogni 100 km, applicato automaticamente ad ogni "Chiudi mese".<br><br>
+        <b>Difesa</b>: ogni rotta si collega a un Avamposto costruito (menu a tendina, non più un numero libero) che la protegge entro un raggio di 400 km × il suo livello — 600 km × Livello QG se il Campo d'Addestramento ha prodotto almeno un'Unità Allenata. Un Avamposto protegge una sola rotta alla volta; smantellarlo scollega automaticamente la rotta, che torna scoperta.<br><br>
+        <b>Rischio</b>: 5% base + 5% ogni 100 km non coperti. Il tiro avviene davvero ad ogni "Chiudi mese": se dichiari un "carico abituale" sulla rotta (materiale + quantità), un attacco riuscito ne sottrae realmente metà dal magazzino; senza carico dichiarato, l'attacco viene comunque tirato e registrato nel resoconto, ma non sottrae nulla.
+      </div>
+    </details>
+
+    <details>
+      <summary>Materie Prime e Magazzino</summary>
+      <div class="guide-body">
+        Prezzo fisso di listino per ogni materiale. Sconti su acquisto: −20% comprando da un altro QG, fino a −30% se il materiale è tra i 5 scontati dal tuo Magazzino. Gli sconti valgono solo sugli acquisti, mai sul costo di costruzione delle strutture.<br><br>
+        Il bottone "⟳ Adegua al fabbisogno" nella tab Magazzino imposta i lavoratori assunti al numero esatto richiesto dalle strutture possedute, in un click.
+      </div>
+    </details>
+
+    <details>
+      <summary>Strutture e Personale</summary>
+      <div class="guide-body">
+        28 strutture in 4 categorie — Generali, Produzione, Vendita, Militare — ciascuna con costo, personale richiesto, materiali, descrizione ed effetto. Il catalogo completo è nella tab <b>Strutture</b>, filtrabile per categoria.<br><br>
+        Ogni struttura richiede personale per funzionare; ogni lavoratore assunto costa <b>1 mo al mese</b> — è la spesa fissa principale del QG.
+      </div>
+    </details>
+
+    <details>
+      <summary>Chiusura del mese</summary>
+      <div class="guide-body">
+        Il bottone <b>"📕 Chiudi mese"</b> (tab Finanze) esegue in automatico l'intero ciclo mensile:
+        <ul>
+          <li><b>Produzione</b> di ogni struttura di Produzione attiva (Campo Coltivato, Miniera — con scelta mensile del materiale da estrarre —, Pescheria, Segheria, Fattoria, Giardino), aggiunta da sola al magazzino.</li>
+          <li><b>Stagioni</b>: il Campo Coltivato riceve un modificatore (+10 Primavera, +5 Estate, −5 Autunno, −10 Inverno); la stagione avanza da sola ogni 3 mesi, correggibile a mano dal menu se serve.</li>
+          <li><b>Raffineria</b>: se costruita, converte automaticamente la produzione grezza (Beni vegetali, Pesce, prodotti animali) nelle rispettive versioni raffinate.</li>
+          <li><b>Token</b> (Miniera/Pesca/Concime): generati e conteggiati ad ogni chiusura — al momento si accumulano soltanto, la funzione per spenderli sulle tabelle dedicate è ancora in lavorazione.</li>
+          <li><b>Rischio-attacco</b> su ogni rotta commerciale (vedi sezione Rotte sopra).</li>
+          <li><b>Upkeep</b>: stipendi + costo rotte, scalati dalla tesoreria.</li>
+          <li>Reset e avanzamenti mensili delle sotto-meccaniche di struttura: rituali della Sala Arcana avanzano di ~4 settimane, i Catalizzatori d'Essenza scarichi tornano disponibili, le Indagini della Biblioteca scadute vengono rimosse, le piante del Giardino crescono o muoiono in base al clima, la Bottega Artistica torna a poter creare un'Opera, lo Studio Diplomatico rinnova le fazioni selezionabili, e gli Avamposti pagano il rifornimento mensile incassando il guadagno passivo.</li>
+        </ul>
+        Ad ogni chiusura appare un resoconto testuale con il dettaglio riga per riga, consultabile anche dopo senza dover richiudere il mese.
+      </div>
+    </details>
+
+    <details>
+      <summary>Sotto-meccaniche di Struttura</summary>
+      <div class="guide-body">
+        Costruendo certe strutture, sotto la tabella "Strutture costruite" compare il pannello <b>"Sotto-meccaniche attive"</b>: una card pieghevole per ciascuna (clicca l'intestazione per aprirla/chiuderla), con un bordo colorato che ne ricorda la categoria. Coprono:
+        <ul>
+          <li><b>Studio Arcano</b> — Charm settimanale per lanciare Identificare gratis.</li>
+          <li><b>Santuario</b> — Catalizzatore d'Essenza (carica/trasferisci in uno Studio Arcano).</li>
+          <li><b>Alchimista</b> — inventario pozioni e Calderone Alchemico (tira 2d100, rimanda alla Tabella della Mescita delle Pozioni per il risultato).</li>
+          <li><b>Biblioteca</b> — fino a 5 Temi (+ personalizzati) con Indagini a tempo, e Bestiario che si sblocca a 3 materiali per sottospecie.</li>
+          <li><b>Giardino</b> — piante speciali legate al clima del settore (impostabile qui), maturano o muoiono ad ogni chiusura mese.</li>
+          <li><b>Bottega Artistica</b> — un'Opera d'Arte al mese (pagata in materiali, multiplo di 120mo) e un calcolatore di Prestigio Artistico verso le regioni di Unshast.</li>
+          <li><b>Studio Diplomatico</b> — selezione mensile di fazioni (fino al livello della struttura) e acquisto di Companion.</li>
+          <li><b>Sala Arcana</b> — un rituale alla volta per apprendere un incantesimo, con costo e cap di livello calcolati in automatico.</li>
+          <li><b>Avamposto</b> — distanza da Porta Ethea, rifornimento mensile (anche in versione ridotta a materiali) e guadagno passivo.</li>
+          <li><b>Campo d'Addestramento</b> — avvia e completa l'addestramento di unità, fino a Allenate.</li>
+          <li><b>Porto Militare / Eliporto Arcano</b> — sconto cumulabile sui potenziamenti navali (il catalogo dei potenziamenti è su una pagina esterna, qui si inserisce solo il costo base).</li>
+          <li><b>Sala da Guerra</b> — tracciamento di stato e note; il regolamento rimanda a una scheda "Guerra" a parte non ancora disponibile, quindi qui non ci sono calcoli di battaglia.</li>
+          <li><b>Impresa</b> — modalità "Porta Ethea" (strumenti da artigiano + vendita diretta) o "Vendita a Distanza" (collegata a una struttura di Vendita posseduta).</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>Registro Spese (tab Finanze)</summary>
+      <div class="guide-body">
+        Un promemoria contabile per i movimenti economici con altri Quartier Generali — <b>non</b> è una meccanica del regolamento, solo un modo per non perdere traccia di chi deve cosa a chi. "Da ricevere"/"Da dare" sono crediti e debiti aperti: restano in sospeso finché non premi "Salda", poi l'importo si applica alla tesoreria. "Entrata"/"Uscita" sono invece movimenti già avvenuti, applicati subito.
+      </div>
+    </details>
+
+    <details>
+      <summary>Come usare il programma — le tab</summary>
+      <div class="guide-body">
+        <ul>
+          <li><b>Panoramica</b>: dati del QG, tesoreria (con "Movimento rapido" per +/- oro), barra Punti QG, membri, riepilogo strutture.</li>
+          <li><b>Strutture</b>: catalogo filtrabile con bottone "Costruisci" (verifica e scala oro/materiali/punti in automatico); elenco strutture possedute con Potenzia/Smantella; pannello Sotto-meccaniche attive più sotto.</li>
+          <li><b>Magazzino</b>: acquisto materiali con sconti, inventario, e lavoratori.</li>
+          <li><b>Rotte Commerciali</b>: aggiungi rotte, collega un Avamposto a difesa, dichiara un carico opzionale, calcolo automatico di costo mensile e rischio.</li>
+          <li><b>Finanze</b>: calendario mese/stagione, bottone "Chiudi mese", storico movimenti registrato da solo ad ogni entrata/uscita, e il Registro Spese.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>Salvataggio, backup e tema</summary>
+      <div class="guide-body">
+        I dati si salvano da soli in un file sul tuo dispositivo (non più solo nel browser): l'app li ritrova automaticamente ad ogni riavvio. Restano comunque <b>legati a questo dispositivo</b> — non si sincronizzano da soli con un altro PC o telefono. Usa <b>⬇ Esporta backup (JSON)</b> per una copia di sicurezza o per spostarti su un altro dispositivo, e <b>⬆ Importa backup</b> per ricaricarla. <b>📋 Copia riepilogo testuale</b> genera un riassunto pronto da incollare su Discord.<br><br>
+        Su mobile, puoi installare l'app come PWA toccando "Aggiungi alla schermata Home" dal menu del browser.
+      </div>
+    </details>
+
+    <div class="guide-foot">
+      <label><input type="checkbox" id="guideDontShow"> Non mostrare più questa guida all'avvio</label>
+      <button class="btn btn-brass" id="guideCloseBtn">Ho capito, chiudi</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
