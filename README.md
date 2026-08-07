@@ -1,5 +1,5 @@
 # registro-qg-desktop
-App Desktop e Mobile per gestione QG Unshast (Windows, Linux, macOS, Android, iOS via PWA)
+App Desktop e Web per gestione QG Unshast (Windows, Linux, macOS, iOS/Android via PWA)
 
 ## Requisiti per build locale
 
@@ -12,22 +12,11 @@ App Desktop e Mobile per gestione QG Unshast (Windows, Linux, macOS, Android, iO
 sudo apt-get install libwebkit2gtk-4.1-dev libgtk-3-dev libappindicator3-dev librsvg2-dev patchelf
 ```
 
-### Android
-- Android Studio
-- Android SDK 34+
-- NDK 27+
-
 ## Build
 
 ```bash
 npm install
 npm run tauri build
-```
-
-### Build Android
-```bash
-npx tauri android init
-npx tauri android build
 ```
 
 ## Output build
@@ -38,23 +27,22 @@ npx tauri android build
 | Linux | Debian Package | `sudo dpkg -i *.deb` |
 | Linux | AppImage | Rendere eseguibile e lanciare |
 | macOS | DMG | Aprire il `.dmg` e trascinare in Applicazioni |
-| Android | APK | Abilitare "Sorgenti sconosciute" e installare |
-| iOS | PWA | Aprire il link e "Aggiungi alla schermata Home" |
+| iOS / Android | PWA | Aprire il link e "Aggiungi alla schermata Home" |
 
-## PWA (iOS e Android mobile)
+## PWA (iOS e Android)
 
-La webapp e disponibile come PWA (Progressive Web App) su GitHub Pages.
+La webapp e disponibile come PWA su GitHub Pages, installabile su qualsiasi smartphone senza app store.
 
 ### Installa su iPhone/iPad
 1. Apri Safari e vai al link della PWA
-2. Tocca il pulsante "Condividi" (quadrato con freccia)
-3. Tocca "Aggiungi alla schermata Home"
+2. Tocca il pulsante **Condividi** (quadrato con freccia)
+3. Tocca **"Aggiungi alla schermata Home"**
 4. Conferma con "Aggiungi"
 
 ### Installa su Android
 1. Apri Chrome e vai al link della PWA
 2. Tocca il menu (tre puntini)
-3. Tocca "Installa app" o "Aggiungi alla schermata Home"
+3. Tocca **"Installa app"** o **"Aggiungi alla schermata Home"**
 4. Conferma
 
 La PWA funziona offline grazie al service worker.
@@ -68,5 +56,5 @@ git push origin v1.0.0
 ```
 
 La GitHub Action creera automaticamente:
-- Una release con tutti i file desktop/mobile
-- La PWA su GitHub Pages
+- Una release con tutti i file desktop (Windows, Linux, macOS)
+- La PWA su GitHub Pages (per iOS e Android)
