@@ -111,6 +111,121 @@ function initKeyboard() {
 }
 
 /* ============================================================
+   GESTURES (mobile swipe)
+   ============================================================ */
+const TAB_ORDER = ['panoramica', 'strutture', 'magazzino', 'rotte', 'finanze', 'preventivo'];
+
+function initGestures() {
+  if (window.innerWidth > 960) return;
+
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  const main = document.querySelector('.main');
+  const swipeHint = document.getElementById('swipeHint');
+  if (!sidebar || !main) return;
+
+  let startX = 0, startY = 0, tracking = false, direction = null;
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay?.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay?.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('touchstart', e => {
+    if (sidebar.classList.contains('open')) return;
+    const touch = e.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+    tracking = true;
+    direction = null;
+    if (startX < 30) swipeHint?.classList.add('show');
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!tracking) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+
+    if (!direction) {
+      if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+        direction = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+      }
+    }
+
+    if (direction === 'h' && startX < 30 && dx > 0) {
+      e.preventDefault();
+      const progress = Math.min(dx / 250, 1);
+      sidebar.style.transform = `translateX(${-280 + 280 * progress}px)`;
+      sidebar.style.transition = 'none';
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', e => {
+    if (!tracking) return;
+    tracking = false;
+    swipeHint?.classList.remove('show');
+
+    sidebar.style.transform = '';
+    sidebar.style.transition = '';
+
+    if (direction === 'h' && startX < 30) {
+      const touch = e.changedTouches[0];
+      const dx = touch.clientX - startX;
+      if (dx > 80) openSidebar();
+    }
+  }, { passive: true });
+
+  // Swipe left on open sidebar → close
+  let sidebarStartX = 0;
+  sidebar.addEventListener('touchstart', e => {
+    if (!sidebar.classList.contains('open')) return;
+    sidebarStartX = e.touches[0].clientX;
+  }, { passive: true });
+
+  sidebar.addEventListener('touchend', e => {
+    if (!sidebar.classList.contains('open')) return;
+    const dx = e.changedTouches[0].clientX - sidebarStartX;
+    if (dx < -60) closeSidebar();
+  }, { passive: true });
+
+  // Swipe left/right on main → switch tabs
+  let mainStartX = 0, mainStartY = 0, mainDir = null;
+  main.addEventListener('touchstart', e => {
+    mainStartX = e.touches[0].clientX;
+    mainStartY = e.touches[0].clientY;
+    mainDir = null;
+  }, { passive: true });
+
+  main.addEventListener('touchmove', e => {
+    const dx = e.touches[0].clientX - mainStartX;
+    const dy = e.touches[0].clientY - mainStartY;
+    if (!mainDir && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+      mainDir = Math.abs(dx) > Math.abs(dy) * 1.5 ? 'h' : 'v';
+    }
+  }, { passive: true });
+
+  main.addEventListener('touchend', e => {
+    if (mainDir !== 'h') return;
+    const dx = e.changedTouches[0].clientX - mainStartX;
+    const currentIdx = TAB_ORDER.indexOf(currentTab);
+    if (Math.abs(dx) > 60 && currentIdx >= 0) {
+      if (dx < 0 && currentIdx < TAB_ORDER.length - 1) {
+        switchTab(TAB_ORDER[currentIdx + 1]);
+      } else if (dx > 0 && currentIdx > 0) {
+        switchTab(TAB_ORDER[currentIdx - 1]);
+      }
+    }
+  }, { passive: true });
+}
+
+/* ============================================================
    INIT
    ============================================================ */
 async function init() {
@@ -128,6 +243,7 @@ async function init() {
   initGuide();
   initImportExport();
   initKeyboard();
+  initGestures();
 
   initDashboardEvents();
   initStructureEvents();
