@@ -15,7 +15,10 @@ export default defineConfig({
   plugins: [
     viteStaticCopy({
       targets: [
-        { src: 'data/regolamento.json', dest: 'data' }
+        { src: 'data/regolamento.json', dest: 'data' },
+        { src: 'manifest.json', dest: '.' },
+        { src: 'sw.js', dest: '.' },
+        { src: '../src-tauri/icons/*', dest: 'icons' }
       ]
     })
   ],

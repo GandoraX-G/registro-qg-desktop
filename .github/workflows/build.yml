@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build-windows:
@@ -205,3 +207,25 @@ jobs:
             artifacts/linux-appimage/*.AppImage
             artifacts/macos/*.dmg
             artifacts/android/**/*.apk
+
+  deploy-pwa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installa Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Installa dipendenze npm
+        run: npm install
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Deploy su GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
