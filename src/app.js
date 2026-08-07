@@ -10,6 +10,7 @@ import { renderCatalogo, renderStrutturePossedute, renderSottomeccaniche, render
 import { renderMagazzino, initWarehouseEvents, setWarehouseCallbacks } from './ui/warehouse.js';
 import { renderRotte, initRoutesEvents } from './ui/routes.js';
 import { renderPreventivo, renderCatalogoPreventivo, initPreventivoEvents, loadSavedPreventivo } from './ui/preventivo.js';
+import { initAdaptive, adaptAll, adaptTables } from './ui/adaptive.js';
 
 /* ============================================================
    GLOBAL RENDER
@@ -24,6 +25,7 @@ function renderAll() {
     case 'finanze': renderFinanze(); break;
     case 'preventivo': renderCatalogoPreventivo(); renderPreventivo(); break;
   }
+  adaptAll();
 }
 
 /* ============================================================
@@ -244,6 +246,7 @@ async function init() {
   initImportExport();
   initKeyboard();
   initGestures();
+  initAdaptive();
 
   initDashboardEvents();
   initStructureEvents();
@@ -259,6 +262,7 @@ async function init() {
 
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = 'grid';
+  adaptAll();
 
   if (!localStorage.getItem(GUIDE_KEY)) {
     setTimeout(() => {
