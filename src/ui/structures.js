@@ -26,6 +26,9 @@ import { ALBERI_LUOGO, scegliAlberoSegheria, ottieniSemeOLio } from '../modules/
 
 const SATELLITE_CATALOG_IDS = ['campo_coltivato', 'miniera', 'pescheria', 'segheria', 'fattoria'];
 
+// La modalità importazione serve a registrare strutture già esistenti senza ricostruirne i costi.
+let modalitaImportazione = false;
+
 const PORTATE_LOCANDA = [
   { id: 'pesce',    nome: 'Pesce',       materiali: 'Pesce',                cottura: 'Media',  effettoPortata: 'Velocità Nuoto 10ft',              durata: '7 giorni',  contorno: 'Pesce',     effettoContorno: 'Respirare sott\'acqua',              spellContorno: true },
   { id: 'carne',    nome: 'Carne',       materiali: 'Carne Animale',        cottura: 'Lenta',  effettoPortata: 'Velocità Movimento 20ft',           durata: '1 giorno',  contorno: 'Carne',     effettoContorno: 'Ingrandire/Ridurre',                  spellContorno: true },
@@ -47,6 +50,24 @@ export function renderCatalogo() {
   });
 
   const grid = document.getElementById('struct-catalog');
+  let importModeWrap = document.getElementById('struct-import-mode-wrap');
+  if (!importModeWrap) {
+    importModeWrap = document.createElement('section');
+    importModeWrap.id = 'struct-import-mode-wrap';
+    importModeWrap.className = 'card';
+    importModeWrap.style.margin = '12px 0';
+    grid.parentNode.insertBefore(importModeWrap, grid);
+  }
+  importModeWrap.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <div><strong>Modalità importazione QG</strong><div class="hint" style="margin:4px 0 0;">${modalitaImportazione ? 'Attiva: aggiungi strutture già esistenti spendendo solo Punti QG, senza oro o materiali.' : 'Regolare: costruisci spendendo oro e materiali come da regolamento.'}</div></div>
+      <button type="button" id="struct-import-mode-toggle" class="btn ${modalitaImportazione ? 'btn-brass' : 'btn-outline'} btn-sm">${modalitaImportazione ? 'Torna alla costruzione normale' : 'Importa QG esistente'}</button>
+    </div>
+    ${modalitaImportazione ? '<p class="hint" style="margin:10px 0 0;">Le strutture importate rispettano i limiti e il budget di Punti QG. Saranno contrassegnate come importate; nessun costo in oro/materiali verrà registrato.</p>' : ''}`;
+  document.getElementById('struct-import-mode-toggle').onclick = () => {
+    modalitaImportazione = !modalitaImportazione;
+    renderCatalogo();
+  };
   grid.innerHTML = '';
   const searchLower = (structSearchTerm || '').toLowerCase();
   const lista = CATALOGO.filter(c => {
@@ -95,7 +116,7 @@ export function renderCatalogo() {
       <div class="desc">${c.desc}</div>
       ${selettoreDispiegamento}
       ${selettoreImpresa}
-      <div class="foot"><button class="btn btn-brass btn-sm" data-action="costruisci" data-id="${c.id}">Costruisci</button></div>
+      <div class="foot"><button class="btn ${modalitaImportazione ? 'btn-outline' : 'btn-brass'} btn-sm" data-action="${modalitaImportazione ? 'importa-struttura' : 'costruisci'}" data-id="${c.id}">${modalitaImportazione ? 'Importa struttura' : 'Costruisci'}</button></div>
     `;
     grid.appendChild(card);
   });
@@ -135,7 +156,7 @@ export function renderStrutturePossedute() {
     }
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${c.nome}</td>
+      <td>${c.nome}${(s.livelliImportati || 0) > 0 ? ' <span class="tag tag-generali">Importata</span>' : ''}</td>
       <td><span class="tag tag-${c.categoria.toLowerCase()}">${c.categoria}</span></td>
       <td class="mono">Lv. ${s.livello}</td>
       <td class="mono">${c.exempt ? 'esente' : punti}</td>
@@ -697,9 +718,9 @@ export function renderCardImpresa(s, c) {
 
 export function initStructureEvents() {
   document.getElementById('struct-catalog').addEventListener('click', e => {
-    const btn = e.target.closest('[data-action="costruisci"]');
+    const btn = e.target.closest('[data-action="costruisci"], [data-action="importa-struttura"]');
     if (!btn) return;
-    costruisciStruttura(btn.dataset.id);
+    costruisciStruttura(btn.dataset.id, btn.dataset.action === 'importa-struttura');
   });
 
   document.getElementById('struct-catalog').addEventListener('change', e => {
@@ -1102,7 +1123,7 @@ export function initStructureEvents() {
   });
 }
 
-function costruisciStruttura(catId) {
+function costruisciStruttura(catId, importazione = false) {
   const c = CATALOGO.find(x => x.id === catId);
   if (!c) return;
   const costoPunti = puntiCosto(c);
@@ -1128,9 +1149,11 @@ function costruisciStruttura(catId) {
     if (!validazione.ok) { showToast(validazione.messaggio, 'warning'); return; }
     costoEffettivo = costoDispiegamentoAvamposto(tipoDispiegamento, c.costo);
   }
-  const oroDisp = oroDisponibile();
-  if (oroDisp < costoEffettivo) {
-    errori.push(`Oro: servono ${fmtMo(costoEffettivo)} mo, disponibili ${fmtMo(oroDisp)} mo`);
+  if (!importazione) {
+    const oroDisp = oroDisponibile();
+    if (oroDisp < costoEffettivo) {
+      errori.push(`Oro: servono ${fmtMo(costoEffettivo)} mo, disponibili ${fmtMo(oroDisp)} mo`);
+    }
   }
   let tipoImpresa = 'distanza';
   if (catId === 'impresa') {
@@ -1142,15 +1165,17 @@ function costruisciStruttura(catId) {
     const selMat = document.querySelector(`[data-field="matScelta"][data-cid="${catId}"]`);
     if (selMat && selMat.value === 'alternativi') materialiSet = c.materialiOppure;
   }
-  const matMancanti = [];
-  for (const mat of materialiSet) {
-    const disp = state.materiali[mat.m] || 0;
-    if (disp < mat.u) {
-      matMancanti.push(`${mat.m}: servono ${mat.u}U, disponibili ${disp}U`);
+  if (!importazione) {
+    const matMancanti = [];
+    for (const mat of materialiSet) {
+      const disp = state.materiali[mat.m] || 0;
+      if (disp < mat.u) {
+        matMancanti.push(`${mat.m}: servono ${mat.u}U, disponibili ${disp}U`);
+      }
     }
-  }
-  if (matMancanti.length > 0) {
-    errori.push(`Materiali mancanti:\n  • ${matMancanti.join('\n  • ')}`);
+    if (matMancanti.length > 0) {
+      errori.push(`Materiali mancanti:\n  • ${matMancanti.join('\n  • ')}`);
+    }
   }
 
   if (errori.length > 0) {
@@ -1159,15 +1184,27 @@ function costruisciStruttura(catId) {
   }
   const etichettaDispiegamento = (catId === 'avamposto' && tipoDispiegamento !== 'standard')
     ? ` (${labelTipoDispiegamento(tipoDispiegamento)})` : '';
-  registraMovimento(`Costruzione: ${c.nome}${etichettaDispiegamento}`, -costoEffettivo);
-  materialiSet.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) - mat.u; });
-  state.strutture.push({ uid: uid(), catId: c.id, livello: 1, materialiScelte: materialiSet === c.materialiOppure ? 'alternativi' : 'primari', ...statoIniziale(c.id, { tipoDispiegamento, tipoImpresa }) });
+  if (!importazione) {
+    registraMovimento(`Costruzione: ${c.nome}${etichettaDispiegamento}`, -costoEffettivo);
+    materialiSet.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) - mat.u; });
+  }
+  state.strutture.push({
+    uid: uid(), catId: c.id, livello: 1,
+    materialiScelte: materialiSet === c.materialiOppure ? 'alternativi' : 'primari',
+    ...statoIniziale(c.id, { tipoDispiegamento, tipoImpresa }),
+    origine: importazione ? 'importazione' : 'costruzione',
+    livelliImportati: importazione ? 1 : 0
+  });
 
   if (c.categoria !== 'Generali' && state.classe === 'Nessuna') {
     state.classe = c.categoria;
-    showToast(`${c.nome} costruita! Il QG ottiene la Classe ${c.categoria}`);
+    showToast(importazione
+      ? `${c.nome} importata! Il QG ottiene la Classe ${c.categoria}`
+      : `${c.nome} costruita! Il QG ottiene la Classe ${c.categoria}`);
   } else {
-    showToast(`${c.nome} costruita!`);
+    showToast(importazione
+      ? `${c.nome} importata senza costi in oro o materiali`
+      : `${c.nome} costruita!`);
   }
   saveState();
   callRenderAll();
@@ -1227,24 +1264,26 @@ function smantellaStruttura(uidStr) {
   const s = state.strutture[idx];
   const c = CATALOGO.find(x => x.id === s.catId);
   if (!confirm(`Sei sicuro di voler smantellare ${c.nome} Liv.${s.livello}? L'operazione non è reversibile.`)) return;
-  // Restituisci materiali (usando lo stesso set scelto alla costruzione)
+  // Restituisci solo i materiali delle versioni costruite normalmente; la base importata non li ha consumati.
   let matSetSm = c.materiali;
   if (s.materialiScelte === 'alternativi' && c.materialiOppure && c.materialiOppure.length > 0) matSetSm = c.materialiOppure;
-  matSetSm.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) + mat.u * s.livello; });
+  const livelliMaterialiPagati = Math.max(0, s.livello - (s.livelliImportati || 0));
+  const notaMateriali = livelliMaterialiPagati > 0 ? 'materiali restituiti al magazzino' : 'nessun materiale da restituire (base importata)';
+  matSetSm.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) + mat.u * livelliMaterialiPagati; });
   if (c.id === 'avamposto') {
     const rotteScollegate = state.rotte.filter(r => r.avampostoUid === uidStr).length;
     state.rotte.forEach(r => { if (r.avampostoUid === uidStr) r.avampostoUid = null; });
     showToast(rotteScollegate > 0
-      ? `Avamposto smantellato: materiali restituiti, ${rotteScollegate} rotta/e tornate scoperte`
-      : 'Avamposto smantellato: materiali restituiti al magazzino');
+      ? `Avamposto smantellato: ${notaMateriali}, ${rotteScollegate} rotta/e tornate scoperte`
+      : `Avamposto smantellato: ${notaMateriali}`);
   } else if (c.categoria === 'Vendita') {
     const impreseScollegate = state.strutture.filter(x => x.catId === 'impresa' && x.strutturaVenditaUid === uidStr);
     impreseScollegate.forEach(imp => { imp.strutturaVenditaUid = null; imp.spesaMensile = 0; });
     showToast(impreseScollegate.length > 0
-      ? `${c.nome} smantellata: ${impreseScollegate.length} Impresa/e tornate senza struttura collegata. Materiali restituiti.`
-      : `${c.nome} smantellata: materiali restituiti al magazzino`);
+      ? `${c.nome} smantellata: ${impreseScollegate.length} Impresa/e tornate senza struttura collegata. ${notaMateriali}.`
+      : `${c.nome} smantellata: ${notaMateriali}`);
   } else {
-    showToast(`${c.nome} smantellata: materiali restituiti al magazzino`);
+    showToast(`${c.nome} smantellata: ${notaMateriali}`);
   }
   state.strutture.splice(idx, 1);
   saveState();
