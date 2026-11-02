@@ -15,8 +15,8 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "pretest": "npm run build",
-    "test": "node --test test/unit/ test/smoke.test.mjs",
-    "test:unit": "node --test test/unit/",
+    "test": "node --test \"test/unit/*.test.mjs\" \"test/smoke.test.mjs\"",
+    "test:unit": "node --test \"test/unit/*.test.mjs\"",
     "test:smoke": "node --test test/smoke.test.mjs",
     "test:ui-contract": "node --test test/ui-contract.test.mjs",
     "verify": "npm test"
