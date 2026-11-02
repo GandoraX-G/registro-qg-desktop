@@ -1,8 +1,11 @@
 import { state, STORAGE_KEY, storageOk, setStorageOk, salvataggioBloccato, setSalvataggioBloccato, callRenderAll } from './state.js';
-import { validaStato, migraRotteLegacy } from './validation.js';
+import { validaStato, applicaMigrazioni } from './validation.js';
+import { sanificaRegistro } from './defaultState.js';
 import { showToast } from '../ui/toast.js';
 
-export const TAURI_DISPONIBILE = !!(window.__TAURI__ && window.__TAURI__.core);
+// Guardie per l'ambiente: i moduli del motore vengono importati anche dai
+// test in Node, dove window/document non esistono.
+export const TAURI_DISPONIBILE = typeof window !== "undefined" && !!(window.__TAURI__ && window.__TAURI__.core);
 
 const PREFISSO_QUARANTENA = STORAGE_KEY + '.danneggiato.';
 
@@ -45,11 +48,11 @@ export async function loadState(){
 
   if(raw){
     try{
-      const parsed = JSON.parse(raw);
-      if(typeof parsed !== "object" || parsed === null || Array.isArray(parsed)){
+      const pulito = sanificaRegistro(JSON.parse(raw));
+      if(!pulito){
         throw new Error("struttura inattesa");
       }
-      Object.assign(state, parsed);
+      Object.assign(state, pulito);
     }catch(e){
       dettaglio = (e && e.message) ? e.message : "JSON non valido";
     }
@@ -64,7 +67,7 @@ export async function loadState(){
     showToast("Il registro salvato non è leggibile: salvataggi sospesi ⚠", "danger");
   }
 
-  migraRotteLegacy();
+  applicaMigrazioni();
   validaStato();
   document.getElementById("loading").style.display = "none";
   document.getElementById("app").style.display = "grid";
@@ -145,24 +148,35 @@ function mostraRecupero(dettaglio){
 let saveTimeout = null;
 // Ultimo JSON effettivamente scritto: serve a non riscrivere nulla di identico.
 let ultimoPayload = null;
+// Payload in attesa di essere scritto: se la finestra si chiude prima del
+// debounce, flushSave() lo scrive subito invece di perdere l'ultima modifica.
+let payloadInAttesa = null;
+
+async function scriviOra(payload){
+  if(TAURI_DISPONIBILE){
+    await window.__TAURI__.core.invoke("salva_registro", {contenuto: payload});
+  }else if(storageOk){
+    localStorage.setItem(STORAGE_KEY, payload);
+  }else{
+    throw new Error("Nessuna destinazione di salvataggio disponibile");
+  }
+  ultimoPayload = payload;
+  payloadInAttesa = null;
+}
+
 export function saveState(){
   // Finché il registro è in quarantena nessuna scrittura deve sovrascriverlo.
   if(salvataggioBloccato) return;
 
+  payloadInAttesa = JSON.stringify(state);
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(async ()=>{
-    const payload = JSON.stringify(state);
+    const payload = payloadInAttesa;
+    if(payload === null) return;
     // Stato invariato: nessuna scrittura, nessuna quota consumata.
-    if(payload === ultimoPayload){ flashSaved(); return; }
+    if(payload === ultimoPayload){ flashSaved(); payloadInAttesa = null; return; }
     try{
-      if(TAURI_DISPONIBILE){
-        await window.__TAURI__.core.invoke("salva_registro", {contenuto: payload});
-      }else if(storageOk){
-        localStorage.setItem(STORAGE_KEY, payload);
-      }else{
-        throw new Error("Nessuna destinazione di salvataggio disponibile");
-      }
-      ultimoPayload = payload;
+      await scriviOra(payload);
       flashSaved();
     }catch(e){
       ultimoPayload = null; // il prossimo saveState() deve ritentare
@@ -171,6 +185,39 @@ export function saveState(){
       showToast("Salvataggio non riuscito ⚠ — scarica un backup dalla sidebar");
     }
   }, 250);
+}
+
+/* Scrive subito l'ultima modifica in attesa. Chiamato quando la finestra sta
+   per chiudersi: senza questo, un salvataggio entro 250 ms dalla modifica
+   andava perso (chiudere l'app subito dopo aver editato un campo). */
+export function flushSave(){
+  if(salvataggioBloccato) return;
+  const payload = payloadInAttesa;
+  if(payload === null || payload === ultimoPayload) return;
+  clearTimeout(saveTimeout);
+  saveTimeout = null;
+
+  if(!TAURI_DISPONIBILE && storageOk){
+    try{
+      localStorage.setItem(STORAGE_KEY, payload);
+      ultimoPayload = payload;
+      payloadInAttesa = null;
+    }catch(e){
+      console.error("Errore di salvataggio (flush)", e);
+    }
+    return;
+  }
+  // Su Tauri l'invoke è asincrono: lo avviamo senza aspettare la risposta.
+  scriviOra(payload).catch(e => console.error("Errore di salvataggio (flush)", e));
+}
+
+if(typeof window !== "undefined"){
+  window.addEventListener('pagehide', flushSave);
+}
+if(typeof document !== "undefined"){
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'hidden') flushSave();
+  });
 }
 
 export function flashSaved(){

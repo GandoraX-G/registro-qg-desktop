@@ -7,8 +7,7 @@ import {
   ELIPORTO_ARCANO_CFG,
   PORTO_MILITARE_CFG,
   AVAMPOSTO_RAGGIO_KM_PER_LIVELLO,
-  AVAMPOSTO_CFG,
-  MATERIALI_PREZZI
+  AVAMPOSTO_CFG
 } from '../core/config.js';
 
 export const TIPI_DISPIEGAMENTO_AVAMPOSTO = [
@@ -74,10 +73,10 @@ export function raggioAvampostoEsterno(livello){
   const perLivello = haUnitaAllenate() ? 600 : AVAMPOSTO_RAGGIO_KM_PER_LIVELLO;
   return perLivello * Number(livello||1);
 }
-export function kmDifesiRotta(r){
+export function kmDifesiRotta(r, s = state){
   let difesa = 0;
   if(r.avampostoUid){
-    const av = state.strutture.find(s=>s.uid===r.avampostoUid && s.catId==="avamposto");
+    const av = s.strutture.find(x=>x.uid===r.avampostoUid && x.catId==="avamposto");
     if(av) difesa = raggioAvamposto(av);
   }
   if(r.avampostoEsternoLivello){
@@ -99,16 +98,6 @@ export function popolaSelectAvamposti(select, rottaUidCorrente){
     select.appendChild(opt);
   });
   select.value = scelto || "";
-}
-
-export function popolaSelectCaricoMateriali(){
-  const select = document.getElementById("rCaricoMateriale");
-  if(!select || select.options.length > 1) return;
-  Object.keys(MATERIALI_PREZZI).forEach(m=>{
-    const opt = document.createElement("option");
-    opt.value = m; opt.textContent = m;
-    select.appendChild(opt);
-  });
 }
 
 export function costoRifornimentoAvamposto(av){

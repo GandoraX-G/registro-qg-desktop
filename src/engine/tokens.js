@@ -1,23 +1,24 @@
-import { state } from '../core/state.js';
-import { CATALOGO } from '../core/config.js';
+import { CATALOGO as CATALOGO_GLOBALE } from '../core/config.js';
+import { state as statoGlobale } from '../core/state.js';
 
-function calcolaTokenMensili(){
+/* Token generati dalle strutture che ne producono. Prende stato e catalogo
+   come parametri per poter essere verificato su uno stato finto. */
+
+function calcolaTokenMensili(s = statoGlobale, catalogo = CATALOGO_GLOBALE) {
   const generati = { miniera: 0, pesca: 0, concime: 0 };
-  state.strutture.forEach(s=>{
-    const c = CATALOGO.find(x=>x.id===s.catId);
-    const tipo = c && c.produzione && c.produzione.token;
-    if(tipo && generati[tipo] !== undefined) generati[tipo]++;
-  });
-  if (state.satelliti && state.satelliti.length > 0) {
-    state.satelliti.forEach(sat => {
-      const c = CATALOGO.find(x => x.id === sat.catId);
-      const tipo = c && c.produzione && c.produzione.token;
-      if (tipo && generati[tipo] !== undefined) generati[tipo]++;
-    });
-  }
+
+  const conta = struttura => {
+    const cat = catalogo.find(c => c.id === struttura.catId);
+    const tipo = cat && cat.produzione && cat.produzione.token;
+    if (tipo && generati[tipo] !== undefined) generati[tipo] += 1;
+  };
+
+  s.strutture.forEach(conta);
+  (s.satelliti || []).forEach(conta);
+
   return generati;
 }
 
 export {
-  calcolaTokenMensili
+  calcolaTokenMensili,
 };
