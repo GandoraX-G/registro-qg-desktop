@@ -1694,7 +1694,7 @@
 <script>
   if ('serviceWorker' in navigator) {
     const swBase = document.querySelector('link[rel="manifest"]')?.href?.replace('/manifest.json','') || '';
-    navigator.serviceWorker.register(swBase + '/sw.js').catch(() => {});
+    navigator.serviceWorker.register(swBase + '/sw.js').catch(err => console.warn('Service worker non registrato:', err));
   }
 </script>
 </body>

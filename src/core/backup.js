@@ -1,5 +1,6 @@
-import { state } from './state.js';
-import { saveState, TAURI_DISPONIBILE } from './persistence.js';
+import { state, setSalvataggioBloccato } from './state.js';
+import { saveState, TAURI_DISPONIBILE, chiudiRecupero } from './persistence.js';
+import { validaStato } from './validation.js';
 import { callRenderAll } from './state.js';
 import { showToast } from '../ui/toast.js';
 
@@ -68,9 +69,16 @@ export async function importBackup(){
 function applicaBackup(raw){
   try{
     const parsed = JSON.parse(raw);
-    if(typeof parsed !== "object" || parsed === null) throw new Error("Formato non valido");
+    if(typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("Formato non valido");
+    const chiaviNote = ["nome","strutture","membri","oro","materiali","rotte"].filter(k => k in parsed);
+    if(chiaviNote.length === 0) throw new Error("Non sembra un backup del Registro");
     if(!confirm("Importare questo backup sovrascriver\u00e0 il registro attuale su questo dispositivo. Continuare?")) return;
     Object.assign(state, defaultState, parsed);
+    validaStato();
+    // Un backup valido è un recupero esplicito: riattiva i salvataggi anche se
+    // il registro precedente era in quarantena (quella copia resta intatta).
+    setSalvataggioBloccato(false);
+    chiudiRecupero();
     saveState();
     callRenderAll();
     showToast("Backup importato");

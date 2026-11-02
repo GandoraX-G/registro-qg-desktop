@@ -32,6 +32,9 @@ export let currentTab = "panoramica";
 export let catFilter = "Tutte";
 export let structSearchTerm = "";
 export let storageOk = true;
+// Diventa true quando il registro salvato è illeggibile: blocca le scritture
+// per non sovrascrivere dati che l'utente può ancora recuperare.
+export let salvataggioBloccato = false;
 export let classeSbloccataManualmente = false;
 export let sottomeccanicaAperta = {};
 
@@ -39,6 +42,7 @@ export function setCurrentTab(v) { currentTab = v; }
 export function setCatFilter(v) { catFilter = v; }
 export function setStructSearchTerm(v) { structSearchTerm = v; }
 export function setStorageOk(v) { storageOk = v; }
+export function setSalvataggioBloccato(v) { salvataggioBloccato = v; }
 
 let _renderAll, _renderSottomeccaniche, _renderDashboard;
 
