@@ -50,6 +50,7 @@ export function validaStato(s = state) {
   if (typeof s.classe !== "string") s.classe = "Nessuna";
   if (typeof s.livello !== "number" || s.livello < 1) s.livello = 1;
   if (typeof s.oro !== "number") s.oro = 0;
+  if (typeof s.modalitaSoloPuntiQG !== "boolean") s.modalitaSoloPuntiQG = false;
   if (!Array.isArray(s.membri)) s.membri = [];
   if (!Array.isArray(s.strutture)) s.strutture = [];
   if (typeof s.materiali !== "object" || s.materiali === null || Array.isArray(s.materiali)) s.materiali = {};

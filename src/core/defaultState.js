@@ -19,6 +19,9 @@ export function createDefaultState() {
     classe: "Nessuna",
     livello: 1,
     oro: 0,
+    // Costruzione e potenziamento senza materiali né oro: si pagano solo i
+    // punti QG. Le strutture così ottenute sono marcate `costoSospeso`.
+    modalitaSoloPuntiQG: false,
     membri: [],
     strutture: [],
     materiali: {},

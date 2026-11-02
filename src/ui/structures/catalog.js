@@ -5,6 +5,7 @@ import { catFilter, structSearchTerm, sottomeccanicaAperta, setCatFilter, setStr
 import { CATALOGO, MATERIALI_PREZZI, PUNTI_QG_MAX, LIVELLO_STRUTTURA_MAX, RARITA_POZIONI, ARGOMENTI_BIBLIOTECA, TEMI_BIBLIOTECA_SCELTE, PIANTE_SPECIALI, OPERA_ARTE_CFG, STUDIO_DIPLOMATICO_CFG, SALA_ARCANA_CFG, AVAMPOSTO_CFG, CAMPO_ADDESTRAMENTO_CFG, SALA_DA_GUERRA_CFG, IMPRESA_CFG, CATEGORIE, ELIPORTO_ARCANO_CFG } from '../../core/config.js';
 import { uid, fmtMo, escapeHtml } from '../../utils/format.js';
 import { puntiCosto, puntiSpesiTotali } from '../../engine/qg.js';
+import { soloPuntiQG } from '../../engine/costruzione.js';
 import { showToast } from '../toast.js';
 import { registraMovimento, oroDisponibile } from '../../engine/finance.js';
 import { haRaffineria, scelteProduzioneMiniera, scelteProduzioneAttivaMiniera } from '../../engine/production.js';
@@ -51,6 +52,7 @@ export function renderCatalogo() {
     const matStr = c.materiali.length ? c.materiali.map(m => `${m.m} ${m.u}U`).join(', ') : '—';
     const haOppure = c.materialiOppure && c.materialiOppure.length > 0;
     const matStrOppure = haOppure ? c.materialiOppure.map(m => `${m.m} ${m.u}U`).join(', ') : '';
+    const soloPunti = soloPuntiQG();
     const card = document.createElement('div');
     card.className = 'struct-card';
     const selettoreDispiegamento = c.id === 'avamposto'
@@ -73,8 +75,10 @@ export function renderCatalogo() {
       : '';
     card.innerHTML = `
       <h4>${c.nome} <span class="tag tag-${c.categoria.toLowerCase()}">${c.categoria}</span></h4>
-      <div class="meta">Costo: ${c.costo} mo · Personale: ${c.personale} · Punti QG: ${c.exempt ? 'esente' : costoPunti}</div>
-      ${haOppure
+      <div class="meta">Costo: ${soloPunti ? 'sospeso' : `${c.costo} mo`} · Personale: ${c.personale} · Punti QG: ${c.exempt ? 'esente' : costoPunti}</div>
+      ${soloPunti
+        ? `<div class="mats">Materiali: sospesi (modalità solo punti QG)</div>`
+        : haOppure
         ? `<div class="mats"><label style="margin:0;">Materiali:</label>
             <select data-field="matScelta" data-cid="${c.id}" style="max-width:100%; margin:4px 0;">
               <option value="primari">${matStr}</option>
@@ -125,7 +129,7 @@ export function renderStrutturePossedute() {
     }
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${c.nome}</td>
+      <td>${c.nome}${s.costoSospeso ? ' <span class="tag tag-generali">senza costi</span>' : ''}</td>
       <td><span class="tag tag-${c.categoria.toLowerCase()}">${c.categoria}</span></td>
       <td class="mono">Lv. ${s.livello}</td>
       <td class="mono">${c.exempt ? 'esente' : punti}</td>

@@ -1,4 +1,4 @@
-import { state } from '../core/state.js';
+import { state, callRenderAll } from '../core/state.js';
 import { saveState } from '../core/persistence.js';
 import { CATALOGO, PUNTI_QG_MAX, CATEGORIE } from '../core/config.js';
 import { calcolaLivelloQGDaMembri } from '../core/validation.js';
@@ -28,6 +28,7 @@ export function renderDashboard() {
   document.getElementById('dash-btn-sblocca-classe').style.display = classeAssegnata && !classeSbloccataManualmente ? 'inline-flex' : 'none';
   document.getElementById('dash-in-livello').value = state.livello;
   document.getElementById('dash-in-oro').value = state.oro;
+  document.getElementById('dash-in-solo-punti-qg').checked = state.modalitaSoloPuntiQG === true;
 
   const spesi = puntiSpesiTotali();
   const pct = Math.min(100, (spesi / PUNTI_QG_MAX) * 100);
@@ -129,6 +130,15 @@ export function initDashboardEvents() {
     if (delta !== 0) registraMovimento('Correzione manuale saldo', delta);
     renderDashboard();
     saveState();
+  });
+  document.getElementById('dash-in-solo-punti-qg').addEventListener('change', e => {
+    state.modalitaSoloPuntiQG = e.target.checked;
+    saveState();
+    // Il catalogo mostra i costi sospesi: va ridisegnato insieme alla dashboard.
+    callRenderAll();
+    showToast(e.target.checked
+      ? 'Modalità solo punti QG attiva: costruzioni e potenziamenti non addebitano materiali né oro'
+      : 'Modalità solo punti QG disattivata', e.target.checked ? 'warning' : 'success');
   });
   document.getElementById('dash-btn-movimento').addEventListener('click', () => {
     const val = Number(document.getElementById('dash-in-movimento').value) || 0;

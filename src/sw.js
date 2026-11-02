@@ -9,7 +9,7 @@
 /* Alzare questo numero ad ogni release: la cache vecchia viene cancellata
    in fase di activate. Dalla v4 la configurazione di gioco è dentro il
    bundle (niente più fetch di data/regolamento.json a runtime). */
-const CACHE_NAME = 'registro-qg-v4';
+const CACHE_NAME = 'registro-qg-v5';
 
 /* Risorse minime per aprire l'app offline. I bundle hashati entrano in
    cache alla prima visita, tramite il gestore degli asset. */

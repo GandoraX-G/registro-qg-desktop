@@ -44,6 +44,17 @@ npm run tauri:build  # pacchetti desktop
   presenti in `index.html` (o creati dai template) ed esige che la
   navigazione sia fatta di `<button>` con `aria-current` e pannelli `tabpanel`.
 
+## Modalità "solo punti QG"
+
+Nella Panoramica c'è l'interruttore **Costruisci senza materiali né oro**:
+serve a chi ricrea un Quartier Generale di cui non ha i salvataggi. Finché è
+attivo, costruire e potenziare non addebitano materiali né oro e non serve oro
+in tesoreria; restano validi i punti QG, i limiti per livello e le altre
+regole. Le strutture ottenute così sono marcate *senza costi* e, se
+smantellate, non restituiscono materiali: la modalità non è un modo per
+generare materiali dal nulla accendendola, costruendo, spegnendola e
+smantellando.
+
 ## Pipeline (`.github/workflows/ci.yml`)
 
 Un solo workflow:
