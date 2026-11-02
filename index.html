@@ -2,10 +2,10 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Registro del Quartier Generale</title>
 <meta name="description" content="Gestione Quartier Generale - Cronache di Unshast">
-<meta name="theme-color" content="#0a1016">
+<meta name="theme-color" content="#130e09">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Registro QG">
@@ -14,7 +14,7 @@
 <link rel="manifest" href="/registro-qg-desktop/manifest.json">
 <link rel="apple-touch-icon" href="/registro-qg-desktop/icons/icon_128x128.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600;700;800&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   @keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
@@ -1013,8 +1013,7 @@
     .card{break-inside:avoid; box-shadow:none; border:1px solid var(--line);}
   }
 </style>
-  <script type="module" crossorigin src="/registro-qg-desktop/assets/index-Dtfdh-1B.js"></script>
-  <link rel="stylesheet" crossorigin href="/registro-qg-desktop/assets/index-DtGUO3Rv.css">
+  <script type="module" crossorigin src="/registro-qg-desktop/assets/index-DUDQr6hL.js"></script>
 </head>
 <body>
 
@@ -1555,25 +1554,6 @@
   </div>
 </div>
 
-
-<nav class="mobile-bottom-nav" aria-label="Navigazione principale mobile">
-  <button class="nav-item active" data-tab="panoramica" aria-label="Panoramica">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"/></svg><span>Home</span>
-  </button>
-  <button class="nav-item" data-tab="strutture" aria-label="Strutture">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Strutture</span>
-  </button>
-  <button class="nav-item" data-tab="magazzino" aria-label="Magazzino">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v14H4zM2 7l2-4h16l2 4M9 11a3 3 0 0 0 6 0"/></svg><span>Magazzino</span>
-  </button>
-  <button class="nav-item" data-tab="rotte" aria-label="Rotte commerciali">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span>Rotte</span>
-  </button>
-  <button class="nav-item" data-tab="finanze" aria-label="Finanze">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M17 6H9a3 3 0 0 0 0 6h6a3 3 0 0 1 0 6H6"/></svg><span>Finanze</span>
-  </button>
-</nav>
-
 <div class="modal-bg" id="guideModalBg" style="display:none;">
   <div class="modal guide-modal">
     <button class="modal-close" id="guideCloseX" title="Chiudi">✕</button>
@@ -1712,8 +1692,8 @@
 <div id="toast"></div>
 
 <script>
-  if ('serviceWorker' in navigator && !document.querySelector('script[src*="@vite/client"]')) {
-    const swBase = "/registro-qg-desktop";
+  if ('serviceWorker' in navigator) {
+    const swBase = document.querySelector('link[rel="manifest"]')?.href?.replace('/manifest.json','') || '';
     navigator.serviceWorker.register(swBase + '/sw.js').catch(() => {});
   }
 </script>
