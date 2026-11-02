@@ -203,17 +203,13 @@ function adaptSidebar() {
     sidebar.style.top = '0';
     sidebar.style.bottom = '0';
     sidebar.style.width = '300px';
-    sidebar.style.zIndex = '100';
+    // Let the mobile CSS control left/z-index/shadow. Inline values here
+    // override .sidebar.open and can leave an invisible drawer above the UI.
+    sidebar.style.zIndex = '';
+    sidebar.style.left = '';
+    sidebar.style.boxShadow = '';
     sidebar.style.transition = 'left .3s cubic-bezier(.32,.72,0,1)';
     sidebar.style.willChange = 'left';
-
-    if (!sidebar.classList.contains('open')) {
-      sidebar.style.left = '-300px';
-      sidebar.style.boxShadow = 'none';
-    } else {
-      sidebar.style.left = '0';
-      sidebar.style.boxShadow = '12px 0 48px rgba(0,0,0,.65)';
-    }
   } else {
     sidebar.style.position = '';
     sidebar.style.top = '';
