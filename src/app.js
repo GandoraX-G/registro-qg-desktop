@@ -1,4 +1,5 @@
 import { caricaConfig } from './core/config.js';
+import { createDefaultState } from './core/defaultState.js';
 import { state, currentTab, setCurrentTab, GUIDE_KEY, setRenderAll, setRenderDashboard, setRenderSottomeccaniche } from './core/state.js';
 import { saveState, loadState } from './core/persistence.js';
 import { exportBackup, importBackup } from './core/backup.js';
@@ -34,7 +35,11 @@ function renderAll() {
 function switchTab(tabId) {
   setCurrentTab(tabId);
   document.querySelectorAll('.nav-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.tab === tabId);
+    const attivo = el.dataset.tab === tabId;
+    el.classList.toggle('active', attivo);
+    // La voce corrente va annunciata, non solo colorata.
+    if (attivo) el.setAttribute('aria-current', 'page');
+    else el.removeAttribute('aria-current');
   });
   ['panoramica', 'strutture', 'magazzino', 'rotte', 'finanze', 'preventivo'].forEach(t => {
     const panel = document.getElementById('tab-' + t);
@@ -52,24 +57,52 @@ function initNavigation() {
 /* ============================================================
    GUIDE MODAL
    ============================================================ */
-function initGuide() {
-  const guideDontShow = document.getElementById('guideDontShow');
+/* Modale della guida: oltre a mostrarla, deve essere usabile da tastiera.
+   Apriamo ricordando il focus, lo intrappoliamo nel dialogo finché è aperto
+   e lo restituiamo alla fine; Esc chiude. */
+let apriGuida = () => {};
 
-  function closeGuide() {
-    document.getElementById('guideModalBg').style.display = 'none';
-    if (guideDontShow?.checked) {
-      localStorage.setItem(GUIDE_KEY, '1');
-    }
+function initGuide() {
+  const modalBg = document.getElementById('guideModalBg');
+  const modal = modalBg?.querySelector('.modal');
+  const guideDontShow = document.getElementById('guideDontShow');
+  let focusPrecedente = null;
+
+  function chiudi() {
+    if (!modalBg || modalBg.style.display === 'none') return;
+    modalBg.style.display = 'none';
+    document.removeEventListener('keydown', gestisciTastiera);
+    if (guideDontShow?.checked) localStorage.setItem(GUIDE_KEY, '1');
+    if (focusPrecedente && typeof focusPrecedente.focus === 'function') focusPrecedente.focus();
+    focusPrecedente = null;
   }
 
-  document.getElementById('guideBtn')?.addEventListener('click', () => {
-    document.getElementById('guideModalBg').style.display = 'flex';
+  function gestisciTastiera(e) {
+    if (e.key === 'Escape') { chiudi(); return; }
+    if (e.key !== 'Tab' || !modal) return;
+    const focusabili = [...modal.querySelectorAll('button, [href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])')]
+      .filter(el => !el.disabled && el.offsetParent !== null);
+    if (focusabili.length === 0) return;
+    const primo = focusabili[0];
+    const ultimo = focusabili[focusabili.length - 1];
+    if (e.shiftKey && document.activeElement === primo) { e.preventDefault(); ultimo.focus(); }
+    else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primo.focus(); }
+  }
+
+  apriGuida = function apri() {
+    if (!modalBg) return;
+    focusPrecedente = document.activeElement;
+    modalBg.style.display = 'flex';
     if (guideDontShow) guideDontShow.checked = false;
-  });
-  document.getElementById('guideCloseX')?.addEventListener('click', closeGuide);
-  document.getElementById('guideCloseBtn')?.addEventListener('click', closeGuide);
-  document.getElementById('guideModalBg')?.addEventListener('click', e => {
-    if (e.target.id === 'guideModalBg') e.target.style.display = 'none';
+    document.addEventListener('keydown', gestisciTastiera);
+    (modal?.querySelector('summary, button') || modal)?.focus();
+  };
+
+  document.getElementById('guideBtn')?.addEventListener('click', apriGuida);
+  document.getElementById('guideCloseX')?.addEventListener('click', chiudi);
+  document.getElementById('guideCloseBtn')?.addEventListener('click', chiudi);
+  modalBg?.addEventListener('click', e => {
+    if (e.target.id === 'guideModalBg') chiudi();
   });
 }
 
@@ -81,13 +114,7 @@ function initImportExport() {
   document.getElementById('importBtn')?.addEventListener('click', () => importBackup());
   document.getElementById('resetBtn')?.addEventListener('click', () => {
     if (!confirm('Vuoi davvero azzerare tutto il registro del QG? L\'operazione non è reversibile. (Consiglio: esporta prima un backup)')) return;
-    Object.assign(state, {
-      nome: 'Il mio Quartier Generale', fondatore: '', cofondatore: '', classe: 'Nessuna', livello: 1,
-      oro: 0, membri: [], strutture: [], materiali: {}, lavoratori: 0, rotte: [],
-      magazzinoScontati: [], movimenti: [], riservaBancaria: 0, registroAltriQG: [],
-      calendario: { mese: 1, stagione: 'Primavera' }, clima: 'Mite',
-      token: { miniera: 0, pesca: 0, concime: 0 }, tokenConcimeDaSpendere: 0, tokenMinieraDaSpendere: 0, tokenPescaDaSpendere: 0, satelliti: [], resocontoUltimoMese: null, speseExtra: []
-    });
+    Object.assign(state, createDefaultState());
     renderAll();
     saveState();
     showToast('Registro azzerato');
@@ -265,9 +292,7 @@ async function init() {
   adaptAll();
 
   if (!localStorage.getItem(GUIDE_KEY)) {
-    setTimeout(() => {
-      document.getElementById('guideModalBg').style.display = 'flex';
-    }, 500);
+    setTimeout(() => apriGuida(), 500);
   }
 }
 
@@ -290,11 +315,13 @@ function initSidebar() {
     sidebar?.classList.add('open');
     overlay?.classList.add('show');
     document.body.style.overflow = 'hidden';
+    hamburger?.setAttribute('aria-expanded', 'true');
   }
   function closeMobileSidebar() {
     sidebar?.classList.remove('open');
     overlay?.classList.remove('show');
     document.body.style.overflow = '';
+    hamburger?.setAttribute('aria-expanded', 'false');
   }
 
   hamburger?.addEventListener('click', () => {
