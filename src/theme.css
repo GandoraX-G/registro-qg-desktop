@@ -313,7 +313,8 @@ details > :last-child { margin-bottom:14px; }
   .mobile-bottom-nav .nav-item:active { transform:scale(.96); }
   .sidebar { padding-bottom:env(safe-area-inset-bottom,0px); }
   .sidebar .nav-item { min-height:48px; }
-  .modal-bg { padding:0!important; align-items:flex-end!important; }
+  /* Dialogs must sit above the fixed bottom navigation and drawer overlay. */
+  .modal-bg { z-index:200; padding:0!important; align-items:flex-end!important; }
   .modal,.guide-modal > div {
     width:100%; max-width:none; max-height:92dvh;
     border-radius:20px 20px 0 0; padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));
