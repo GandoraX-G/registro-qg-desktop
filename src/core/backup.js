@@ -1,17 +1,8 @@
-import { state, setSalvataggioBloccato } from './state.js';
+import { state, setSalvataggioBloccato, callRenderAll } from './state.js';
+import { applicaRegistro } from './defaultState.js';
 import { saveState, TAURI_DISPONIBILE, chiudiRecupero } from './persistence.js';
-import { validaStato } from './validation.js';
-import { callRenderAll } from './state.js';
+import { validaStato, applicaMigrazioni } from './validation.js';
 import { showToast } from '../ui/toast.js';
-
-const defaultState = {
-  nome:"Il mio Quartier Generale", fondatore:"", cofondatore:"", classe:"Nessuna", livello:1,
-  oro:0, membri:[], strutture:[], materiali:{}, lavoratori:0, rotte:[],
-  magazzinoScontati:[], movimenti:[], riservaBancaria:0, registroAltriQG:[],
-  calendario:{ mese:1, stagione:"Primavera" }, clima:"Mite",
-  token:{ miniera:0, pesca:0, concime:0 }, tokenConcimeDaSpendere:0, tokenMinieraDaSpendere:0, tokenPescaDaSpendere:0,
-  satelliti:[], resocontoUltimoMese:null, speseExtra:[]
-};
 
 export async function exportBackup(){
   try{
@@ -73,7 +64,10 @@ function applicaBackup(raw){
     const chiaviNote = ["nome","strutture","membri","oro","materiali","rotte"].filter(k => k in parsed);
     if(chiaviNote.length === 0) throw new Error("Non sembra un backup del Registro");
     if(!confirm("Importare questo backup sovrascriver\u00e0 il registro attuale su questo dispositivo. Continuare?")) return;
-    Object.assign(state, defaultState, parsed);
+    // Solo le chiavi note del registro: un file estraneo non può iniettare
+    // campi arbitrari (o un __proto__) dentro lo stato dell'app.
+    if(!applicaRegistro(state, parsed)) throw new Error("Formato non valido");
+    applicaMigrazioni();
     validaStato();
     // Un backup valido è un recupero esplicito: riattiva i salvataggi anche se
     // il registro precedente era in quarantena (quella copia resta intatta).

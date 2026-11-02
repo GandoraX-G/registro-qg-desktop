@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Registro del Quartier Generale — app desktop per Cronache di Unshast",
+  "description": "Registro del Quartier Generale — app desktop per Cronache di Unhast",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,8 +14,12 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
-    "test": "node --test test/smoke.test.mjs",
-    "verify": "npm run build && npm test"
+    "pretest": "npm run build",
+    "test": "node --test test/unit/ test/smoke.test.mjs",
+    "test:unit": "node --test test/unit/",
+    "test:smoke": "node --test test/smoke.test.mjs",
+    "test:ui-contract": "node --test test/ui-contract.test.mjs",
+    "verify": "npm test"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

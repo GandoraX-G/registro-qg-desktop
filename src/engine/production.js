@@ -1,91 +1,121 @@
-import { state } from '../core/state.js';
-import { CATALOGO, CALENDARIO_MOD_CAMPO_COLTIVATO, RAFFINERIA_CAT_ID } from '../core/config.js';
+import { CATALOGO as CATALOGO_GLOBALE, CALENDARIO_MOD_CAMPO_COLTIVATO as MOD_STAGIONALI, RAFFINERIA_CAT_ID } from '../core/config.js';
+import { state as statoGlobale } from '../core/state.js';
 
-function haRaffineria(){
-  return state.strutture.some(s=>s.catId===RAFFINERIA_CAT_ID);
+/* Produzione mensile delle strutture.
+
+   `state` e catalogo sono parametri (default: quelli reali) e i modificatori
+   stagionali arrivano dalla configurazione: la funzione non dipende più da
+   un registro globale, quindi si può testare su una campagna inventata. */
+
+function haRaffineria(s = statoGlobale, raffineriaId = RAFFINERIA_CAT_ID) {
+  return s.strutture.some(struttura => struttura.catId === raffineriaId);
 }
 
-function scelteProduzioneMiniera(s, c){
-  return (c.produzione.scelte||[]).filter(sc=>s.livello >= sc.livelloMin);
+function scelteProduzioneMiniera(struttura, cat) {
+  return (cat.produzione.scelte || []).filter(scelta => struttura.livello >= scelta.livelloMin);
 }
 
-function scelteProduzioneAttivaMiniera(s, c){
-  const disponibili = scelteProduzioneMiniera(s, c);
-  if(disponibili.length===0) return null;
-  const scelta = disponibili.find(sc=>sc.materiale === s.produzioneScelta);
-  return scelta || disponibili[disponibili.length-1];
+function scelteProduzioneAttivaMiniera(struttura, cat) {
+  const disponibili = scelteProduzioneMiniera(struttura, cat);
+  if (disponibili.length === 0) return null;
+  return disponibili.find(scelta => scelta.materiale === struttura.produzioneScelta)
+    || disponibili[disponibili.length - 1];
 }
 
-function calcolaProduzioneMensile(){
+function quantitaStagionale(cat, quantita, stagione, modificatori) {
+  if (!cat.produzione.stagionale || cat.id !== "campo_coltivato") return quantita;
+  return Math.max(0, quantita + (modificatori[stagione] || 0));
+}
+
+function calcolaProduzioneMensile(s = statoGlobale, catalogo = CATALOGO_GLOBALE, {
+  modificatoriStagionali = MOD_STAGIONALI,
+  raffineriaId = RAFFINERIA_CAT_ID,
+} = {}) {
   const righe = [];
-  const raffineria = haRaffineria();
-  state.strutture.forEach(s=>{
-    const c = CATALOGO.find(x=>x.id===s.catId);
-    if(!c) return;
+  const raffineria = haRaffineria(s, raffineriaId);
 
-    if(c.produzioneStep){
-      const tabella = c.produzioneStep.valori;
-      const livelliDisponibili = Object.keys(tabella).map(Number).filter(l=>l<=s.livello);
-      if(livelliDisponibili.length===0) return;
-      const quantita = tabella[Math.max(...livelliDisponibili)];
-      righe.push({ strutturaUid: s.uid, nome: c.nome, materiale: c.produzioneStep.materiale, quantita });
+  s.strutture.forEach(struttura => {
+    const cat = catalogo.find(c => c.id === struttura.catId);
+    if (!cat) return;
+
+    if (cat.produzioneStep) {
+      const tabella = cat.produzioneStep.valori;
+      const livelli = Object.keys(tabella).map(Number).filter(l => l <= struttura.livello);
+      if (livelli.length === 0) return;
+      righe.push({
+        strutturaUid: struttura.uid,
+        nome: cat.nome,
+        materiale: cat.produzioneStep.materiale,
+        quantita: tabella[Math.max(...livelli)],
+      });
       return;
     }
-    if(!c.produzione) return;
-    const p = c.produzione;
+    if (!cat.produzione) return;
 
-    if(c.id === "miniera"){
-      const scelta = scelteProduzioneAttivaMiniera(s, c);
-      if(!scelta) return;
-      const quantita = scelta.base + scelta.perLivello * s.livello;
-      righe.push({ strutturaUid: s.uid, nome: c.nome, materiale: scelta.materiale, quantita });
+    const produzione = cat.produzione;
+
+    if (cat.id === "miniera") {
+      const scelta = scelteProduzioneAttivaMiniera(struttura, cat);
+      if (!scelta) return;
+      righe.push({
+        strutturaUid: struttura.uid,
+        nome: cat.nome,
+        materiale: scelta.materiale,
+        quantita: scelta.base + scelta.perLivello * struttura.livello,
+      });
       return;
     }
 
-    let quantita = p.base + p.perLivello * s.livello;
-    let materiale = p.materiale;
+    let quantita = produzione.base + produzione.perLivello * struttura.livello;
+    let materiale = produzione.materiale;
 
-    if(p.stagionale && c.id === "campo_coltivato"){
-      quantita += CALENDARIO_MOD_CAMPO_COLTIVATO[state.calendario.stagione] || 0;
-      quantita = Math.max(0, quantita);
-    }
-    if(raffineria && p.materialeRaffinato){
-      materiale = p.materialeRaffinato;
-    }
-    righe.push({ strutturaUid: s.uid, nome: c.nome, materiale, quantita });
+    quantita = quantitaStagionale(cat, quantita, s.calendario.stagione, modificatoriStagionali);
+    if (raffineria && produzione.materialeRaffinato) materiale = produzione.materialeRaffinato;
+
+    righe.push({ strutturaUid: struttura.uid, nome: cat.nome, materiale, quantita });
   });
 
-  state.strutture.forEach(s=>{
-    if(s.catId !== "fattoria") return;
-    const pecore = (s.animali && s.animali.Pecora) || 0;
-    if(pecore > 0){
-      const qStoffa = pecore + (s.livello || 1);
-      righe.push({ strutturaUid: s.uid, nome: 'Fattoria (Pecore)', materiale: 'Stoffa', quantita: qStoffa });
-    }
-  });
-
-  if (state.satelliti && state.satelliti.length > 0) {
-    state.satelliti.forEach(sat => {
-      const c = CATALOGO.find(x => x.id === sat.catId);
-      if (!c || !c.produzione) return;
-      const p = c.produzione;
-      if (c.id === 'miniera') {
-        const scelte = (c.produzione.scelte || []).filter(sc => 1 >= sc.livelloMin);
-        if (scelte.length === 0) return;
-        const scelta = scelte[scelte.length - 1];
-        righe.push({ strutturaUid: sat.uid, nome: `${c.nome} (satellite)`, materiale: scelta.materiale, quantita: scelta.base + scelta.perLivello });
-        return;
-      }
-      let quantita = p.base + p.perLivello;
-      let materiale = p.materiale;
-      if (p.stagionale && c.id === 'campo_coltivato') {
-        quantita += CALENDARIO_MOD_CAMPO_COLTIVATO[state.calendario.stagione] || 0;
-        quantita = Math.max(0, quantita);
-      }
-      if (raffineria && p.materialeRaffinato) materiale = p.materialeRaffinato;
-      righe.push({ strutturaUid: sat.uid, nome: `${c.nome} (satellite)`, materiale, quantita });
+  s.strutture.forEach(struttura => {
+    if (struttura.catId !== "fattoria") return;
+    const pecore = (struttura.animali && struttura.animali.Pecora) || 0;
+    if (pecore <= 0) return;
+    righe.push({
+      strutturaUid: struttura.uid,
+      nome: 'Fattoria (Pecore)',
+      materiale: 'Stoffa',
+      quantita: pecore + (struttura.livello || 1),
     });
-  }
+  });
+
+  (s.satelliti || []).forEach(satellite => {
+    const cat = catalogo.find(c => c.id === satellite.catId);
+    if (!cat || !cat.produzione) return;
+    const produzione = cat.produzione;
+
+    if (cat.id === 'miniera') {
+      const scelte = (produzione.scelte || []).filter(scelta => 1 >= scelta.livelloMin);
+      if (scelte.length === 0) return;
+      const scelta = scelte[scelte.length - 1];
+      righe.push({
+        strutturaUid: satellite.uid,
+        nome: `${cat.nome} (satellite)`,
+        materiale: scelta.materiale,
+        quantita: scelta.base + scelta.perLivello,
+      });
+      return;
+    }
+
+    let quantita = quantitaStagionale(cat, produzione.base + produzione.perLivello, s.calendario.stagione, modificatoriStagionali);
+    let materiale = produzione.materiale;
+    if (raffineria && produzione.materialeRaffinato) materiale = produzione.materialeRaffinato;
+
+    righe.push({
+      strutturaUid: satellite.uid,
+      nome: `${cat.nome} (satellite)`,
+      materiale,
+      quantita,
+    });
+  });
 
   return righe;
 }
@@ -94,5 +124,5 @@ export {
   haRaffineria,
   scelteProduzioneMiniera,
   scelteProduzioneAttivaMiniera,
-  calcolaProduzioneMensile
+  calcolaProduzioneMensile,
 };

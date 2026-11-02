@@ -1,57 +1,61 @@
-import { state } from '../core/state.js';
-import { COSTO_ROTTA_MO_PER_100KM } from '../core/config.js';
+import { COSTO_LAVORATORE_MESE, COSTO_ROTTA_MO_PER_100KM } from '../core/config.js';
+import { state as statoGlobale } from '../core/state.js';
 
-function costoMensileRotte(){
-  return state.rotte.reduce((sum,r)=> sum + (r.distanza/100)*COSTO_ROTTA_MO_PER_100KM, 0);
+/* Costi ricorrenti del QG. Come il resto del motore, accetta lo stato come
+   parametro: i test possono calcolare un mese su uno stato finto. */
+
+function costoMensileRotte(s = statoGlobale, per100 = COSTO_ROTTA_MO_PER_100KM) {
+  return s.rotte.reduce((somma, rotta) => somma + (rotta.distanza / 100) * per100, 0);
 }
 
-function costiFissiDettaglio(){
+function costiFissiDettaglio(s = statoGlobale, costoPerLavoratore = COSTO_LAVORATORE_MESE) {
   return [
     {
       voce: "Stipendi lavoratori",
-      base: `${state.lavoratori} lavorator${state.lavoratori===1?"e":"i"} × 1 mo`,
-      importo: state.lavoratori
-    }
+      base: `${s.lavoratori} lavorator${s.lavoratori === 1 ? "e" : "i"} × ${costoPerLavoratore} mo`,
+      importo: s.lavoratori * costoPerLavoratore,
+    },
   ];
 }
 
-function costiVariabiliDettaglio(){
-  const righe = [];
-  const kmTot = state.rotte.reduce((s,r)=>s+Number(r.distanza||0),0);
-  righe.push({
-    voce: "Rotte commerciali",
-    base: state.rotte.length ? `${kmTot} km totali × 5 mo/100km` : "Nessuna rotta attiva",
-    importo: costoMensileRotte()
-  });
-  return righe;
+function costiVariabiliDettaglio(s = statoGlobale, per100 = COSTO_ROTTA_MO_PER_100KM) {
+  const kmTot = s.rotte.reduce((somma, rotta) => somma + Number(rotta.distanza || 0), 0);
+  return [
+    {
+      voce: "Rotte commerciali",
+      base: s.rotte.length ? `${kmTot} km totali × ${per100} mo/100km` : "Nessuna rotta attiva",
+      importo: costoMensileRotte(s, per100),
+    },
+  ];
 }
 
-function costiFissiMensili(){
-  return costiFissiDettaglio().reduce((s,r)=>s+r.importo,0);
+function costiFissiMensili(s = statoGlobale) {
+  return costiFissiDettaglio(s).reduce((somma, riga) => somma + riga.importo, 0);
 }
 
-function costiVariabiliMensili(){
-  return costiVariabiliDettaglio().reduce((s,r)=>s+r.importo,0);
+function costiVariabiliMensili(s = statoGlobale) {
+  return costiVariabiliDettaglio(s).reduce((somma, riga) => somma + riga.importo, 0);
 }
 
-function costoMensileTotale(){
-  return costiFissiMensili() + costiVariabiliMensili();
+function costoMensileTotale(s = statoGlobale) {
+  return costiFissiMensili(s) + costiVariabiliMensili(s);
 }
 
-function registraMovimento(label, importo){
-  state.oro += importo;
-  state.movimenti.unshift({
-    data: new Date().toLocaleDateString("it-IT", {day:"2-digit", month:"2-digit", year:"numeric"}) + " " +
-          new Date().toLocaleTimeString("it-IT", {hour:"2-digit", minute:"2-digit"}),
+function registraMovimento(label, importo, s = statoGlobale) {
+  s.oro += importo;
+  const adesso = new Date();
+  s.movimenti.unshift({
+    data: adesso.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" }) + " " +
+          adesso.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }),
     label,
     importo,
-    saldoDopo: state.oro
+    saldoDopo: s.oro,
   });
-  if(state.movimenti.length > 60) state.movimenti.length = 60;
+  if (s.movimenti.length > 60) s.movimenti.length = 60;
 }
 
-function oroDisponibile(){
-  return state.oro - (state.riservaBancaria || 0);
+function oroDisponibile(s = statoGlobale) {
+  return s.oro - (s.riservaBancaria || 0);
 }
 
 export {
@@ -62,5 +66,5 @@ export {
   costiVariabiliMensili,
   costoMensileTotale,
   registraMovimento,
-  oroDisponibile
+  oroDisponibile,
 };

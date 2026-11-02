@@ -1,29 +1,9 @@
-export const state = {
-  nome: "Il mio Quartier Generale",
-  fondatore: "",
-  cofondatore: "",
-  classe: "Nessuna",
-  livello: 1,
-  oro: 0,
-  membri: [],
-  strutture: [],
-  materiali: {},
-  lavoratori: 0,
-  rotte: [],
-  magazzinoScontati: [],
-  movimenti: [],
-  riservaBancaria: 0,
-  registroAltriQG: [],
-  calendario: { mese: 1, stagione: "Primavera" },
-  clima: "Mite",
-  token: { miniera: 0, pesca: 0, concime: 0 },
-  tokenConcimeDaSpendere: 0,
-  tokenMinieraDaSpendere: 0,
-  tokenPescaDaSpendere: 0,
-  satelliti: [],
-  resocontoUltimoMese: null,
-  speseExtra: []
-};
+import { createDefaultState } from './defaultState.js';
+
+/* Il registro dell'app. È un singleton per scelta (una sola campagna per
+   dispositivo), ma chi lo consuma nel motore riceve `state` come parametro,
+   così le regole sono testabili su uno stato finto. */
+export const state = createDefaultState();
 
 export const STORAGE_KEY = "qg_registro_v1";
 export const GUIDE_KEY = "qg_guida_nascosta";
@@ -35,7 +15,6 @@ export let storageOk = true;
 // Diventa true quando il registro salvato è illeggibile: blocca le scritture
 // per non sovrascrivere dati che l'utente può ancora recuperare.
 export let salvataggioBloccato = false;
-export let classeSbloccataManualmente = false;
 export let sottomeccanicaAperta = {};
 
 export function setCurrentTab(v) { currentTab = v; }

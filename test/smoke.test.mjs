@@ -97,7 +97,8 @@ for (const caso of [
       assert.ok(doc.getElementById('tab-' + tab), `manca il pannello #tab-${tab}`);
     }
 
-    for (const target of ['finanze', 'strutture']) {
+    // Ogni tab deve aprirsi senza errori: copre anche i moduli divisi.
+    for (const target of TAB) {
       const voce = doc.querySelector(`.nav-item[data-tab="${target}"]`);
       assert.ok(voce, `manca la voce di navigazione ${target}`);
       voce.click();

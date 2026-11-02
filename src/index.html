@@ -22,7 +22,7 @@
 <div id="mobileOverlay" class="mobile-overlay"></div>
 <div class="swipe-hint" id="swipeHint"></div>
 
-<div id="loading" class="loading-screen">
+<div id="loading" class="loading-screen" role="status" aria-live="polite">
   <div class="loading-seal">QG</div>
   <div>Aprendo il registro del Quartier Generale...</div>
   <div class="loading-text">Cronache di Unshast</div>
@@ -35,38 +35,38 @@
       <div class="brand-text">Registro del<br>Quartier Generale<small>Cronache di Unshast</small></div>
     </div>
     <nav>
-      <div class="nav-item active" data-tab="panoramica">
+      <button type="button" id="nav-panoramica" class="nav-item active" data-tab="panoramica" aria-current="page">
         <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
         Panoramica
-      </div>
-      <div class="nav-item" data-tab="strutture">
+      </button>
+      <button type="button" id="nav-strutture" class="nav-item" data-tab="strutture">
         <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
         Strutture
-      </div>
-      <div class="nav-item" data-tab="magazzino">
+      </button>
+      <button type="button" id="nav-magazzino" class="nav-item" data-tab="magazzino">
         <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
         Magazzino
-      </div>
-      <div class="nav-item" data-tab="rotte">
+      </button>
+      <button type="button" id="nav-rotte" class="nav-item" data-tab="rotte">
         <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
         Rotte Commerciali
-      </div>
-      <div class="nav-item" data-tab="finanze">
+      </button>
+      <button type="button" id="nav-finanze" class="nav-item" data-tab="finanze">
         <span class="nav-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
         Finanze
-      </div>
-      <div class="nav-item" data-tab="preventivo">
+      </button>
+      <button type="button" id="nav-preventivo" class="nav-item" data-tab="preventivo">
         <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
         Preventivo
-      </div>
+      </button>
     </nav>
 
-    <div class="sidebar-toggle" id="sidebarToggle" data-tooltip="Comprimi sidebar">
+    <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-controls="sidebar" aria-expanded="true" data-tooltip="Comprimi sidebar">
       <span class="toggle-icon">&#9664;</span> <span>Comprimi</span>
-    </div>
+    </button>
 
     <div class="sidebar-foot">
-      <div class="save-indicator" id="saveIndicator"><span class="dot" id="saveDot"></span><span id="saveText">In attesa di modifiche...</span></div>
+      <div class="save-indicator" id="saveIndicator" role="status" aria-live="polite"><span class="dot" id="saveDot"></span><span id="saveText">In attesa di modifiche...</span></div>
       <div class="storage-warning" id="storageWarning">Il salvataggio locale non e disponibile (modalita privata?). Usa "Esporta backup" spesso per non perdere i dati.</div>
       <button id="exportBtn" data-tooltip="Salva una copia di sicurezza">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -95,13 +95,13 @@
   <div class="main">
     <div class="mobile-header">
       <span class="brand-text">Registro QG</span>
-      <button class="hamburger" id="hamburgerBtn">
+      <button class="hamburger" id="hamburgerBtn" type="button" aria-label="Apri il menu di navigazione" aria-controls="sidebar" aria-expanded="false">
         <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
     </div>
 
     <!-- ================= PANORAMICA ================= -->
-    <section id="tab-panoramica">
+    <section id="tab-panoramica" role="tabpanel" aria-labelledby="nav-panoramica">
       <div class="topbar">
         <div>
           <div class="qg-title" id="qg-name-display">Il mio Quartier Generale</div>
@@ -207,7 +207,7 @@
     </section>
 
     <!-- ================= STRUTTURE ================= -->
-    <section id="tab-strutture" style="display:none;">
+    <section id="tab-strutture" role="tabpanel" aria-labelledby="nav-strutture" style="display:none;">
       <div class="topbar">
         <div>
           <div class="qg-title">Strutture</div>
@@ -245,7 +245,7 @@
     </section>
 
     <!-- ================= MAGAZZINO ================= -->
-    <section id="tab-magazzino" style="display:none;">
+    <section id="tab-magazzino" role="tabpanel" aria-labelledby="nav-magazzino" style="display:none;">
       <div class="topbar">
         <div>
           <div class="qg-title">Magazzino</div>
@@ -291,6 +291,7 @@
 
       <div class="card">
         <h2 class="section-title">Inventario</h2>
+        <div id="wh-capacity" class="hint" style="display:none;"></div>
         <table>
           <thead><tr><th>Materiale</th><th>Prezzo unitario</th><th>Quantit&agrave; (U)</th><th>Valore</th><th></th></tr></thead>
           <tbody id="wh-inventory-body"></tbody>
@@ -309,7 +310,7 @@
     </section>
 
     <!-- ================= ROTTE ================= -->
-    <section id="tab-rotte" style="display:none;">
+    <section id="tab-rotte" role="tabpanel" aria-labelledby="nav-rotte" style="display:none;">
       <div class="topbar">
         <div>
           <div class="qg-title">Rotte Commerciali</div>
@@ -361,7 +362,7 @@
     </section>
 
     <!-- ================= FINANZE ================= -->
-    <section id="tab-finanze" style="display:none;">
+    <section id="tab-finanze" role="tabpanel" aria-labelledby="nav-finanze" style="display:none;">
       <div class="topbar">
         <div>
           <div class="qg-title">Finanze</div>
@@ -481,7 +482,7 @@
     </section>
 
     <!-- ================= PREVENTIVO ================= -->
-    <section id="tab-preventivo" style="display:none;">
+    <section id="tab-preventivo" role="tabpanel" aria-labelledby="nav-preventivo" style="display:none;">
       <div class="topbar">
         <div>
           <div class="qg-title">Preventivo Costi</div>
@@ -556,10 +557,10 @@
   </div>
 </div>
 
-<div class="modal-bg" id="guideModalBg" style="display:none;">
+<div class="modal-bg" id="guideModalBg" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
   <div class="modal guide-modal">
     <button class="modal-close" id="guideCloseX" title="Chiudi">✕</button>
-    <h3>📖 Guida al Quartier Generale</h3>
+    <h3 id="guideTitle">📖 Guida al Quartier Generale</h3>
     <div class="guide-intro">Meccanica di gioco e funzionamento del Registro — Cronache di Unshast</div>
 
     <details open>
@@ -691,7 +692,7 @@
   </div>
 </div>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite" aria-atomic="false"></div>
 
 <script type="module" src="./app.js"></script>
 <script>

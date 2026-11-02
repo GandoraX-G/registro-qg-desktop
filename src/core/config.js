@@ -1,3 +1,13 @@
+import REGOLAMENTO from '../data/regolamento.json' with { type: 'json' };
+
+/* Configurazione di gioco, unica fonte: src/data/regolamento.json.
+
+   Il file viene importato a build time invece di essere scaricato con fetch.
+   Prima un errore di rete (o una cache PWA stantia) lasciava l'app bloccata
+   sulla schermata di caricamento, senza possibilità di esportare il registro:
+   i dati c'erano ma erano irraggiungibili. Ora la configurazione è dentro il
+   bundle e l'avvio offline non può più fallire. */
+
 let MATERIALI_PREZZI = {};
 let CATALOGO = [];
 let PUNTI_QG_MAX = 44;
@@ -12,10 +22,10 @@ let COSTO_LAVORATORE_MESE = 1;
 let AVAMPOSTO_RAGGIO_KM_PER_LIVELLO = 400;
 let LIVELLO_QG_CRITERIO = "massimo";
 let LIVELLO_QG_SOGLIE = [];
-let CALENDARIO_ORDINE_STAGIONI = ["Primavera","Estate","Autunno","Inverno"];
+let CALENDARIO_ORDINE_STAGIONI = ["Primavera", "Estate", "Autunno", "Inverno"];
 let CALENDARIO_MOD_CAMPO_COLTIVATO = {};
 let RAFFINERIA_CAT_ID = "raffineria";
-let RARITA_POZIONI = ["Comune","Non Comune","Raro","Molto Raro","Leggendario"];
+let RARITA_POZIONI = ["Comune", "Non Comune", "Raro", "Molto Raro", "Leggendario"];
 let ARGOMENTI_BIBLIOTECA = [];
 let TEMI_BIBLIOTECA_SCELTE = 5;
 let PIANTE_SPECIALI = [];
@@ -29,7 +39,7 @@ let ELIPORTO_ARCANO_CFG = {};
 let SALA_DA_GUERRA_CFG = {};
 let IMPRESA_CFG = {};
 
-const CATEGORIE = ["Generali","Produzione","Vendita","Militare"];
+const CATEGORIE = ["Generali", "Produzione", "Vendita", "Militare"];
 
 export {
   MATERIALI_PREZZI,
@@ -65,11 +75,11 @@ export {
   CATEGORIE,
 };
 
-export async function caricaConfig(){
-  const base = import.meta.env.BASE_URL || "/";
-  const res = await fetch(`${base}data/regolamento.json`);
-  if(!res.ok) throw new Error("Impossibile caricare data/regolamento.json ("+res.status+")");
-  const cfg = await res.json();
+/* Resta asincrona per compatibilità con il boot (app.js fa `await`), ma non
+   tocca più la rete. Accetta una configurazione alternativa per i test. */
+export async function caricaConfig(cfg = REGOLAMENTO) {
+  if (!cfg) throw new Error("Configurazione del regolamento mancante");
+
   MATERIALI_PREZZI = cfg.materiali || {};
   CATALOGO = cfg.catalogo || [];
   const c = cfg.costanti || {};

@@ -10,7 +10,10 @@ import { kmDifesiRotta, applicaAvampostiMensile } from '../modules/outpost.js';
 import { avanzaGiardini } from '../modules/giardino.js';
 import { avanzaRitualiArcani } from '../modules/sala-arcana.js';
 
-function eseguiChiusuraMese(){
+/* Chiusura del mese: è un'operazione di integrazione (tocca produzione,
+   token, rischi, sotto-meccaniche e tesoreria), quindi resta legata al
+   registro reale. `rng` è iniettabile per rendere deterministici i tiri. */
+function eseguiChiusuraMese(rng = Math.random){
   const righe = [];
   righe.push(`\u2550\u2550\u2550 Chiusura di ${state.calendario.stagione}, mese ${state.calendario.mese} \u2550\u2550\u2550`);
 
@@ -67,7 +70,7 @@ function eseguiChiusuraMese(){
 
   if(state.rotte.length>0){
     righe.push("Rotte commerciali:");
-    tiraRischioRotte().forEach(esito=>{
+    tiraRischioRotte(state, rng).forEach(esito=>{
       if(!esito.colpita){
         righe.push(`  \u2022 ${esito.rotta}: tiro ${esito.tiro} vs ${esito.rischioPct}% \u2014 nessun attacco`);
       }else if(esito.perso){

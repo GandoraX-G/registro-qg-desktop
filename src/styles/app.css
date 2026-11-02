@@ -158,6 +158,11 @@
     padding:11px 14px;
     border-radius:var(--radius-sm);
     color:var(--nav-text);
+    /* La navigazione ora è fatta di <button>: azzeriamo lo stile nativo del
+       bottone perché resti identica alla sidebar di prima. */
+    font-family:inherit;
+    font-weight:400;
+    line-height:inherit;
     font-size:13.5px;
     letter-spacing:.015em;
     cursor:pointer;
@@ -246,7 +251,8 @@
   .sidebar-toggle{
     display:flex; align-items:center; justify-content:center; gap:6px;
     padding:8px; margin:10px 10px 0; border-radius:var(--radius-sm); cursor:pointer;
-    color:var(--nav-text); font-size:11px; letter-spacing:.03em;
+    color:var(--nav-text); font-family:inherit; font-size:11px; letter-spacing:.03em;
+    text-align:center;
     border:1px solid var(--sidebar-border); background:transparent;
     transition:all var(--transition-fast); user-select:none;
   }
@@ -562,6 +568,12 @@
     max-width:440px; line-height:1.5; white-space:pre-line;
   }
   .toast.show{opacity:1; transform:translateY(0);}
+  /* Focus visibile: la navigazione da tastiera deve sapere dov'è. */
+  .nav-item:focus-visible, .sidebar-toggle:focus-visible, .filter-chip:focus-visible,
+  .btn:focus-visible, .modal-close:focus-visible, details > summary:focus-visible{
+    outline:2px solid var(--brass-bright);
+    outline-offset:2px;
+  }
   .toast-warning{border-left-color:var(--amber);}
   .toast-danger{border-left-color:var(--red);}
 
