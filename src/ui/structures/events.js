@@ -5,6 +5,7 @@ import { catFilter, structSearchTerm, sottomeccanicaAperta, setCatFilter, setStr
 import { CATALOGO, MATERIALI_PREZZI, PUNTI_QG_MAX, LIVELLO_STRUTTURA_MAX, RARITA_POZIONI, ARGOMENTI_BIBLIOTECA, TEMI_BIBLIOTECA_SCELTE, PIANTE_SPECIALI, OPERA_ARTE_CFG, STUDIO_DIPLOMATICO_CFG, SALA_ARCANA_CFG, AVAMPOSTO_CFG, CAMPO_ADDESTRAMENTO_CFG, SALA_DA_GUERRA_CFG, IMPRESA_CFG, CATEGORIE, ELIPORTO_ARCANO_CFG } from '../../core/config.js';
 import { uid, fmtMo, escapeHtml } from '../../utils/format.js';
 import { puntiCosto, puntiSpesiTotali } from '../../engine/qg.js';
+import { valutaCosti, materialiRestituiti } from '../../engine/costruzione.js';
 import { showToast } from '../toast.js';
 import { registraMovimento, oroDisponibile } from '../../engine/finance.js';
 import { haRaffineria, scelteProduzioneMiniera, scelteProduzioneAttivaMiniera } from '../../engine/production.js';
@@ -431,6 +432,16 @@ export function initStructureEvents() {
   });
 }
 
+/* Traduce gli errori di valutaCosti nei messaggi già usati dall'app. */
+function messaggiCosti(costi) {
+  return costi.errori.map(errore => {
+    if (errore.tipo === 'oro') {
+      return `Oro: servono ${fmtMo(errore.richiesti)} mo, disponibili ${fmtMo(errore.disponibili)} mo`;
+    }
+    return `Materiali mancanti:\n  • ${errore.mancanti.map(m => `${m.materiale}: servono ${m.richiesti}U, disponibili ${m.disponibili}U`).join('\n  • ')}`;
+  });
+}
+
 function costruisciStruttura(catId) {
   const c = CATALOGO.find(x => x.id === catId);
   if (!c) return;
@@ -457,10 +468,6 @@ function costruisciStruttura(catId) {
     if (!validazione.ok) { showToast(validazione.messaggio, 'warning'); return; }
     costoEffettivo = costoDispiegamentoAvamposto(tipoDispiegamento, c.costo);
   }
-  const oroDisp = oroDisponibile();
-  if (oroDisp < costoEffettivo) {
-    errori.push(`Oro: servono ${fmtMo(costoEffettivo)} mo, disponibili ${fmtMo(oroDisp)} mo`);
-  }
   let tipoImpresa = 'distanza';
   if (catId === 'impresa') {
     const selImpresa = document.getElementById('impresaTipoSelect');
@@ -471,16 +478,13 @@ function costruisciStruttura(catId) {
     const selMat = document.querySelector(`[data-field="matScelta"][data-cid="${catId}"]`);
     if (selMat && selMat.value === 'alternativi') materialiSet = c.materialiOppure;
   }
-  const matMancanti = [];
-  for (const mat of materialiSet) {
-    const disp = state.materiali[mat.m] || 0;
-    if (disp < mat.u) {
-      matMancanti.push(`${mat.m}: servono ${mat.u}U, disponibili ${disp}U`);
-    }
-  }
-  if (matMancanti.length > 0) {
-    errori.push(`Materiali mancanti:\n  • ${matMancanti.join('\n  • ')}`);
-  }
+  const costi = valutaCosti({
+    costoOro: costoEffettivo,
+    oroDisponibile: oroDisponibile(),
+    materiali: materialiSet,
+    giacenze: state.materiali,
+  });
+  errori.push(...messaggiCosti(costi));
 
   if (errori.length > 0) {
     showToast(`Impossibile costruire ${c.nome}:\n• ${errori.join('\n• ')}`, 'warning');
@@ -488,15 +492,18 @@ function costruisciStruttura(catId) {
   }
   const etichettaDispiegamento = (catId === 'avamposto' && tipoDispiegamento !== 'standard')
     ? ` (${labelTipoDispiegamento(tipoDispiegamento)})` : '';
-  registraMovimento(`Costruzione: ${c.nome}${etichettaDispiegamento}`, -costoEffettivo);
-  materialiSet.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) - mat.u; });
-  state.strutture.push({ uid: uid(), catId: c.id, livello: 1, materialiScelte: materialiSet === c.materialiOppure ? 'alternativi' : 'primari', ...statoIniziale(c.id, { tipoDispiegamento, tipoImpresa }) });
+  if (!costi.costoSospeso) {
+    registraMovimento(`Costruzione: ${c.nome}${etichettaDispiegamento}`, -costi.oroDaPagare);
+  }
+  costi.materialiDaScalare.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) - mat.u; });
+  state.strutture.push({ uid: uid(), catId: c.id, livello: 1, materialiScelte: materialiSet === c.materialiOppure ? 'alternativi' : 'primari', ...(costi.costoSospeso ? { costoSospeso: true } : {}), ...statoIniziale(c.id, { tipoDispiegamento, tipoImpresa }) });
 
+  const notaCosti = costi.costoSospeso ? ' (senza costi: modalità solo punti QG)' : '';
   if (c.categoria !== 'Generali' && state.classe === 'Nessuna') {
     state.classe = c.categoria;
-    showToast(`${c.nome} costruita! Il QG ottiene la Classe ${c.categoria}`);
+    showToast(`${c.nome} costruita! Il QG ottiene la Classe ${c.categoria}${notaCosti}`);
   } else {
-    showToast(`${c.nome} costruita!`);
+    showToast(`${c.nome} costruita!${notaCosti}`);
   }
   saveState();
   callRenderAll();
@@ -515,30 +522,26 @@ function potenziaStruttura(uidStr) {
   if (!c.exempt && puntiSpesiTotali() + costoPunti > PUNTI_QG_MAX) {
     errori.push(`Punti QG: servono ${costoPunti}, disponibili ${PUNTI_QG_MAX - puntiSpesiTotali()}`);
   }
-  const oroDisp = oroDisponibile();
-  if (oroDisp < c.costo) {
-    errori.push(`Oro: servono ${fmtMo(c.costo)} mo, disponibili ${fmtMo(oroDisp)} mo`);
-  }
   let matSetPot = c.materiali;
   if (s.materialiScelte === 'alternativi' && c.materialiOppure && c.materialiOppure.length > 0) matSetPot = c.materialiOppure;
-  const matMancanti = [];
-  for (const mat of matSetPot) {
-    const disp = state.materiali[mat.m] || 0;
-    if (disp < mat.u) {
-      matMancanti.push(`${mat.m}: servono ${mat.u}U, disponibili ${disp}U`);
-    }
-  }
-  if (matMancanti.length > 0) {
-    errori.push(`Materiali mancanti:\n  • ${matMancanti.join('\n  • ')}`);
-  }
+  const costi = valutaCosti({
+    costoOro: c.costo,
+    oroDisponibile: oroDisponibile(),
+    materiali: matSetPot,
+    giacenze: state.materiali,
+  });
+  errori.push(...messaggiCosti(costi));
   if (errori.length > 0) {
     showToast(`Impossibile potenziare ${c.nome}:\n• ${errori.join('\n• ')}`, 'warning');
     return;
   }
-  registraMovimento(`Potenziamento: ${c.nome} → Lv.${s.livello + 1}`, -c.costo);
-  matSetPot.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) - mat.u; });
+  if (!costi.costoSospeso) {
+    registraMovimento(`Potenziamento: ${c.nome} → Lv.${s.livello + 1}`, -costi.oroDaPagare);
+  }
+  costi.materialiDaScalare.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) - mat.u; });
+  if (costi.costoSospeso) s.costoSospeso = true;
   s.livello += 1;
-  showToast(`${c.nome} potenziata a Livello ${s.livello}`);
+  showToast(`${c.nome} potenziata a Livello ${s.livello}${costi.costoSospeso ? ' (senza costi: modalità solo punti QG)' : ''}`);
   if (SATELLITE_CATALOG_IDS.includes(s.catId)) {
     const nomeCitta = prompt(`Potenziamento effettuato! Vuoi creare un satellite Lv.1 di ${c.nome} in un'altra città? Inserisci il nome della città (o annulla per saltare):`);
     if (nomeCitta && nomeCitta.trim()) {
@@ -559,21 +562,25 @@ function smantellaStruttura(uidStr) {
   // Restituisci materiali (usando lo stesso set scelto alla costruzione)
   let matSetSm = c.materiali;
   if (s.materialiScelte === 'alternativi' && c.materialiOppure && c.materialiOppure.length > 0) matSetSm = c.materialiOppure;
-  matSetSm.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) + mat.u * s.livello; });
+  const restituibili = materialiRestituiti(s, matSetSm);
+  restituibili.forEach(mat => { state.materiali[mat.m] = (state.materiali[mat.m] || 0) + mat.u * s.livello; });
+  const esitoMateriali = s.costoSospeso
+    ? 'nessun materiale da restituire (costruita senza costi)'
+    : 'materiali restituiti';
   if (c.id === 'avamposto') {
     const rotteScollegate = state.rotte.filter(r => r.avampostoUid === uidStr).length;
     state.rotte.forEach(r => { if (r.avampostoUid === uidStr) r.avampostoUid = null; });
     showToast(rotteScollegate > 0
-      ? `Avamposto smantellato: materiali restituiti, ${rotteScollegate} rotta/e tornate scoperte`
-      : 'Avamposto smantellato: materiali restituiti al magazzino');
+      ? `Avamposto smantellato: ${esitoMateriali}, ${rotteScollegate} rotta/e tornate scoperte`
+      : `Avamposto smantellato: ${esitoMateriali}`);
   } else if (c.categoria === 'Vendita') {
     const impreseScollegate = state.strutture.filter(x => x.catId === 'impresa' && x.strutturaVenditaUid === uidStr);
     impreseScollegate.forEach(imp => { imp.strutturaVenditaUid = null; imp.spesaMensile = 0; });
     showToast(impreseScollegate.length > 0
-      ? `${c.nome} smantellata: ${impreseScollegate.length} Impresa/e tornate senza struttura collegata. Materiali restituiti.`
-      : `${c.nome} smantellata: materiali restituiti al magazzino`);
+      ? `${c.nome} smantellata: ${impreseScollegate.length} Impresa/e tornate senza struttura collegata. ${esitoMateriali}.`
+      : `${c.nome} smantellata: ${esitoMateriali}`);
   } else {
-    showToast(`${c.nome} smantellata: materiali restituiti al magazzino`);
+    showToast(`${c.nome} smantellata: ${esitoMateriali}`);
   }
   state.strutture.splice(idx, 1);
   saveState();
