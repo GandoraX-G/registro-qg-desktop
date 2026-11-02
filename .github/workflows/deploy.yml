@@ -1,0 +1,93 @@
+name: deploy
+
+# Pipeline web completa: test → build Pages → commit automatico → pubblicazione.
+# I pacchetti desktop (Tauri) restano in build.yml, che non pubblica più nulla.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy-pages
+  cancel-in-progress: true
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Il push automatico del bot non deve ritriggerare la pipeline (loop).
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Installa Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Installa dipendenze
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            echo "::warning::package-lock.json non versionato: uso npm install, la build non è riproducibile"
+            npm install
+          fi
+
+      - name: Smoke test
+        run: npm test
+
+      - name: Build di produzione per Pages
+        run: npm run build
+        env:
+          DEPLOY_PWA: "true"
+
+      - name: Verifica del build
+        run: |
+          set -euo pipefail
+          test -f dist/index.html
+          test -f dist/sw.js
+          grep -q '/registro-qg-desktop/manifest.json' dist/index.html
+          if grep -qE 'user-scalable=no|maximum-scale=1' dist/index.html; then
+            echo "::error::Lo zoom è bloccato nel viewport"
+            exit 1
+          fi
+          if grep -rqE 'fonts\.(googleapis|gstatic)' dist; then
+            echo "::error::Il build contiene font esterni"
+            exit 1
+          fi
+          echo "index.html: $(stat -c%s dist/index.html) byte · asset: $(ls dist/assets | wc -l)"
+
+      - name: Commit automatico dei file generati
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nessun file generato da committare"
+            exit 0
+          fi
+          git commit -m "chore(ci): file generati dal deploy [skip ci]"
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:main
+
+      - name: Pubblica su GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          user_name: "github-actions[bot]"
+          user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          commit_message: "deploy: ${{ github.sha }}"

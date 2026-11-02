@@ -153,30 +153,3 @@ jobs:
             artifacts/linux-deb/*.deb
             artifacts/linux-appimage/*.AppImage
             artifacts/macos/*.dmg
-
-  deploy-pwa:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Installa Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Installa dipendenze npm
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-        env:
-          DEPLOY_PWA: "true"
-
-      - name: Smoke test
-        run: npm test
-
-      - name: Deploy su GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
