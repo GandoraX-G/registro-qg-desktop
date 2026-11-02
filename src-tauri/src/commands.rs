@@ -44,24 +44,41 @@ pub fn percorso_registro(app: tauri::AppHandle) -> Result<String, String> {
     Ok(dir.join(REGISTRO_FILENAME).to_string_lossy().to_string())
 }
 
+/* `rfd::FileDialog` apre un dialogo nativo bloccante. Dentro un comando
+   sincrono quel blocco finisce sul thread principale e la finestra sembra
+   congelata (si nota soprattutto su macOS). I due comandi sono quindi
+   `async` e spostano il dialogo su un thread dedicato: l'interfaccia resta
+   reattiva mentre l'utente sceglie il file. */
 #[tauri::command]
-pub fn esporta_backup(contenuto: String, nome_suggerito: String) -> Result<String, String> {
-    let dialog = rfd::FileDialog::new()
-        .set_title("Salva backup QG")
-        .add_filter("JSON", &["json"])
-        .set_file_name(&nome_suggerito);
-    let path = dialog.save_file().ok_or("Nessun percorso selezionato")?;
-    fs::write(&path, &contenuto)
-        .map_err(|e| format!("Errore durante la scrittura del backup: {e}"))?;
-    Ok(path.to_string_lossy().to_string())
+pub async fn esporta_backup(contenuto: String, nome_suggerito: String) -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let dialog = rfd::FileDialog::new()
+            .set_title("Salva backup QG")
+            .add_filter("JSON", &["json"])
+            .set_file_name(&nome_suggerito);
+        let path = dialog
+            .save_file()
+            .ok_or_else(|| "Nessun percorso selezionato".to_string())?;
+        fs::write(&path, &contenuto)
+            .map_err(|e| format!("Errore durante la scrittura del backup: {e}"))?;
+        Ok(path.to_string_lossy().to_string())
+    })
+    .await
+    .map_err(|e| format!("Dialogo di salvataggio non riuscito: {e}"))?
 }
 
 #[tauri::command]
-pub fn importa_backup() -> Result<String, String> {
-    let dialog = rfd::FileDialog::new()
-        .set_title("Seleziona backup QG")
-        .add_filter("JSON", &["json"]);
-    let path = dialog.pick_file().ok_or("Nessun file selezionato")?;
-    fs::read_to_string(&path)
-        .map_err(|e| format!("Errore durante la lettura del file: {e}"))
+pub async fn importa_backup() -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let dialog = rfd::FileDialog::new()
+            .set_title("Seleziona backup QG")
+            .add_filter("JSON", &["json"]);
+        let path = dialog
+            .pick_file()
+            .ok_or_else(|| "Nessun file selezionato".to_string())?;
+        fs::read_to_string(&path)
+            .map_err(|e| format!("Errore durante la lettura del file: {e}"))
+    })
+    .await
+    .map_err(|e| format!("Dialogo di apertura non riuscito: {e}"))?
 }
