@@ -143,6 +143,8 @@ function mostraRecupero(dettaglio){
 }
 
 let saveTimeout = null;
+// Ultimo JSON effettivamente scritto: serve a non riscrivere nulla di identico.
+let ultimoPayload = null;
 export function saveState(){
   // Finché il registro è in quarantena nessuna scrittura deve sovrascriverlo.
   if(salvataggioBloccato) return;
@@ -150,6 +152,8 @@ export function saveState(){
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(async ()=>{
     const payload = JSON.stringify(state);
+    // Stato invariato: nessuna scrittura, nessuna quota consumata.
+    if(payload === ultimoPayload){ flashSaved(); return; }
     try{
       if(TAURI_DISPONIBILE){
         await window.__TAURI__.core.invoke("salva_registro", {contenuto: payload});
@@ -158,8 +162,10 @@ export function saveState(){
       }else{
         throw new Error("Nessuna destinazione di salvataggio disponibile");
       }
+      ultimoPayload = payload;
       flashSaved();
     }catch(e){
+      ultimoPayload = null; // il prossimo saveState() deve ritentare
       console.error("Errore di salvataggio", e);
       document.getElementById("storageWarning").classList.add("show");
       showToast("Salvataggio non riuscito ⚠ — scarica un backup dalla sidebar");
