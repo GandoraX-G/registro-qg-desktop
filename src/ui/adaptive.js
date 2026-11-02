@@ -32,12 +32,13 @@ function getScreenInfo() {
 
 function detectDevice() {
   const ua = navigator.userAgent;
+  const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isAndroid = /Android/.test(ua);
   const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
   const isChrome = /Chrome/.test(ua) && !/Edge/.test(ua);
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  const hasNotch = CSS.supports('padding-top', 'env(safe-area-inset-top)') && isTouch;
+  const hasNotch = typeof CSS !== 'undefined' && CSS.supports('padding-top', 'env(safe-area-inset-top)') && isTouch;
 
   return { isIOS, isAndroid, isSafari, isChrome, isStandalone, hasNotch, isMobile: isIOS || isAndroid };
 }
