@@ -207,14 +207,9 @@ function adaptSidebar() {
     sidebar.style.zIndex = '100';
     sidebar.style.transition = 'left .3s cubic-bezier(.32,.72,0,1)';
     sidebar.style.willChange = 'left';
-
-    if (!sidebar.classList.contains('open')) {
-      sidebar.style.left = '-300px';
-      sidebar.style.boxShadow = 'none';
-    } else {
-      sidebar.style.left = '0';
-      sidebar.style.boxShadow = '12px 0 48px rgba(0,0,0,.65)';
-    }
+    // La posizione del cassetto la decide il CSS (.sidebar.open{left:0}).
+    // Uno `left` inline qui resterebbe congelato sul valore calcolato prima
+    // del click sull'hamburger e il menu non entrerebbe mai nello schermo.
   } else {
     sidebar.style.position = '';
     sidebar.style.top = '';

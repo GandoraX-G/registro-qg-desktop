@@ -110,6 +110,19 @@ for (const caso of [
   });
 }
 
+test('il CSS emesso conserva le regole critiche', () => {
+  const assets = path.join(DIST, 'assets');
+  const css = fs.readdirSync(assets).filter(f => f.endsWith('.css'))
+    .map(f => fs.readFileSync(path.join(assets, f), 'utf8')).join('\n');
+  const html = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
+
+  assert.ok(css.length > 30000, `CSS emesso sospettosamente corto: ${css.length} byte`);
+  assert.match(css, /\.profile-mobile \.sidebar\.open[^{]*\{[^}]*left:0/, 'manca la regola che apre il cassetto mobile');
+  assert.match(css, /@font-face\{[^}]*font-family:['"]?Cinzel/, 'manca il font Cinzel locale');
+  assert.doesNotMatch(html, /user-scalable=no|maximum-scale=1/, 'lo zoom è di nuovo bloccato');
+  assert.doesNotMatch(html + css, /fonts\.(googleapis|gstatic)/, 'reintrodotto un font esterno');
+});
+
 test('registro illeggibile: in quarantena e mai sovrascritto', async () => {
   const rotto = '{"nome":"QG di prova","rotte":[';
   const { win, doc, errori } = await avvia({ width: 1280, height: 900, seed: { qg_registro_v1: rotto } });

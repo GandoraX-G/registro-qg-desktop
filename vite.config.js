@@ -20,6 +20,7 @@ function pwaLinks() {
       handler: html => html
         .replace(/href="[^"]*manifest[^"]*\.json"/, `href="${base}manifest.json"`)
         .replace(/href="[^"]*icon_128x128[^"]*"/, `href="${base}icons/icon_128x128.png"`)
+        .replace(/href="[^"]*icon_32x32[^"]*"/, `href="${base}icons/icon_32x32.png"`)
         .replace(/const swBase = [^;]*;/, `const swBase = ${JSON.stringify(swBase)};`)
         // In dev il service worker resta spento, per non servire moduli stantii.
         .replace("if ('serviceWorker' in navigator) {",
