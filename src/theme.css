@@ -228,7 +228,16 @@ details > :last-child { margin-bottom:14px; }
     display:grid; grid-template-columns:minmax(0,1fr)!important;
     height:100dvh; min-height:100dvh; overflow:hidden;
   }
+  .sidebar {
+    position:fixed!important; top:0; bottom:0; left:-320px; width:300px; min-width:0;
+    height:100dvh; z-index:130; transition:left .28s cubic-bezier(.32,.72,0,1);
+    padding-top:env(safe-area-inset-top,0px); box-shadow:none;
+  }
+  .sidebar.open { left:0; box-shadow:12px 0 48px rgba(0,0,0,.55); }
+  .mobile-overlay { display:none; position:fixed; inset:0; z-index:125; background:rgba(0,0,0,.56); }
+  .mobile-overlay.show { display:block; }
   .main {
+    grid-column:1; grid-row:1;
     height:100dvh; min-height:0; overflow-y:auto; overflow-x:hidden;
     -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain;
     padding:0 14px calc(92px + env(safe-area-inset-bottom,0px))!important;
