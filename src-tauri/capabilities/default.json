@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permessi di base dell'app desktop: core e memoria di dimensioni/posizione della finestra. I comandi del registro (salva/carica/backup) sono comandi dell'app, non dei plugin, quindi non passano da qui.",
+  "windows": ["main"],
+  "permissions": ["core:default", "window-state:default"]
+}

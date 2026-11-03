@@ -55,6 +55,41 @@ smantellate, non restituiscono materiali: la modalità non è un modo per
 generare materiali dal nulla accendendola, costruendo, spegnendola e
 smantellando.
 
+## Tema chiaro e scuro
+
+In **Panoramica → Aspetto** si sceglie il tema: *Come il sistema*, *Chiaro
+(pergamena)* oppure *Scuro (notte)*. La preferenza è un campo del registro
+(`tema`), quindi resta la stessa ad ogni avvio e viaggia con i backup; con
+*Come il sistema* l'app segue l'impostazione del dispositivo e si aggiorna
+anche a runtime se questa cambia.
+
+Tutti i colori sono variabili CSS in `:root` (`src/styles/app.css`): il tema
+scuro è un secondo insieme di valori sotto `:root[data-theme="dark"]`, con
+`color-scheme: dark` perché anche i controlli nativi seguano il tema. Le tinte
+usate come *testo* hanno varianti dedicate (`--red-text`, `--green-text`, …)
+separate da quelle che fanno da sfondo ai tag. `src/ui/theme.js` si limita a
+scrivere `data-theme` su `<html>`; uno script inline in `index.html` lo imposta
+prima del primo paint, così non c'è il lampo chiaro all'avvio.
+
+## Ricerca globale (`Ctrl+K`)
+
+`Ctrl+K` (⌘K su Mac) apre una palette che cerca in tutto il registro: catalogo
+strutture, strutture possedute, magazzino, membri, movimenti e rotte. Invio o
+click portano nella tab della voce scelta. L'indice è in
+`src/engine/ricerca.js` (modulo puro, accenti e maiuscole ignorati) e viene
+ricostruito ad ogni apertura; la UI è in `src/ui/palette.js`.
+
+## Sala da Guerra e potenziamenti navali
+
+La scheda "Guerra" del regolamento non è stata fornita e il catalogo dei
+potenziamenti navali vive su una pagina esterna: l'app non inventa né regole di
+battaglia né prezzi. La **Sala da Guerra** tiene il piano (stato, obiettivi come
+checklist, forze disponibili lette dal Campo d'Addestramento, diario datato col
+mese di campagna) e `src/engine/guerra.js` si limita a contare le unità e
+riassumere gli obiettivi. Porto Militare ed Eliporto Arcano registrano gli
+acquisti effettivi con lo sconto applicato in un catalogo personale
+(`state.potenziamentiNavali`), che resta consultabile mese dopo mese.
+
 ## Pipeline (`.github/workflows/ci.yml`)
 
 Un solo workflow:
@@ -76,9 +111,10 @@ src/
   app.js            avvio, navigazione, scorciatoie, gesti
   core/             stato, persistenza, configurazione, backup, validazione
     defaultState.js stato iniziale unico + versione di schema + sanificazione
-  engine/           regole di gioco (produzione, rischio, token, chiusura mese)
+  engine/           regole di gioco (produzione, rischio, token, chiusura mese,
+                    ricerca globale, forze della Sala da Guerra)
   modules/          sotto-meccaniche per struttura (biblioteca, avamposto, ...)
-  ui/               rendering delle tab
+  ui/               rendering delle tab, tema, palette di ricerca
     structures/     catalogo, sotto-meccaniche, satelliti, eventi
   data/regolamento.json   configurazione di gioco (importata a build time)
 src-tauri/          shell desktop (Rust, Tauri 2)

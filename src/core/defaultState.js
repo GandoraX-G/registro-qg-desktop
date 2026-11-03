@@ -22,6 +22,9 @@ export function createDefaultState() {
     // Costruzione e potenziamento senza materiali né oro: si pagano solo i
     // punti QG. Le strutture così ottenute sono marcate `costoSospeso`.
     modalitaSoloPuntiQG: false,
+    // Preferenza di aspetto: "auto" segue il sistema, altrimenti "chiaro" o
+    // "scuro". Vive nel registro, così viaggia insieme al resto del backup.
+    tema: "auto",
     membri: [],
     strutture: [],
     materiali: {},
@@ -40,6 +43,10 @@ export function createDefaultState() {
     satelliti: [],
     resocontoUltimoMese: null,
     speseExtra: [],
+    // Catalogo personale dei potenziamenti navali/aerei acquistati: il
+    // regolamento li rimanda a una pagina esterna, quindi si registra ciò che
+    // il gruppo compra davvero (con lo sconto applicato) invece di inventarlo.
+    potenziamentiNavali: [],
   };
 }
 

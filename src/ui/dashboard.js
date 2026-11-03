@@ -6,6 +6,7 @@ import { puntiSpesiTotali, personaleRichiesto, puntiCosto, contaStruttureCategor
 import { registraMovimento } from '../engine/finance.js';
 import { fmtMo, escapeHtml } from '../utils/format.js';
 import { showToast } from '../ui/toast.js';
+import { TEMI, impostaTema } from '../ui/theme.js';
 
 let classeSbloccataManualmente = false;
 
@@ -29,6 +30,8 @@ export function renderDashboard() {
   document.getElementById('dash-in-livello').value = state.livello;
   document.getElementById('dash-in-oro').value = state.oro;
   document.getElementById('dash-in-solo-punti-qg').checked = state.modalitaSoloPuntiQG === true;
+  const menuTema = document.getElementById('dash-in-tema');
+  if (menuTema) menuTema.value = TEMI.includes(state.tema) ? state.tema : 'auto';
 
   const spesi = puntiSpesiTotali();
   const pct = Math.min(100, (spesi / PUNTI_QG_MAX) * 100);
@@ -139,6 +142,12 @@ export function initDashboardEvents() {
     showToast(e.target.checked
       ? 'Modalità solo punti QG attiva: costruzioni e potenziamenti non addebitano materiali né oro'
       : 'Modalità solo punti QG disattivata', e.target.checked ? 'warning' : 'success');
+  });
+  document.getElementById('dash-in-tema').addEventListener('change', e => {
+    const scelto = impostaTema(e.target.value);
+    saveState();
+    const etichette = { chiaro: 'Tema chiaro (pergamena)', scuro: 'Tema scuro (notte)', auto: 'Tema come il sistema' };
+    showToast(etichette[state.tema] || `Tema: ${scelto}`);
   });
   document.getElementById('dash-btn-movimento').addEventListener('click', () => {
     const val = Number(document.getElementById('dash-in-movimento').value) || 0;

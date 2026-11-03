@@ -5,6 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Registro del Quartier Generale</title>
 <meta name="description" content="Gestione Quartier Generale - Cronache di Unshast">
+<script>
+  /* Tema applicato prima del primo paint: senza questo, chi ha scelto il tema
+     scuro vedrebbe un lampo pergamena ad ogni avvio. Legge il registro da
+     localStorage (sulla PWA); se non c'è nulla di valido segue il sistema,
+     come farebbe "auto". Sull'app Tauri la preferenza arriva poco dopo con
+     il registro e initTema() riallinea. */
+  (function () {
+    var preferenza = null;
+    try {
+      var raw = localStorage.getItem('qg_registro_v1');
+      if (raw) preferenza = JSON.parse(raw).tema;
+    } catch (e) { /* registro illeggibile: si decide dal sistema */ }
+    if (preferenza !== 'chiaro' && preferenza !== 'scuro') {
+      var scuro = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      preferenza = scuro ? 'scuro' : 'chiaro';
+    }
+    document.documentElement.dataset.theme = preferenza === 'scuro' ? 'dark' : 'light';
+  })();
+</script>
 <meta name="theme-color" content="#130e09">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -117,15 +136,15 @@
         <div class="card">
           <h2 class="section-title">Dati del Quartier Generale</h2>
           <div class="row">
-            <div><label>Nome del QG</label><input type="text" id="dash-in-nome" placeholder="es. Bastione della Torcia"></div>
+            <div><label for="dash-in-nome">Nome del QG</label><input type="text" id="dash-in-nome" placeholder="es. Bastione della Torcia"></div>
           </div>
           <div class="row">
-            <div><label>Fondatore</label><input type="text" id="dash-in-fondatore" placeholder="Nome personaggio"></div>
-            <div><label>Co-fondatore</label><input type="text" id="dash-in-cofondatore" placeholder="Nome personaggio"></div>
+            <div><label for="dash-in-fondatore">Fondatore</label><input type="text" id="dash-in-fondatore" placeholder="Nome personaggio"></div>
+            <div><label for="dash-in-cofondatore">Co-fondatore</label><input type="text" id="dash-in-cofondatore" placeholder="Nome personaggio"></div>
           </div>
           <div class="row">
             <div>
-              <label>Classe del QG</label>
+              <label for="dash-in-classe">Classe del QG</label>
               <div style="display:flex; gap:6px; align-items:center;">
                 <select id="dash-in-classe" style="flex:1;">
                   <option value="Nessuna">Senza Classe</option>
@@ -137,7 +156,7 @@
               </div>
             </div>
             <div>
-              <label>Livello del QG <span style="font-weight:400;opacity:.7;">(calcolato automaticamente)</span></label>
+              <label for="dash-in-livello">Livello del QG <span style="font-weight:400;opacity:.7;">(calcolato automaticamente)</span></label>
               <select id="dash-in-livello" disabled>
                 <option value="1">Livello 1 (personaggi Lv 3–6)</option>
                 <option value="2">Livello 2 (personaggi Lv 7–10)</option>
@@ -153,16 +172,16 @@
 
         <div class="card">
           <h2 class="section-title">Tesoreria</h2>
-          <label>Oro in cassa (mo)</label>
+          <label for="dash-in-oro">Oro in cassa (mo)</label>
           <div class="row">
             <div><input type="number" id="dash-in-oro" value="0"></div>
           </div>
           <div class="row" style="margin-top:8px;">
-            <div><label>Movimento rapido</label><input type="number" id="dash-in-movimento" placeholder="es. 50 oppure -20"></div>
+            <div><label for="dash-in-movimento">Movimento rapido</label><input type="number" id="dash-in-movimento" placeholder="es. 50 oppure -20"></div>
             <div style="flex:0 0 auto;"><button class="btn btn-brass" id="dash-btn-movimento" style="margin-bottom:1px;">Applica</button></div>
           </div>
           <div class="divider"></div>
-          <label style="margin-top:0;">Punti QG</label>
+          <label style="margin-top:0;" for="dash-in-solo-punti-qg">Punti QG</label>
           <div class="progress-wrap"><div class="progress-bar" id="dash-points-bar" style="width:0%;"></div><div class="progress-label" id="dash-points-label">0 / 44</div></div>
           <div class="hint">Generali e strutture della tua classe costano 2 punti; strutture specializzate di classe diversa costano 4 punti. Superati i 44 punti spesi non potrai costruire altro (le costruzioni esenti, come Avamposti e Imprese aggiuntive, non consumano punti).</div>
         </div>
@@ -177,9 +196,20 @@
       </div>
 
       <div class="card">
+        <h2 class="section-title">Aspetto</h2>
+        <label for="dash-in-tema">Tema dell'interfaccia</label>
+        <select id="dash-in-tema">
+          <option value="auto">Come il sistema</option>
+          <option value="chiaro">Chiaro (pergamena)</option>
+          <option value="scuro">Scuro (notte)</option>
+        </select>
+        <div class="hint">La scelta si salva dentro il registro, quindi resta la stessa ad ogni avvio e viaggia con i backup. "Come il sistema" segue l'impostazione chiara/scura del dispositivo e cambia anche mentre l'app è aperta.</div>
+      </div>
+
+      <div class="card">
         <h2 class="section-title">Riepilogo QG</h2>
         <table>
-          <thead><tr><th>Campo</th><th>Valore</th></tr></thead>
+          <thead><tr><th scope="col">Campo</th><th scope="col">Valore</th></tr></thead>
           <tbody id="dash-overview-body"></tbody>
         </table>
       </div>
@@ -187,7 +217,7 @@
       <div class="card">
         <h2 class="section-title">Membri del QG</h2>
         <table>
-          <thead><tr><th>Personaggio</th><th>Livello</th><th></th></tr></thead>
+          <thead><tr><th scope="col">Personaggio</th><th scope="col">Livello</th><th scope="col"></th></tr></thead>
           <tbody id="dash-members-body"></tbody>
         </table>
         <div class="row" style="margin-top:10px;">
@@ -200,7 +230,7 @@
       <div class="card">
         <h2 class="section-title">Riepilogo Strutture per Categoria</h2>
         <table>
-          <thead><tr><th>Categoria</th><th>Costruite</th><th>Costo punti</th></tr></thead>
+          <thead><tr><th scope="col">Categoria</th><th scope="col">Costruite</th><th scope="col">Costo punti</th></tr></thead>
           <tbody id="dash-summary-body"></tbody>
         </table>
       </div>
@@ -208,7 +238,7 @@
       <div class="card">
         <h2 class="section-title">Attivit&agrave; recenti</h2>
         <table>
-          <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo dopo</th></tr></thead>
+          <thead><tr><th scope="col">Data</th><th scope="col">Descrizione</th><th scope="col">Importo</th><th scope="col">Saldo dopo</th></tr></thead>
           <tbody id="dash-activities-body"></tbody>
         </table>
       </div>
@@ -234,7 +264,7 @@
 
       <h2 class="section-title">Strutture costruite</h2>
       <table>
-        <thead><tr><th>Struttura</th><th>Categoria</th><th>Livello</th><th>Punti spesi</th><th></th></tr></thead>
+        <thead><tr><th scope="col">Struttura</th><th scope="col">Categoria</th><th scope="col">Livello</th><th scope="col">Punti spesi</th><th scope="col"></th></tr></thead>
         <tbody id="struct-owned-body"></tbody>
       </table>
       <div id="struct-owned-empty" class="empty" style="display:none;">Le fondamenta del tuo Quartier Generale sono ancora vuote. Scegli una struttura dal catalogo qui sopra per dare inizio alla costruzione.</div>
@@ -268,15 +298,15 @@
         <h2 class="section-title">Acquista materiali</h2>
         <div class="row">
           <div>
-            <label>Materiale</label>
+            <label for="wh-purchase-material">Materiale</label>
             <select id="wh-purchase-material"></select>
           </div>
           <div>
-            <label>Quantit&agrave; (U)</label>
+            <label for="wh-purchase-qty">Quantit&agrave; (U)</label>
             <input type="number" id="wh-purchase-qty" min="1" value="1">
           </div>
           <div>
-            <label>Provenienza</label>
+            <label for="wh-purchase-source">Provenienza</label>
             <select id="wh-purchase-source">
               <option value="bazaar">Bazaar (prezzo pieno)</option>
               <option value="qg20">Acquisto da un altro QG (−20%)</option>
@@ -301,7 +331,7 @@
         <h2 class="section-title">Inventario</h2>
         <div id="wh-capacity" class="hint" style="display:none;"></div>
         <table>
-          <thead><tr><th>Materiale</th><th>Prezzo unitario</th><th>Quantit&agrave; (U)</th><th>Valore</th><th></th></tr></thead>
+          <thead><tr><th scope="col">Materiale</th><th scope="col">Prezzo unitario</th><th scope="col">Quantit&agrave; (U)</th><th scope="col">Valore</th><th scope="col"></th></tr></thead>
           <tbody id="wh-inventory-body"></tbody>
         </table>
         <div class="hint">Il prezzo unitario segue il listino ufficiale di Unshast (mo per unità di materiale). Ricorda: acquistando da un altro QG ricevi uno sconto del 20% (fino al 30% se il materiale è tra quelli scontati dal tuo Magazzino).</div>
@@ -310,7 +340,7 @@
       <div class="card">
         <h2 class="section-title">Lavoratori</h2>
         <div class="row" style="align-items:flex-end;">
-          <div><label>Lavoratori assunti</label><input type="number" id="wh-workers" value="0" min="0"></div>
+          <div><label for="wh-workers">Lavoratori assunti</label><input type="number" id="wh-workers" value="0" min="0"></div>
           <div style="flex:0 0 auto;"><button class="btn btn-outline" id="wh-workers-adjust-btn" style="margin-bottom:1px;">⟳ Adegua al fabbisogno</button></div>
         </div>
         <div class="hint">Ogni lavoratore costa 1 mo al mese. Personale totale richiesto dalle strutture costruite: <span class="mono" id="wh-workers-need">0</span>. <span id="wh-workers-deficit" style="display:none; color:var(--red-dk); font-weight:600;"></span></div>
@@ -329,17 +359,17 @@
       <div class="card">
         <h2 class="section-title">Nuova rotta</h2>
         <div style="display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:8px 12px; align-items:end;">
-          <div><label>Nome / destinazione</label><input type="text" id="route-name" placeholder="es. Rotta per Samat"></div>
-          <div><label>Distanza (km)</label><input type="number" id="route-distance" min="0" placeholder="0"></div>
-          <div><label>Costo mensile</label><div id="route-cost-preview" class="mono" style="height:32px;display:flex;align-items:center;font-size:13px;opacity:.8;">-</div></div>
+          <div><label for="route-name">Nome / destinazione</label><input type="text" id="route-name" placeholder="es. Rotta per Samat"></div>
+          <div><label for="route-distance">Distanza (km)</label><input type="number" id="route-distance" min="0" placeholder="0"></div>
+          <div><label for="route-cargo-material">Costo mensile</label><div id="route-cost-preview" class="mono" style="height:32px;display:flex;align-items:center;font-size:13px;opacity:.8;">-</div></div>
           <div style="display:flex;gap:6px;">
             <button class="btn btn-brass" id="route-add-btn">+ Aggiungi</button>
             <button class="btn btn-outline btn-sm" id="route-cancel-btn" style="display:none;">Annulla</button>
           </div>
-          <div><label>Carico abituale</label><select id="route-cargo-material"><option value="">-- nessuno --</option></select></div>
-          <div><label>Quantita</label><input type="number" id="route-cargo-qty" min="0" placeholder="es. 40"></div>
+          <div><label for="route-cargo-material">Carico abituale</label><select id="route-cargo-material"><option value="">-- nessuno --</option></select></div>
+          <div><label for="route-cargo-qty">Quantita</label><input type="number" id="route-cargo-qty" min="0" placeholder="es. 40"></div>
           <div>
-            <label>Difesa</label>
+            <label for="route-protected">Difesa</label>
             <div style="display:flex;gap:5px;align-items:center;">
               <label style="display:flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;font-size:11px;"><input type="checkbox" id="route-protected" style="margin:0;"> Protetta</label>
               <select id="route-defense-type" style="display:none;"><option value="">-- scegli --</option><option value="mio">Mio avamposto</option><option value="esterno">Esterno</option></select>
@@ -355,7 +385,7 @@
       <div class="card">
         <h2 class="section-title">Rotte attive</h2>
         <table>
-          <thead><tr><th>Rotta</th><th>Distanza</th><th>Difesa</th><th>Costo/mese</th><th>Rischio</th><th>Carico</th><th></th></tr></thead>
+          <thead><tr><th scope="col">Rotta</th><th scope="col">Distanza</th><th scope="col">Difesa</th><th scope="col">Costo/mese</th><th scope="col">Rischio</th><th scope="col">Carico</th><th scope="col"></th></tr></thead>
           <tbody id="route-body"></tbody>
         </table>
         <div id="route-empty" class="empty" style="display:none;">Nessuna rotta commerciale registrata.</div>
@@ -385,7 +415,7 @@
         <div class="row" style="align-items:center; margin-bottom:12px;">
           <div class="stat-chip"><div class="v mono" id="fin-month">Mese 1</div><div class="l">Mese corrente</div></div>
           <div>
-            <label>Stagione</label>
+            <label for="fin-season">Stagione</label>
             <select id="fin-season">
               <option value="Primavera">Primavera (+10 Campo Coltivato)</option>
               <option value="Estate">Estate (+5 Campo Coltivato)</option>
@@ -398,17 +428,17 @@
         </div>
         <div id="fin-tokens-row" class="row" style="flex-wrap:wrap; gap:16px; display:none;">
           <div id="fin-token-concime-wrap" style="display:none;">
-            <label>Concime <span class="fin-tok-count">(<span id="fin-token-concime-count">0</span> disp.)</span></label>
+            <label for="fin-token-concime-input">Concime <span class="fin-tok-count">(<span id="fin-token-concime-count">0</span> disp.)</span></label>
             <input type="number" id="fin-token-concime-input" min="0" value="0" style="max-width:70px;">
             <div class="hint">+10 Beni vegetali / token</div>
           </div>
           <div id="fin-token-miniera-wrap" style="display:none;">
-            <label>Miniera <span class="fin-tok-count">(<span id="fin-token-miniera-count">0</span> disp.)</span></label>
+            <label for="fin-token-miniera-input">Miniera <span class="fin-tok-count">(<span id="fin-token-miniera-count">0</span> disp.)</span></label>
             <input type="number" id="fin-token-miniera-input" min="0" max="3" value="0" style="max-width:70px;">
             <div class="hint">Max 3 · tira d6/d10/d12</div>
           </div>
           <div id="fin-token-pesca-wrap" style="display:none;">
-            <label>Pesca <span class="fin-tok-count">(<span id="fin-token-pesca-count">0</span> disp.)</span></label>
+            <label for="fin-token-pesca-input">Pesca <span class="fin-tok-count">(<span id="fin-token-pesca-count">0</span> disp.)</span></label>
             <input type="number" id="fin-token-pesca-input" min="0" max="3" value="0" style="max-width:70px;">
             <div class="hint">Max 3 · tira d6/d10/d12</div>
           </div>
@@ -425,7 +455,7 @@
         <h2 class="section-title">Riepilogo costi mensili</h2>
         <div class="hint" style="margin-top:0;">Costi fissi (stipendi) e variabili (rotte) in un'unica tabella.</div>
         <table>
-          <thead><tr><th>Tipo</th><th>Voce</th><th>Base di calcolo</th><th style="text-align:right">Importo/mese</th></tr></thead>
+          <thead><tr><th scope="col">Tipo</th><th scope="col">Voce</th><th scope="col">Base di calcolo</th><th scope="col" style="text-align:right">Importo/mese</th></tr></thead>
           <tbody id="fin-cost-body"></tbody>
           <tfoot><tr><td colspan="3" style="text-align:right; font-weight:700;">Totale</td><td class="mono" style="text-align:right; font-weight:700;" id="fin-cost-total">0 mo</td></tr></tfoot>
         </table>
@@ -439,7 +469,7 @@
         <summary>Storico movimenti</summary>
         <div class="sub-card-body">
           <table>
-            <thead><tr><th>Data</th><th>Descrizione</th><th>Importo</th><th>Saldo dopo</th></tr></thead>
+            <thead><tr><th scope="col">Data</th><th scope="col">Descrizione</th><th scope="col">Importo</th><th scope="col">Saldo dopo</th></tr></thead>
             <tbody id="fin-movements-body"></tbody>
           </table>
           <div id="fin-movements-empty" class="empty" style="display:none;">Nessun movimento registrato ancora.</div>
@@ -453,14 +483,14 @@
           <div class="hint" style="margin-top:0;">Promemoria contabile e spese extra. "Da ricevere"/"Da dare" = crediti/debiti aperti (Salda per applicare). "Entrata"/"Uscita" = movimenti già applicati alla tesoreria. "Spesa extra" = spese manuali (es. multe, donazioni) applicate subito alla tesoreria.</div>
           <div id="fin-altriqg-summary" style="margin-bottom:10px;"></div>
           <table>
-            <thead><tr><th>Spesa</th><th>Tipo</th><th>Importo</th><th>Nota</th><th>Stato</th><th></th></tr></thead>
+            <thead><tr><th scope="col">Spesa</th><th scope="col">Tipo</th><th scope="col">Importo</th><th scope="col">Nota</th><th scope="col">Stato</th><th scope="col"></th></tr></thead>
             <tbody id="fin-altriqg-body"></tbody>
           </table>
           <div id="fin-altriqg-empty" class="empty" style="display:none;">Nessuna voce registrata.</div>
           <div class="row" style="align-items:flex-end; margin-top:10px;">
-            <div><label>Spesa / Descrizione</label><input type="text" id="fin-altriqg-name" placeholder="es. QG di Samat (opzionale per Spesa extra)"></div>
+            <div><label for="fin-altriqg-name">Spesa / Descrizione</label><input type="text" id="fin-altriqg-name" placeholder="es. QG di Samat (opzionale per Spesa extra)"></div>
             <div>
-              <label>Tipo</label>
+              <label for="fin-altriqg-type">Tipo</label>
               <select id="fin-altriqg-type">
                 <option value="da_ricevere">Da ricevere (credito)</option>
                 <option value="da_dare">Da dare (debito)</option>
@@ -469,8 +499,8 @@
                 <option value="spesa">Spesa extra (applicata)</option>
               </select>
             </div>
-            <div style="max-width:130px;"><label>Importo (mo)</label><input type="number" min="0" id="fin-altriqg-amount" value="0"></div>
-            <div><label>Nota</label><input type="text" id="fin-altriqg-note" placeholder="es. quota rotta condivisa"></div>
+            <div style="max-width:130px;"><label for="fin-altriqg-amount">Importo (mo)</label><input type="number" min="0" id="fin-altriqg-amount" value="0"></div>
+            <div><label for="fin-altriqg-note">Nota</label><input type="text" id="fin-altriqg-note" placeholder="es. quota rotta condivisa"></div>
             <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" id="fin-altriqg-add-btn">+ Aggiungi</button></div>
           </div>
         </div>
@@ -482,7 +512,7 @@
         <div class="sub-card-body">
           <div class="hint" style="margin-top:0;">Soglia personale: le azioni volontarie dell'app (costruzioni, acquisti) non useranno questi fondi. L'upkeep obbligatorio la ignora — se lo intacca, la chiusura lo segnala.</div>
           <div class="row" style="align-items:center;">
-            <div><label>Riserva fissa (mo)</label><input type="number" min="0" id="fin-reserve" value="0" style="max-width:150px;"></div>
+            <div><label for="fin-reserve">Riserva fissa (mo)</label><input type="number" min="0" id="fin-reserve" value="0" style="max-width:150px;"></div>
             <div class="stat-chip"><div class="v mono" id="fin-reserve-current">0 mo</div><div class="l">Riserva attuale</div></div>
           </div>
         </div>
@@ -528,15 +558,15 @@
             <table>
               <thead>
                 <tr>
-                  <th>Struttura</th>
-                  <th>Categoria</th>
-                  <th>Pt</th>
-                  <th>Costo/u</th>
-                  <th>Qta</th>
-                  <th>Tot oro</th>
-                  <th>Tot pt</th>
-                  <th>Pers.</th>
-                  <th></th>
+                  <th scope="col">Struttura</th>
+                  <th scope="col">Categoria</th>
+                  <th scope="col">Pt</th>
+                  <th scope="col">Costo/u</th>
+                  <th scope="col">Qta</th>
+                  <th scope="col">Tot oro</th>
+                  <th scope="col">Tot pt</th>
+                  <th scope="col">Pers.</th>
+                  <th scope="col"></th>
                 </tr>
               </thead>
               <tbody id="prev-table-body"></tbody>
@@ -550,10 +580,10 @@
             <table>
               <thead>
                 <tr>
-                  <th>Risorsa</th>
-                  <th>Necessaria</th>
-                  <th>Disponibile</th>
-                  <th>Differenza</th>
+                  <th scope="col">Risorsa</th>
+                  <th scope="col">Necessaria</th>
+                  <th scope="col">Disponibile</th>
+                  <th scope="col">Differenza</th>
                 </tr>
               </thead>
               <tbody id="prev-compare-body"></tbody>
@@ -562,6 +592,18 @@
         </div>
       </div>
     </section>
+  </div>
+</div>
+
+<div class="modal-bg" id="searchModalBg" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+  <div class="modal palette-modal">
+    <h3 id="searchTitle" class="palette-title">Cerca nel registro</h3>
+    <div class="palette-search">
+      <input type="text" id="search-input" role="combobox" aria-expanded="true" aria-controls="search-results"
+             aria-autocomplete="list" aria-labelledby="searchTitle" placeholder="Strutture, materiali, membri, movimenti, rotte…">
+    </div>
+    <ul class="palette-results" id="search-results" role="listbox" aria-labelledby="searchTitle"></ul>
+    <div class="palette-foot">&#8593; &#8595; per scorrere · Invio per aprire · Esc per chiudere</div>
   </div>
 </div>
 
@@ -634,7 +676,7 @@
           <li><b>Produzione</b> di ogni struttura di Produzione attiva (Campo Coltivato, Miniera — con scelta mensile del materiale da estrarre —, Pescheria, Segheria, Fattoria, Giardino), aggiunta da sola al magazzino.</li>
           <li><b>Stagioni</b>: il Campo Coltivato riceve un modificatore (+10 Primavera, +5 Estate, −5 Autunno, −10 Inverno); la stagione avanza da sola ogni 3 mesi, correggibile a mano dal menu se serve.</li>
           <li><b>Raffineria</b>: se costruita, converte automaticamente la produzione grezza (Beni vegetali, Pesce, prodotti animali) nelle rispettive versioni raffinate.</li>
-          <li><b>Token</b> (Miniera/Pesca/Concime): generati e conteggiati ad ogni chiusura — al momento si accumulano soltanto, la funzione per spenderli sulle tabelle dedicate è ancora in lavorazione.</li>
+          <li><b>Token</b> (Miniera/Pesca/Concime): generati e conteggiati ad ogni chiusura. Si spendono dalla tab <b>Finanze</b>, nei campi accanto a "Chiudi mese": il Concime dà +10 materiali vegetali per token, mentre Miniera e Pesca fanno tirare d6/d10/d12 spendendo 1/2/3 token. I campi tornano a zero dopo l'applicazione, il resoconto del mese riporta ogni tiro.</li>
           <li><b>Rischio-attacco</b> su ogni rotta commerciale (vedi sezione Rotte sopra).</li>
           <li><b>Upkeep</b>: stipendi + costo rotte, scalati dalla tesoreria.</li>
           <li>Reset e avanzamenti mensili delle sotto-meccaniche di struttura: rituali della Sala Arcana avanzano di ~4 settimane, i Catalizzatori d'Essenza scarichi tornano disponibili, le Indagini della Biblioteca scadute vengono rimosse, le piante del Giardino crescono o muoiono in base al clima, la Bottega Artistica torna a poter creare un'Opera, lo Studio Diplomatico rinnova le fazioni selezionabili, e gli Avamposti pagano il rifornimento mensile incassando il guadagno passivo.</li>
@@ -658,8 +700,8 @@
           <li><b>Sala Arcana</b> — un rituale alla volta per apprendere un incantesimo, con costo e cap di livello calcolati in automatico.</li>
           <li><b>Avamposto</b> — distanza da Porta Ethea, rifornimento mensile (anche in versione ridotta a materiali) e guadagno passivo.</li>
           <li><b>Campo d'Addestramento</b> — avvia e completa l'addestramento di unità, fino a Allenate.</li>
-          <li><b>Porto Militare / Eliporto Arcano</b> — sconto cumulabile sui potenziamenti navali (il catalogo dei potenziamenti è su una pagina esterna, qui si inserisce solo il costo base).</li>
-          <li><b>Sala da Guerra</b> — tracciamento di stato e note; il regolamento rimanda a una scheda "Guerra" a parte non ancora disponibile, quindi qui non ci sono calcoli di battaglia.</li>
+          <li><b>Porto Militare / Eliporto Arcano</b> — sconto cumulabile sui potenziamenti navali e aerei. Il catalogo ufficiale è su una pagina esterna non disponibile qui: ogni acquisto che registri (nome + costo base) entra in un <b>catalogo personale</b> con lo sconto già applicato, così la prossima volta il prezzo lo hai sotto mano.</li>
+          <li><b>Sala da Guerra</b> — il <b>piano</b> della guerra: stato, obiettivi come checklist, forze disponibili (unità Allenate e in addestramento lette dal Campo d'Addestramento) e un diario con il mese di campagna. La scheda "Guerra" del regolamento non è stata fornita, quindi qui non si inventano regole di battaglia: niente tiri, iniziative o perdite calcolate.</li>
           <li><b>Impresa</b> — modalità "Porta Ethea" (strumenti da artigiano + vendita diretta) o "Vendita a Distanza" (collegata a una struttura di Vendita posseduta).</li>
         </ul>
       </div>
@@ -682,6 +724,7 @@
           <li><b>Rotte Commerciali</b>: aggiungi rotte, collega un Avamposto a difesa, dichiara un carico opzionale, calcolo automatico di costo mensile e rischio.</li>
           <li><b>Finanze</b>: calendario mese/stagione, bottone "Chiudi mese", storico movimenti registrato da solo ad ogni entrata/uscita, e il Registro Spese.</li>
         </ul>
+        Con <b>Ctrl+K</b> (⌘K su Mac) si apre la ricerca globale su tutto il registro — strutture, magazzino, membri, movimenti e rotte — e Invio porta direttamente nella tab giusta.
       </div>
     </details>
 
@@ -689,7 +732,8 @@
       <summary>Salvataggio, backup e tema</summary>
       <div class="guide-body">
         I dati si salvano da soli in un file sul tuo dispositivo (non più solo nel browser): l'app li ritrova automaticamente ad ogni riavvio. Restano comunque <b>legati a questo dispositivo</b> — non si sincronizzano da soli con un altro PC o telefono. Usa <b>⬇ Esporta backup (JSON)</b> per una copia di sicurezza o per spostarti su un altro dispositivo, e <b>⬆ Importa backup</b> per ricaricarla. <b>📋 Copia riepilogo testuale</b> genera un riassunto pronto da incollare su Discord.<br><br>
-        Su mobile, puoi installare l'app come PWA toccando "Aggiungi alla schermata Home" dal menu del browser.
+        Su mobile, puoi installare l'app come PWA toccando "Aggiungi alla schermata Home" dal menu del browser.<br><br>
+        Il <b>tema</b> (chiaro, scuro o "come il sistema") si sceglie in <b>Panoramica → Aspetto</b>; è una preferenza salvata nel registro, non un'impostazione di sistema, e viene inclusa nel backup.
       </div>
     </details>
 
