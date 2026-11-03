@@ -18,6 +18,8 @@ import { ottieniCharm, usaCharm } from '../../modules/studio-arcano.js';
 import { costruisciCatalizzatore, caricaCatalizzatore, trasferisciCatalizzatore, costoCatalizzatore, gsMassimoCatalizzatore } from '../../modules/santuario.js';
 import { aggiungiPozione, rimuoviPozione, totalePerRarita, usaCalderone } from '../../modules/alchimista.js';
 import { toggleTemaBiblioteca, aggiungiTemaPersonalizzato, avviaIndagineTema, aggiungiSottospecieBestiario, aggiungiMaterialeBestiario, avviaIndagineBestiario, rimuoviIndagine } from '../../modules/biblioteca.js';
+import { aggiungiObbiettivo, rimuoviObiettivo, toggleObiettivo, aggiungiVoceDiario, rimuoviVoceDiario } from '../../modules/sala-guerra.js';
+import { rimuoviPotenziamentoNavale } from '../../modules/porto-navale.js';
 import { piantaSeme, raccogliPianta } from '../../modules/giardino.js';
 import { creaOperaArte, calcolaPrestigioArtistico } from '../../modules/bottega-artistica.js';
 import { toggleFazioneSelezionata, ottieniCompanion, rimuoviCompanion } from '../../modules/studio-diplomatico.js';
@@ -286,9 +288,35 @@ export function initStructureEvents() {
     if (regNav) {
       const suid = regNav.dataset.uid;
       const costo = document.querySelector(`[data-field='navaleCosto'][data-uid='${suid}']`).value;
-      registraAcquistoNavale(suid, costo);
+      const nome = document.querySelector(`[data-field='navaleNome'][data-uid='${suid}']`)?.value;
+      registraAcquistoNavale(suid, costo, nome);
       return;
     }
+
+    const delNav = azione("[data-action='rimuovi-potenziamento-navale']");
+    if (delNav) { rimuoviPotenziamentoNavale(delNav.dataset.uid); return; }
+
+    const aggObiettivo = azione("[data-action='aggiungi-obiettivo-guerra']");
+    if (aggObiettivo) {
+      const suid = aggObiettivo.dataset.uid;
+      const campo = document.querySelector(`[data-field='guerraObiettivo'][data-uid='${suid}']`);
+      aggiungiObbiettivo(suid, campo ? campo.value : '');
+      return;
+    }
+
+    const delObiettivo = azione("[data-action='rimuovi-obiettivo-guerra']");
+    if (delObiettivo) { rimuoviObiettivo(delObiettivo.dataset.uid, delObiettivo.dataset.uid2); return; }
+
+    const aggDiario = azione("[data-action='aggiungi-diario-guerra']");
+    if (aggDiario) {
+      const suid = aggDiario.dataset.uid;
+      const campo = document.querySelector(`[data-field='guerraDiario'][data-uid='${suid}']`);
+      aggiungiVoceDiario(suid, campo ? campo.value : '');
+      return;
+    }
+
+    const delDiario = azione("[data-action='rimuovi-diario-guerra']");
+    if (delDiario) { rimuoviVoceDiario(delDiario.dataset.uid, delDiario.dataset.uid2); return; }
 
     const salvaNote = azione("[data-action='salva-note-guerra']");
     if (salvaNote) {
@@ -401,6 +429,8 @@ export function initStructureEvents() {
     if (rif) { toggleRifornimentoRidotto(rif.dataset.uid); return; }
     const statoGuerra = e.target.closest("[data-action='cambia-stato-guerra']");
     if (statoGuerra) { cambiaStatoGuerra(statoGuerra.dataset.uid, statoGuerra.value); return; }
+    const obiettivoGuerra = e.target.closest("[data-action='toggle-obiettivo-guerra']");
+    if (obiettivoGuerra) { toggleObiettivo(obiettivoGuerra.dataset.uid, obiettivoGuerra.dataset.uid2); return; }
     const selVendita = e.target.closest("[data-action='seleziona-struttura-vendita-impresa']");
     if (selVendita) { selezionaStrutturaVenditaImpresa(selVendita.dataset.uid, selVendita.value); return; }
     if (e.target.id === 'inClimaQG') {

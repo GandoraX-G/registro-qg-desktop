@@ -6,6 +6,7 @@
   @keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 
   :root{
+    color-scheme:light;
     --wood-1:#130e09;
     --wood-2:#1a1309;
     --wood-3:#2a1e10;
@@ -57,12 +58,70 @@
     --nav-text-hover:var(--brass-bright);
     --nav-active-text:var(--brass-bright);
     --footer-text:#7a6a4e;
+    /* Varianti usate come *testo*. In tema scuro vanno schiarite, mentre le
+       stesse tinte (--*-dk) restano sature perché fanno da sfondo ai tag:
+       separarle evita di schiarire anche quelli. */
+    --green-text:var(--green-dk);
+    --red-text:var(--red-dk);
+    --amber-text:var(--amber-dk);
+    --blue-text:var(--blue-dk);
     --radius-sm:6px;
     --radius-md:10px;
     --radius-lg:14px;
     --transition-fast:.15s ease;
     --transition-med:.25s ease;
   }
+
+  /* ================= TEMA SCURO ================= */
+  /* Ogni colore dell'app passa da queste variabili, quindi il tema notte è
+     solo un secondo insieme di valori su <html data-theme="dark">. Brass e
+     legno restano quelli (sidebar e barre sono già scure in entrambi i temi). */
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --parchment:#1b140d;
+    --parchment-2:#221a11;
+    --parchment-deep:#2b2015;
+    --parchment-edge:#4a3822;
+    --ink:#efe5cd;
+    --ink-soft:#b5a68a;
+    --line:#45351f;
+    --input-bg:#241a10;
+    --panel-bg:rgba(230,189,118,.045);
+    --progress-track:#2b2015;
+    --table-border:rgba(185,146,79,.16);
+    --table-stripe:rgba(255,255,255,.022);
+    --table-hover:rgba(185,146,79,.1);
+    --btn-outline-hover:rgba(185,146,79,.1);
+    --btn-danger-hover:rgba(224,168,155,.14);
+    --focus-ring:rgba(230,189,118,.28);
+    --kbd-bg:rgba(255,255,255,.07);
+    --kbd-border:rgba(255,255,255,.14);
+    --modal-overlay:rgba(4,2,1,.78);
+    --shadow-sm:0 1px 3px rgba(0,0,0,.45);
+    --shadow:0 4px 12px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
+    --shadow-lift:0 12px 28px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.45);
+    --shadow-inset:inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 2px rgba(0,0,0,.35);
+    --red:#b25a49;
+    --red-soft:#e0a294;
+    --red-hover:#f2c6b9;
+    --red-bg:rgba(224,168,155,.14);
+    --green-dk:#4a6b40;
+    --red-dk:#7d372a;
+    --amber-dk:#8a611c;
+    --blue-dk:#3a5a75;
+    --green-text:#9ccb8f;
+    --red-text:#e8a99b;
+    --amber-text:#e4b875;
+    --blue-text:#a6c6de;
+  }
+
+  /* L'icona della ricerca è un SVG incastonato nel CSS: su fondo scuro va
+     ridisegnata con un tratto più chiaro, altrimenti sparisce. */
+  :root[data-theme="dark"] .search-bar input{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23b5a68a' stroke-width='1.8'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cline x1='11' y1='11' x2='15' y2='15'/%3E%3C/svg%3E");
+  }
+  /* L'avviso di salvataggio ha fondo rosso tenue: serve testo chiaro. */
+  :root[data-theme="dark"] .storage-warning{color:#f0bdb0;}
 
   *,*::before,*::after{box-sizing:border-box;}
   html{scroll-behavior:smooth; overscroll-behavior:none; -webkit-text-size-adjust:100%;}
@@ -379,6 +438,9 @@
     outline:none; border-color:var(--brass);
     box-shadow:var(--shadow-inset), 0 0 0 3px var(--focus-ring);
   }
+  /* Le option native altrimenti seguono i colori di sistema e su tema scuro
+     restano bianche. */
+  select option{background:var(--input-bg); color:var(--ink);}
   .row{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
   .row > div{flex:1; min-width:110px;}
 
@@ -401,7 +463,7 @@
   }
   .btn-outline{background:transparent; border-color:var(--parchment-edge); color:var(--ink-soft);}
   .btn-outline:hover{background:var(--btn-outline-hover); border-color:var(--brass); color:var(--ink);}
-  .btn-danger{background:transparent; border-color:var(--red); color:var(--red-dk);}
+  .btn-danger{background:transparent; border-color:var(--red); color:var(--red-text);}
   .btn-danger:hover{background:var(--btn-danger-hover);}
   .btn-sm{padding:5px 10px; font-size:11px;}
   button:disabled{opacity:.4; cursor:not-allowed; filter:none !important;}
@@ -508,9 +570,9 @@
   .empty{padding:28px; text-align:center; color:var(--ink-soft); font-style:italic; font-size:13px; border:1px dashed var(--parchment-edge); border-radius:var(--radius-md); margin:10px 0;}
 
   /* Risk badges */
-  .badge-risk-low{color:var(--green-dk); font-weight:600;}
-  .badge-risk-mid{color:var(--amber-dk); font-weight:600;}
-  .badge-risk-high{color:var(--red-dk); font-weight:600;}
+  .badge-risk-low{color:var(--green-text); font-weight:600;}
+  .badge-risk-mid{color:var(--amber-text); font-weight:600;}
+  .badge-risk-high{color:var(--red-text); font-weight:600;}
 
   /* Sub-mechanics (collapsible cards) */
   .card.sub-card{
@@ -555,7 +617,7 @@
     transition:color var(--transition-fast); line-height:1; padding:4px;
     border-radius:var(--radius-sm);
   }
-  .modal-close:hover{color:var(--red-dk); background:var(--btn-danger-hover);}
+  .modal-close:hover{color:var(--red-text); background:var(--btn-danger-hover);}
   .hint{font-size:11px; color:var(--ink-soft); margin-top:4px; line-height:1.5;}
   .fin-tok-count{font-size:10px; font-weight:400; opacity:.65;}
 
@@ -576,6 +638,34 @@
   }
   .toast-warning{border-left-color:var(--amber);}
   .toast-danger{border-left-color:var(--red);}
+
+  /* Palette di ricerca (Ctrl+K) */
+  .palette-modal{max-width:620px; padding:0; overflow:hidden;}
+  .palette-modal .palette-title{padding:16px 20px 0; margin:0; font-size:15px;}
+  .palette-search{padding:12px 20px; border-bottom:1px solid var(--parchment-edge);}
+  .palette-search input{
+    width:100%; padding:10px 12px; border:1px solid var(--parchment-edge); border-radius:var(--radius-sm);
+    background:var(--input-bg); color:var(--ink); font-family:'Spectral',serif; font-size:14px;
+  }
+  .palette-search input:focus{outline:none; border-color:var(--brass); box-shadow:0 0 0 3px var(--focus-ring);}
+  .palette-results{list-style:none; margin:0; padding:8px; max-height:52vh; overflow-y:auto;}
+  .palette-item{
+    display:flex; align-items:baseline; gap:10px; width:100%; text-align:left;
+    padding:9px 12px; border:none; border-radius:var(--radius-sm); background:transparent;
+    color:var(--ink); font-family:inherit; font-size:13px; cursor:pointer;
+  }
+  .palette-item:hover, .palette-item[aria-selected="true"]{background:var(--table-hover);}
+  .palette-item .palette-tipo{
+    font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft);
+    flex:0 0 82px;
+  }
+  .palette-item .palette-titolo{font-weight:600;}
+  .palette-item .palette-dettaglio{
+    margin-left:auto; font-size:10.5px; color:var(--ink-soft); font-family:'JetBrains Mono',monospace;
+    white-space:nowrap;
+  }
+  .palette-empty{padding:18px 20px; color:var(--ink-soft); font-style:italic; font-size:12.5px;}
+  .palette-foot{padding:10px 20px 14px; font-size:10.5px; color:var(--ink-soft); border-top:1px solid var(--table-border);}
 
   /* Guide modal */
   .guide-modal{max-width:720px;}
@@ -644,8 +734,8 @@
     font-size:10.5px; padding:8px 10px; border-radius:var(--radius-sm); margin-top:8px; line-height:1.45;
   }
   .storage-warning.show{display:block;}
-  .amount-pos{color:var(--green-dk); font-weight:600;}
-  .amount-neg{color:var(--red-dk); font-weight:600;}
+  .amount-pos{color:var(--green-text); font-weight:600;}
+  .amount-neg{color:var(--red-text); font-weight:600;}
 
   /* Keyboard hints */
   .kbd{

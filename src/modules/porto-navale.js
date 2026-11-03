@@ -16,14 +16,44 @@ export function scontoNavaleTotale(){
   return sconto;
 }
 
-export function registraAcquistoNavale(uidStr, costoBaseInput){
+/* Il catalogo ufficiale dei Potenziamenti Navali vive su una pagina esterna
+   che non è stata fornita: invece di inventare voci e prezzi, il registro
+   tiene quelli che il gruppo acquista davvero, con lo sconto applicato. Così
+   la lista diventa un catalogo personale riutilizzabile (si vede quanto è
+   costato cosa) senza contrabbandare regole inventate per ufficiali. */
+export function registraAcquistoNavale(uidStr, costoBaseInput, nomeInput){
   const base = Math.max(0, Number(costoBaseInput) || 0);
-  if(base <= 0){ showToast("Inserisci un costo base valido ⚠"); return; }
+  if(base <= 0){ showToast("Inserisci un costo base valido ⚠", "warning"); return; }
   const sconto = scontoNavaleTotale();
   const totale = base * (1 - sconto);
   if(oroDisponibile() < totale){ showToast("Oro insufficiente in tesoreria (oltre la riserva bancaria) ⚠"); return; }
-  registraMovimento(`Potenziamento navale (sconto ${(sconto*100).toFixed(0)}%)`, -totale);
+  const struttura = state.strutture.find(s=>s.uid===uidStr);
+  const nome = String(nomeInput || "").trim() || "Potenziamento navale";
+  if(!Array.isArray(state.potenziamentiNavali)) state.potenziamentiNavali = [];
+  state.potenziamentiNavali.push({
+    uid: uid(),
+    nome,
+    costoBase: base,
+    sconto: (sconto*100).toFixed(0),
+    totale: Number(totale.toFixed(2)),
+    origine: struttura ? (struttura.catId === "eliporto_arcano" ? "Eliporto Arcano" : "Porto Militare") : "",
+    quando: `Mese ${state.calendario.mese} · ${state.calendario.stagione}`,
+  });
+  registraMovimento(`Potenziamento navale — ${nome} (sconto ${(sconto*100).toFixed(0)}%)`, -totale);
   showToast(`Potenziamento navale acquistato per ${totale.toFixed(1).replace(/\.0$/,"")} mo (sconto ${(sconto*100).toFixed(0)}%)`);
+  callRenderAll();
+  saveState();
+}
+
+/* Toglie la riga dal catalogo personale. Non rimborsa nulla: l'oro è già
+   stato scalato al momento dell'acquisto, e annullarlo qui falserebbe i
+   movimenti registrati. */
+export function rimuoviPotenziamentoNavale(voceUid){
+  if(!Array.isArray(state.potenziamentiNavali)) return;
+  const prima = state.potenziamentiNavali.length;
+  state.potenziamentiNavali = state.potenziamentiNavali.filter(v=>v.uid !== voceUid);
+  if(state.potenziamentiNavali.length === prima) return;
+  showToast("Voce rimossa dal catalogo (l'oro speso resta registrato nei movimenti)");
   callRenderAll();
   saveState();
 }

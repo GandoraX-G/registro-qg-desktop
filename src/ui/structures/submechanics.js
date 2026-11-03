@@ -11,7 +11,38 @@ import { haRaffineria, scelteProduzioneMiniera, scelteProduzioneAttivaMiniera } 
 import { statoIniziale } from '../../modules/stato-iniziale.js';
 import { opzioniDispiegamentoAvamposto, costoDispiegamentoAvamposto, labelTipoDispiegamento, raggioAvamposto, haUnitaAllenate, validaTipoDispiegamentoAvamposto, costoRifornimentoAvamposto, guadagnoPassivoAvamposto, impostaDistanzaAvamposto, toggleRifornimentoRidotto } from '../../modules/outpost.js';
 import { avviaAddestramento, completaAddestramento, unitaMaxAddestrabili } from '../../modules/campo-addestramento.js';
-import { scontoNavaleTotale, hasEliportoArcano, registraAcquistoNavale, cambiaStatoGuerra, salvaNoteGuerra } from '../../modules/porto-navale.js';
+import { scontoNavaleTotale, hasEliportoArcano, registraAcquistoNavale, cambiaStatoGuerra, salvaNoteGuerra, rimuoviPotenziamentoNavale } from '../../modules/porto-navale.js';
+import { forzeDisponibili, etichettaAvanzamento } from '../../engine/guerra.js';
+
+/* Form di acquisto e catalogo personale dei potenziamenti navali: le due card
+   (Porto Militare ed Eliporto Arcano) condividono lo stesso blocco. */
+function formPotenziamentoNavale(s) {
+  return `<div class="row" style="align-items:flex-end; margin-top:8px;">
+      <div><label for="nav-nome-${s.uid}">Nome del potenziamento</label><input type="text" id="nav-nome-${s.uid}" data-field="navaleNome" data-uid="${s.uid}" placeholder="es. Ariete rinforzato"></div>
+      <div><label for="nav-costo-${s.uid}">Costo base (mo)</label><input type="number" id="nav-costo-${s.uid}" min="0" data-field="navaleCosto" data-uid="${s.uid}" style="max-width:150px;"></div>
+      <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="registra-acquisto-navale" data-uid="${s.uid}">Registra acquisto</button></div>
+    </div>`;
+}
+
+function tabellaPotenziamentiNavali() {
+  const voci = (state.potenziamentiNavali || []).slice().reverse().slice(0, 10);
+  if (voci.length === 0) {
+    return `<div class="hint" style="margin:10px 0 0;">Nessun potenziamento registrato finora: il primo acquisto compare qui e resta come riferimento per i prossimi.</div>`;
+  }
+  const righe = voci.map(v => `<tr>
+      <td>${escapeHtml(v.nome)}${v.origine ? ` <span class="hint" style="margin:0;">(${escapeHtml(v.origine)})</span>` : ''}</td>
+      <td class="mono">${v.costoBase}</td>
+      <td class="mono">${v.sconto}%</td>
+      <td class="mono">${v.totale}</td>
+      <td class="mono">${escapeHtml(v.quando || '')}</td>
+      <td><button class="btn btn-danger btn-sm" data-action="rimuovi-potenziamento-navale" data-uid="${v.uid}" aria-label="Rimuovi ${escapeHtml(v.nome)} dal catalogo">&#10005;</button></td>
+    </tr>`).join('');
+  return `<table style="margin-top:12px;">
+      <thead><tr><th scope="col">Potenziamento</th><th scope="col">Base</th><th scope="col">Sconto</th><th scope="col">Pagato</th><th scope="col">Quando</th><th scope="col">Azione</th></tr></thead>
+      <tbody>${righe}</tbody>
+    </table>
+    <div class="hint" style="margin:6px 0 0;">Togliere una riga non rimborsa l'oro: il movimento resta registrato in Finanze.</div>`;
+}
 import { struttureVenditaDisponibili, calcolaRicavoImpresa, selezionaStrutturaVenditaImpresa, registraGuadagnoImpresa, aggiungiStrumentoImpresa, rimuoviStrumentoImpresa, registraVenditaImpresa } from '../../modules/impresa.js';
 import { ottieniCharm, usaCharm } from '../../modules/studio-arcano.js';
 import { costruisciCatalizzatore, caricaCatalizzatore, trasferisciCatalizzatore, costoCatalizzatore, gsMassimoCatalizzatore } from '../../modules/santuario.js';
@@ -280,12 +311,10 @@ export function renderSottomeccaniche() {
     if (s.catId === 'porto_militare') {
       const sconto = scontoNavaleTotale();
       card.innerHTML = `
-        <h3 style="margin:0 0 8px;">&#9875; ${c.nome} (Lv.${s.livello}) — Sconto sui Potenziamenti Navali</h3>
-        <div class="hint" style="margin:0 0 6px;">Abilita nel catalogo l'opzione "Specchio d'acqua collegato" per gli Avamposti. Sconto navale attuale: <b>${(sconto * 100).toFixed(0)}%</b>${hasEliportoArcano() ? ' (20% Porto Militare + 10% Eliporto Arcano)' : ''}. Il catalogo dei Potenziamenti Navali &egrave; su una pagina esterna non consultabile da qui: inserisci il costo base per applicare lo sconto.</div>
-        <div class="row" style="align-items:flex-end;">
-          <div><label>Costo base potenziamento (mo)</label><input type="number" min="0" data-field="navaleCosto" data-uid="${s.uid}" style="max-width:150px;"></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="registra-acquisto-navale" data-uid="${s.uid}">Registra acquisto</button></div>
-        </div>`;
+        <h3 style="margin:0 0 8px;">&#9875; ${c.nome} (Lv.${s.livello}) — Potenziamenti Navali</h3>
+        <div class="hint" style="margin:0 0 6px;">Abilita nel catalogo l'opzione "Specchio d'acqua collegato" per gli Avamposti. Sconto navale attuale: <b>${(sconto * 100).toFixed(0)}%</b>${hasEliportoArcano() ? ' (20% Porto Militare + 10% Eliporto Arcano)' : ''}. Il catalogo ufficiale dei potenziamenti &egrave; su una pagina esterna non consultabile da qui: quello che compri finisce qui sotto, con lo sconto gi&agrave; applicato, e diventa il catalogo personale da consultare e ripetere.</div>
+        ${formPotenziamentoNavale(s)}
+        ${tabellaPotenziamentiNavali()}`;
     }
 
     if (s.catId === 'eliporto_arcano') {
@@ -294,24 +323,55 @@ export function renderSottomeccaniche() {
       card.innerHTML = `
         <h3 style="margin:0 0 8px;">&#128641; ${c.nome} (Lv.${s.livello}) — Dispiegamento Rapido e Sconto Navale</h3>
         <div class="hint" style="margin:0 0 6px;">Abilita nel catalogo le opzioni "Ovunque in Unshast" (met&agrave; costo) e, dal Livello QG ${livMin}, "Piano Dimensionale Interno" (doppio costo) per gli Avamposto. Il dimezzamento del tempo di dispiegamento &egrave; un effetto narrativo non tracciato numericamente qui, perch&eacute; l'app segue un calendario mensile e non un tempo di costruzione separato. Sconto navale attuale: <b>${(sconto * 100).toFixed(0)}%</b>.</div>
-        <div class="row" style="align-items:flex-end;">
-          <div><label>Costo base potenziamento (mo)</label><input type="number" min="0" data-field="navaleCosto" data-uid="${s.uid}" style="max-width:150px;"></div>
-          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="registra-acquisto-navale" data-uid="${s.uid}">Registra acquisto</button></div>
-        </div>`;
+        ${formPotenziamentoNavale(s)}
+        ${tabellaPotenziamentiNavali()}`;
     }
 
     if (s.catId === 'sala_da_guerra') {
       const stati = SALA_DA_GUERRA_CFG.statiDisponibili || ['Nessuna pianificazione'];
       const opzioniStato = stati.map(st => `<option value="${escapeHtml(st)}" ${s.statoGuerra === st ? 'selected' : ''}>${escapeHtml(st)}</option>`).join('');
+      const forze = forzeDisponibili(state.strutture);
+      const obiettivi = Array.isArray(s.obiettivi) ? s.obiettivi : [];
+      const diario = Array.isArray(s.diario) ? s.diario : [];
+      const avanzamento = etichettaAvanzamento(obiettivi);
       card.innerHTML = `
         <h3 style="margin:0 0 8px;">&#9876;&#65039; ${c.nome} (Lv.${s.livello}) — Organizzazione della Guerra</h3>
-        <div class="hint" style="margin:0 0 6px;">Il regolamento rimanda per le regole dettagliate alla scheda "Guerra" separata (attivit&agrave; complessa, consigliata a giocatori esperti): non essendo qui disponibile quella scheda, questa stanza offre solo un tracciamento di stato e note, senza calcoli o meccaniche di battaglia.</div>
+        <div class="hint" style="margin:0 0 6px;">La scheda "Guerra" del regolamento non &egrave; stata fornita, quindi qui non si inventano regole di battaglia: la Sala tiene il <b>piano</b> — stato, obiettivi, forze disponibili e diario datato col mese di campagna.</div>
         <div class="row" style="align-items:center;">
-          <label style="margin:0;">Stato attuale</label>
-          <select data-action="cambia-stato-guerra" data-uid="${s.uid}">${opzioniStato}</select>
+          <label for="guerra-stato-${s.uid}" style="margin:0;">Stato attuale</label>
+          <select id="guerra-stato-${s.uid}" data-action="cambia-stato-guerra" data-uid="${s.uid}">${opzioniStato}</select>
         </div>
-        <div class="row" style="align-items:flex-end; margin-top:8px;">
-          <div style="flex:1;"><label>Note (piani, alleati, obiettivi...)</label><textarea data-field="salaGuerraNote" data-uid="${s.uid}" rows="3" style="width:100%;">${escapeHtml(s.note || '')}</textarea></div>
+        <div class="hint" style="margin:8px 0 0;">Forze disponibili: <b>${forze.allenate}</b> unit&agrave; Allenate${forze.inAddestramento > 0 ? `, ${forze.inAddestramento} in addestramento (${escapeHtml(forze.nomiInAddestramento.join(', '))})` : ''}. Avanzamento del piano: <b>${escapeHtml(avanzamento)}</b>.</div>
+        <div class="divider"></div>
+        <h4 style="margin:0 0 6px; font-family:'Cinzel',serif; font-size:12.5px;">Obiettivi</h4>
+        ${obiettivi.length === 0
+          ? '<div class="hint" style="margin:0 0 6px;">Nessun obiettivo: aggiungi il primo qui sotto.</div>'
+          : obiettivi.map(o => `<div class="row" style="align-items:center; margin:3px 0; gap:8px;">
+              <label style="margin:0; display:flex; align-items:center; gap:6px; text-transform:none; letter-spacing:0; font-size:12.5px; ${o.fatto ? 'text-decoration:line-through; opacity:.7;' : ''}">
+                <input type="checkbox" data-action="toggle-obiettivo-guerra" data-uid="${s.uid}" data-uid2="${o.id}" ${o.fatto ? 'checked' : ''}>
+                ${escapeHtml(o.testo)}
+              </label>
+              <button class="btn btn-danger btn-sm" data-action="rimuovi-obiettivo-guerra" data-uid="${s.uid}" data-uid2="${o.id}" aria-label="Rimuovi obiettivo">&#10005;</button>
+            </div>`).join('')}
+        <div class="row" style="align-items:flex-end; margin-top:6px;">
+          <div><label for="guerra-obiettivo-${s.uid}">Nuovo obiettivo</label><input type="text" id="guerra-obiettivo-${s.uid}" data-field="guerraObiettivo" data-uid="${s.uid}" placeholder="es. prendere il passo entro l'autunno"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="aggiungi-obiettivo-guerra" data-uid="${s.uid}">+ Obiettivo</button></div>
+        </div>
+        <h4 style="margin:14px 0 6px; font-family:'Cinzel',serif; font-size:12.5px;">Diario del piano</h4>
+        ${diario.length === 0
+          ? '<div class="hint" style="margin:0 0 6px;">Ancora nessuna voce: annota cosa succede, mese per mese.</div>'
+          : diario.map(v => `<div class="row" style="align-items:center; margin:3px 0; gap:8px;">
+              <span class="tag tag-militare">${escapeHtml(v.quando || '')}</span>
+              <span style="flex:1; font-size:12.5px;">${escapeHtml(v.testo)}</span>
+              <button class="btn btn-danger btn-sm" data-action="rimuovi-diario-guerra" data-uid="${s.uid}" data-uid2="${v.id}" aria-label="Rimuovi voce di diario">&#10005;</button>
+            </div>`).join('')}
+        <div class="row" style="align-items:flex-end; margin-top:6px;">
+          <div><label for="guerra-diario-${s.uid}">Nuova voce</label><input type="text" id="guerra-diario-${s.uid}" data-field="guerraDiario" data-uid="${s.uid}" placeholder="es. firmata la tregua con il QG di Hauris"></div>
+          <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="aggiungi-diario-guerra" data-uid="${s.uid}">+ Voce</button></div>
+        </div>
+        <div class="divider"></div>
+        <div class="row" style="align-items:flex-end;">
+          <div style="flex:1;"><label for="guerra-note-${s.uid}">Note (piani, alleati, obiettivi...)</label><textarea id="guerra-note-${s.uid}" data-field="salaGuerraNote" data-uid="${s.uid}" rows="3" style="width:100%;">${escapeHtml(s.note || '')}</textarea></div>
           <div style="flex:0 0 auto;"><button class="btn btn-outline btn-sm" data-action="salva-note-guerra" data-uid="${s.uid}">Salva note</button></div>
         </div>`;
     }

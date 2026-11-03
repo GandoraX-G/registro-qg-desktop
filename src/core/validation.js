@@ -51,6 +51,7 @@ export function validaStato(s = state) {
   if (typeof s.livello !== "number" || s.livello < 1) s.livello = 1;
   if (typeof s.oro !== "number") s.oro = 0;
   if (typeof s.modalitaSoloPuntiQG !== "boolean") s.modalitaSoloPuntiQG = false;
+  if (s.tema !== "chiaro" && s.tema !== "scuro") s.tema = "auto";
   if (!Array.isArray(s.membri)) s.membri = [];
   if (!Array.isArray(s.strutture)) s.strutture = [];
   if (typeof s.materiali !== "object" || s.materiali === null || Array.isArray(s.materiali)) s.materiali = {};
@@ -70,6 +71,8 @@ export function validaStato(s = state) {
   if (typeof s.tokenPescaDaSpendere !== "number" || s.tokenPescaDaSpendere < 0) s.tokenPescaDaSpendere = 0;
   if (!Array.isArray(s.satelliti)) s.satelliti = [];
   if (!Array.isArray(s.speseExtra)) s.speseExtra = [];
+  if (!Array.isArray(s.potenziamentiNavali)) s.potenziamentiNavali = [];
+  s.potenziamentiNavali = s.potenziamentiNavali.filter(v => v && typeof v === "object");
   if (s.resocontoUltimoMese === undefined) s.resocontoUltimoMese = null;
 
   s.rotte.forEach(rotta => {
@@ -82,6 +85,10 @@ export function validaStato(s = state) {
     if (typeof struttura.uid !== "string") struttura.uid = uid();
     if (typeof struttura.catId !== "string") struttura.catId = "";
     if (typeof struttura.livello !== "number" || struttura.livello < 1) struttura.livello = 1;
+    // Piano della Sala da Guerra: checklist e diario restano array anche se
+    // un backup vecchio non li conosce.
+    if (struttura.obiettivi !== undefined && !Array.isArray(struttura.obiettivi)) struttura.obiettivi = [];
+    if (struttura.diario !== undefined && !Array.isArray(struttura.diario)) struttura.diario = [];
   });
   s.membri.forEach(membro => {
     if (typeof membro.nome !== "string") membro.nome = "Sconosciuto";

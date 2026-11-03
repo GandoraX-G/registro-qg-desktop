@@ -64,6 +64,35 @@ test('le aree che cambiano da sole sono annunciate (aria-live)', () => {
   assert.match(html, /id="saveIndicator"[^>]*aria-live="polite"/);
 });
 
+test('ogni etichetta è collegata al suo controllo', () => {
+  const senza = [];
+  for (const m of html.matchAll(/<label([^>]*)>/g)) {
+    const attrs = m[1];
+    if (/\bfor="[^"]+"/.test(attrs)) continue;
+    // Una label che avvolge il controllo va bene anche senza for.
+    const corpo = html.slice(m.index, html.indexOf('</label>', m.index));
+    if (/<(input|select|textarea)\b/.test(corpo)) continue;
+    senza.push(html.slice(m.index, m.index + 90).replace(/\s+/g, ' '));
+  }
+  assert.deepEqual(senza, [], `label senza for e senza controllo avvolto:\n${senza.join('\n')}`);
+});
+
+test('le intestazioni di tabella dichiarano lo scope', () => {
+  const senzaScope = [...html.matchAll(/<th\s[^>]*>/g)]
+    .map(m => m[0])
+    .filter(tag => !/\bscope=/.test(tag));
+  assert.deepEqual(senzaScope, [], `th senza scope:\n${senzaScope.join('\n')}`);
+});
+
+test('la ricerca globale è un dialogo accessibile con la sua scorciatoia', () => {
+  assert.match(html, /id="searchModalBg"[^>]*role="dialog"/);
+  assert.match(html, /id="searchModalBg"[^>]*aria-modal="true"/);
+  assert.match(html, /id="search-input"[^>]*role="combobox"/);
+  assert.match(html, /id="search-results"[^>]*role="listbox"/);
+  const app = fs.readFileSync(path.join(SRC, 'app.js'), 'utf8');
+  assert.match(app, /apriPalette\(\)/, 'Ctrl+K non apre più la palette');
+});
+
 test('la guida è un dialogo accessibile', () => {
   assert.match(html, /id="guideModalBg"[^>]*role="dialog"/);
   assert.match(html, /id="guideModalBg"[^>]*aria-modal="true"/);

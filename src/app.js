@@ -12,6 +12,8 @@ import { renderMagazzino, initWarehouseEvents, setWarehouseCallbacks } from './u
 import { renderRotte, initRoutesEvents } from './ui/routes.js';
 import { renderPreventivo, renderCatalogoPreventivo, initPreventivoEvents, loadSavedPreventivo } from './ui/preventivo.js';
 import { initAdaptive, adaptAll, adaptTables } from './ui/adaptive.js';
+import { initTema } from './ui/theme.js';
+import { initPalette, apriPalette } from './ui/palette.js';
 
 /* ============================================================
    GLOBAL RENDER
@@ -130,8 +132,9 @@ function initKeyboard() {
     if (isInput) return;
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
-      switchTab('strutture');
-      setTimeout(() => document.getElementById('struct-search')?.focus(), 100);
+      // Prima qui si finiva sempre nel catalogo strutture: la ricerca ora
+      // copre tutto il registro e porta da sola nella tab giusta.
+      apriPalette();
       return;
     }
     const map = { '1': 'panoramica', '2': 'strutture', '3': 'magazzino', '4': 'rotte', '5': 'finanze', '6': 'preventivo' };
@@ -266,10 +269,15 @@ async function init() {
   setWarehouseCallbacks({ renderFinanze });
 
   await loadState();
+  // Il tema va applicato subito dopo la lettura del registro: prima non si
+  // conosce la preferenza salvata.
+  initTema();
 
   initNavigation();
   initSidebar();
   initGuide();
+  // La palette riusa switchTab: la ricerca porta nella tab giusta.
+  initPalette({ onNavigate: switchTab });
   initImportExport();
   initKeyboard();
   initGestures();
