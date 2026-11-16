@@ -107,7 +107,7 @@ jobs:
 
       - name: Pubblica su GitHub Pages
         id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   desktop:
     name: desktop (${{ matrix.os }})
