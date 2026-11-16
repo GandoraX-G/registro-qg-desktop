@@ -99,7 +99,7 @@ jobs:
           fi
           echo "index.html: $(stat -c%s dist/index.html) byte · asset: $(ls dist/assets | wc -l)"
 
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
 
       - uses: actions/upload-pages-artifact@v3
         with:
